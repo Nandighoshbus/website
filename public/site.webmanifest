@@ -1,0 +1,26 @@
+{
+  "name": "Nandighosh Bus",
+  "short_name": "Nandighosh",
+  "description": "Premium Travel Experience Across Odisha",
+  "icons": [
+    {
+      "src": "/images/nandighosh-logo-updated.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/images/nandighosh-logo-updated.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "theme_color": "#ea580c",
+  "background_color": "#fff7ed",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "transportation", "business"]
+}
