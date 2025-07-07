@@ -177,7 +177,7 @@
   transform: translateZ(0);
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  color: #b45309;
+  color: #1f2937;
   font-weight: 600;
 }
 
@@ -200,6 +200,47 @@
   transform: translateY(-5px) scale(1.05);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   color: #fff;
+}
+
+/* Styling for outline buttons with tilt-card class */
+.tilt-card {
+  color: #374151 !important;
+}
+
+.tilt-card svg {
+  color: #374151 !important;
+  transition: color 0.3s ease;
+}
+
+.tilt-card:hover {
+  color: white !important;
+}
+
+.tilt-card:hover svg {
+  color: white !important;
+}
+
+/* Preserve orange color for specific icon classes on hover */
+.text-orange-600 {
+  color: #ea580c !important;
+}
+
+.btn-interactive .text-orange-600,
+.btn-interactive:hover .text-orange-600,
+.tilt-card .text-orange-600,
+.tilt-card:hover .text-orange-600,
+*:hover .text-orange-600 {
+  color: #ea580c !important;
+}
+
+/* Icon styling for interactive buttons */
+.btn-interactive svg {
+  color: #1f2937 !important;
+  transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-interactive:hover svg {
+  color: #ffffff !important;
 }
 
 /* Floating Animations */
@@ -555,6 +596,57 @@ html {
   .card-ultra-3d:hover {
     transform: translateY(-15px) translateZ(40px) scale(1.04);
   }
+
+  .premium-bus-container {
+    width: 24rem;
+    height: 24rem;
+  }
+  
+  .bus-fleet-container {
+    height: 12rem;
+  }
+}
+
+/* Ensure scale-in animation works with intersection observer */
+.scale-in-container[data-animate] {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scale-in-container[data-animate].animate-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Additional responsive improvements */
+@media (max-width: 1024px) {
+  .premium-bus-container {
+    width: 32rem;
+    height: 28rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .premium-bus-container {
+    width: 24rem;
+    height: 20rem;
+  }
+  
+  .floating-element {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .floating-crown {
+    top: -1rem;
+    left: -1rem;
+  }
+  
+  .floating-award {
+    bottom: -1rem;
+    right: -1rem;
+  }
 }
 
 /* Accessibility improvements */
@@ -786,3 +878,298 @@ nav .text-white,
   color: #1f2937 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
+
+/* Scroll Animations */
+.animate-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fade-in-up.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fade-in-left.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.fade-in-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fade-in-right.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scale-in {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scale-in.animate-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stagger-animation {
+  transition-delay: 0.1s;
+}
+
+.stagger-animation:nth-child(2) {
+  transition-delay: 0.2s;
+}
+
+.stagger-animation:nth-child(3) {
+  transition-delay: 0.3s;
+}
+
+.stagger-animation:nth-child(4) {
+  transition-delay: 0.4s;
+}
+
+.stagger-animation:nth-child(5) {
+  transition-delay: 0.5s;
+}
+
+.stagger-animation:nth-child(6) {
+  transition-delay: 0.6s;
+}
+
+/* Enhanced section animations */
+section[data-animate] {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+section[data-animate].animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card animations */
+.card-animate {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-animate.animate-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Premium Bus Image Styling */
+.premium-bus-container {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  height: 24rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(to bottom right, #fb923c, #dc2626);
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  margin: 1rem auto;
+  z-index: 1;
+}
+
+/* Tablet view - reduce size */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .premium-bus-container {
+    max-width: 22rem;
+    height: 20rem;
+    margin: 1.5rem auto;
+  }
+}
+
+/* Laptop/Desktop view - prevent overlap */
+@media (min-width: 1024px) {
+  .premium-bus-container {
+    max-width: 32rem;
+    height: 28rem;
+    margin: 2rem 0;
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
+.premium-bus-container:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 35px 70px -12px rgb(0 0 0 / 0.35);
+}
+
+.premium-bus-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 10;
+}
+
+.premium-bus-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.premium-bus-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom right, #fb923c, #dc2626);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 5;
+}
+
+.premium-bus-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* Bus Fleet Image Styling */
+.bus-fleet-container {
+  position: relative;
+  height: 16rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+  background: linear-gradient(to bottom right, #60a5fa, #a855f7);
+}
+
+.bus-fleet-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 10;
+}
+
+.bus-fleet-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom right, #60a5fa, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 5;
+}
+
+.bus-fleet-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  padding: 2rem;
+  color: white;
+  z-index: 15;
+}
+
+/* Floating Elements for Premium Bus */
+.floating-element {
+  position: absolute;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  animation: float 3s ease-in-out infinite;
+  z-index: 20;
+}
+
+.floating-crown {
+  top: -1rem;
+  left: -1rem;
+  background: linear-gradient(to right, #facc15, #fb923c);
+}
+
+.floating-award {
+  bottom: -1rem;
+  right: -1rem;
+  background: linear-gradient(to right, #f87171, #ec4899);
+  animation-delay: 1s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Scale-in animation for containers */
+.scale-in-container {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scale-in-container.animate-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Modern card styling */
+.modern-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 
+    20px 20px 60px rgba(0, 0, 0, 0.1),
+    -20px -20px 60px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.4s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    25px 25px 80px rgba(0, 0, 0, 0.15),
+    -25px -25px 80px rgba(255, 255, 255, 1);
+}
+
+/* Remove debug styles */

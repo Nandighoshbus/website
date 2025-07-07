@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Test</title>
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .test-container { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        img { max-width: 300px; height: auto; border: 2px solid #000; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Static Image Loading Test</h1>
+    
+    <div class="test-container">
+        <h2>Premium Bus Image</h2>
+        <img src="/images/premium-bus.jpg" alt="Premium Bus" id="premium-bus" />
+        <div id="premium-status"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Bus Fleet Image</h2>
+        <img src="/images/bus-fleet.jpg" alt="Bus Fleet" id="bus-fleet" />
+        <div id="fleet-status"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Logo Test</h2>
+        <img src="/images/nandighosh-logo.png" alt="Logo" id="logo" />
+        <div id="logo-status"></div>
+    </div>
+
+    <script>
+        function setupImageTest(imgId, statusId) {
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            
+            img.onload = function() {
+                status.innerHTML = '<span class="success">✓ Image loaded successfully</span>';
+                console.log(imgId + ' loaded');
+            };
+            
+            img.onerror = function() {
+                status.innerHTML = '<span class="error">✗ Image failed to load</span>';
+                console.error(imgId + ' failed to load');
+            };
+        }
+        
+        setupImageTest('premium-bus', 'premium-status');
+        setupImageTest('bus-fleet', 'fleet-status');
+        setupImageTest('logo', 'logo-status');
+    </script>
+</body>
+</html>
