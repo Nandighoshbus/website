@@ -202,6 +202,21 @@
   color: #fff;
 }
 
+/* Ensure orange icons override btn-interactive defaults */
+.btn-interactive .text-orange-600,
+.btn-interactive .text-orange-600 svg,
+.btn-interactive .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
+.btn-interactive:hover .text-orange-600,
+.btn-interactive:hover .text-orange-600 svg,
+.btn-interactive:hover .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
 /* Styling for outline buttons with tilt-card class */
 .tilt-card {
   color: #374151 !important;
@@ -220,7 +235,17 @@
   color: white !important;
 }
 
-/* Preserve orange color for specific icon classes on hover */
+/* Icon styling for interactive buttons */
+.btn-interactive svg {
+  color: #1f2937 !important;
+  transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-interactive:hover svg {
+  color: #ffffff !important;
+}
+
+/* Preserve orange color for specific icon classes - HIGHEST PRIORITY */
 .text-orange-600 {
   color: #ea580c !important;
 }
@@ -233,14 +258,46 @@
   color: #ea580c !important;
 }
 
-/* Icon styling for interactive buttons */
-.btn-interactive svg {
-  color: #1f2937 !important;
-  transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+/* Ensure orange icons override btn-interactive defaults */
+.btn-interactive .text-orange-600,
+.btn-interactive .text-orange-600 svg,
+.btn-interactive .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
 }
 
-.btn-interactive:hover svg {
-  color: #ffffff !important;
+.btn-interactive:hover .text-orange-600,
+.btn-interactive:hover .text-orange-600 svg,
+.btn-interactive:hover .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
+/* General Lucide icon improvements */
+.lucide {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Ensure proper icon rendering */
+svg.lucide {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Icon color fixes */
+.text-white .lucide,
+.text-white svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+.text-orange-600 .lucide,
+.text-orange-600 svg {
+  color: #ea580c;
+  stroke: #ea580c;
 }
 
 /* Floating Animations */
@@ -302,9 +359,64 @@
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
 
-/* Sacred scroll behavior */
+/* Enhanced smooth scrolling and performance */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+* {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improved scroll performance */
+.scroll-container {
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Enhanced intersection observer animations */
+[data-animate] {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Smooth transitions for all animated elements */
+.fade-in-up, .fade-in-left, .fade-in-right {
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Better easing for scroll animations */
+.animate-in {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Performance optimizations */
+.optimized-animation {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Sacred scroll behavior - Enhanced */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
+/* Smooth scrolling for all containers */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Performance optimizations for smooth scrolling */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Cultural typography */
@@ -607,36 +719,314 @@ html {
   }
 }
 
-/* Ensure scale-in animation works with intersection observer */
+/* Modern Card Styling */
+.modern-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border-radius: 1.5rem;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modern-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 32px 64px -12px rgba(0, 0, 0, 0.15),
+    0 25px 32px -12px rgba(0, 0, 0, 0.08);
+}
+
+/* Bus Fleet Container - Clean Implementation */
+.bus-fleet-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(251, 146, 60, 0.2);
+}
+
+.bus-fleet-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.bus-fleet-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  z-index: 10;
+}
+
+.bus-fleet-container:hover img {
+  transform: scale(1.05);
+}
+
+/* Bus Fleet Fallback */
+.bus-fleet-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: white;
+  z-index: 1;
+}
+
+.bus-fleet-fallback .text-center {
+  padding: 2rem;
+  text-align: center;
+}
+
+.bus-fleet-fallback h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white;
+}
+
+.bus-fleet-fallback p {
+  opacity: 0.9;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Bus Fleet Text Overlay */
+.bus-fleet-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+  padding: 2rem;
+  z-index: 20;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bus-fleet-container:hover .bus-fleet-text-overlay {
+  transform: translateY(0);
+}
+
+.bus-fleet-text-overlay h4 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.bus-fleet-text-overlay p {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bus-fleet-fallback .text-center {
+  padding: 2rem;
+}
+
+.bus-fleet-fallback h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.bus-fleet-fallback p {
+  opacity: 0.9;
+  font-size: 0.875rem;
+}
+
+/* Bus Fleet Text Overlay */
+.bus-fleet-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+  padding: 2rem;
+  z-index: 2;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bus-fleet-container:hover .bus-fleet-text-overlay {
+  transform: translateY(0);
+}
+
+.bus-fleet-text-overlay h4 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.bus-fleet-text-overlay p {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+/* Enhanced scroll-triggered animations */
 .scale-in-container[data-animate] {
   opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(0.9) translateY(40px);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .scale-in-container[data-animate].animate-in {
   opacity: 1;
+  transform: scale(1) translateY(0px);
+}
+
+/* Section-based fade in animations */
+section[data-animate] {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+section[data-animate].animate-in {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Card animations with stagger */
+.card-container[data-animate] {
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.card-container[data-animate].animate-in {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+/* Staggered child animations */
+.stagger-child {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.stagger-child.animate-in {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Image reveal animations */
+.image-reveal[data-animate] {
+  opacity: 0;
+  transform: scale(1.1);
+  transition: all 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.image-reveal[data-animate].animate-in {
+  opacity: 1;
   transform: scale(1);
 }
 
-/* Additional responsive improvements */
-@media (max-width: 1024px) {
-  .premium-bus-container {
-    width: 32rem;
-    height: 28rem;
-  }
+/* Text reveal animations */
+.text-reveal[data-animate] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
-@media (max-width: 640px) {
-  .premium-bus-container {
-    width: 24rem;
-    height: 20rem;
-  }
-  
-  .floating-element {
-    width: 3rem;
-    height: 3rem;
-  }
+.text-reveal[data-animate].animate-in {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Enhanced text visibility and contrast */
+.hero-text-enhanced {
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hero-title {
+  text-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  color: white !important;
+  font-weight: 800;
+}
+
+.hero-subtitle {
+  text-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hero-description {
+  text-shadow: 
+    0 1px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced background overlay */
+.hero-enhanced-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.8) 0%,
+    rgba(249, 115, 22, 0.75) 25%,
+    rgba(239, 68, 68, 0.7) 50%,
+    rgba(220, 38, 38, 0.75) 75%,
+    rgba(185, 28, 28, 0.8) 100%
+  );
+}
+
+/* Better contrast for premium features */
+.premium-feature-badge {
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced button visibility */
+.hero-button-primary {
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hero-button-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Accessibility improvements */
@@ -720,514 +1110,109 @@ html {
   animation: shimmer 1.5s infinite;
 }
 
-/* Animation classes for icons and effects */
-.icon-bounce {
-  animation: icon-bounce 1s ease-in-out infinite;
-  color: #b45309;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.10));
+/* Loading Animation Styles */
+@keyframes shimmer-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-@keyframes icon-bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
+.shimmer-wave {
+  animation: shimmer-wave 2s ease-in-out infinite;
+}
+
+/* Enhanced Loading Screen Animations */
+.loading-container {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.loading-logo {
+  animation: logoEntrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.loading-text {
+  animation: textSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.loading-progress {
+  animation: progressBarSlide 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+  position: relative;
+}
+
+.loading-progress-fill {
+  background: linear-gradient(90deg, #fb923c, #f97316, #ea580c, #dc2626);
+  background-size: 200% 100%;
+  animation: gradientShift 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-wave {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  40% {
-    transform: translateY(-10px);
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes logoEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.8);
   }
   60% {
-    transform: translateY(-5px);
+    opacity: 1;
+    transform: translateY(10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Icon visibility and contrast improvements */
-.icon-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+@keyframes textSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.icon-visible {
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
-  transition: all 0.3s ease;
+@keyframes progressBarSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.icon-visible:hover {
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-  transform: scale(1.1);
-}
-
-/* Ensure Lucide icons are visible */
-svg[data-lucide] {
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1em;
-  fill: none;
-  stroke: #1f2937 !important;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  color: #1f2937 !important;
-}
-
-/* Force all Lucide React icons to be dark and visible */
-/* Ensure all svg icons are visible but respect context */
-.lucide {
-  display: inline-block !important;
-  vertical-align: middle !important;
-}
-
-/* Booking form text visibility fixes */
-.booking-form label,
-.booking-form .text-gray-700 {
-  color: #374151 !important;
-  font-weight: 500;
-  text-shadow: none;
-}
-
-.booking-form input,
-.booking-form select {
-  color: #1f2937 !important;
-  background-color: #ffffff !important;
-}
-
-.booking-form input::placeholder {
-  color: #6b7280 !important;
-}
-
-/* Additional text visibility fixes */
-[data-radix-select-trigger],
-[data-radix-tabs-trigger],
-.tabsList button,
-.card label,
-.card h2,
-.card h3,
-.card p {
-  color: #1f2937 !important;
-  font-weight: 500;
-}
-
-/* Input and form styling overrides */
-input[type="text"],
-input[type="date"],
-select,
-textarea {
-  color: #1f2937 !important;
-  background-color: #ffffff !important;
-  border: 1px solid #fdba74 !important;
-}
-
-input[type="text"]:focus,
-input[type="date"]:focus,
-select:focus,
-textarea:focus {
-  border-color: #f97316 !important;
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1) !important;
-}
-
-/* Tab styling */
-.tab-trigger {
-  color: #374151 !important;
-}
-
-.tab-trigger[data-state="active"] {
-  color: #ea580c !important;
-  background-color: #fff7ed !important;
-}
-
-/* Navigation link visibility fixes */
-nav button,
-nav a,
-.navbar-glass button,
-.navbar-glass a {
-  color: #1f2937 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-  font-weight: 600;
-}
-
-nav button:hover,
-nav a:hover,
-.navbar-glass button:hover,
-.navbar-glass a:hover {
-  color: #111827 !important;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 1);
-}
-
-/* Mobile menu text visibility */
-.md\:hidden div button,
-.mobile-nav button,
-.mobile-nav a {
-  color: #1f2937 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-}
-
-/* Override any white text in navigation */
-nav .text-white,
-.navbar-glass .text-white {
-  color: #1f2937 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-}
-
-/* Scroll Animations */
-.animate-in {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-}
-
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.fade-in-up.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-in-left {
-  opacity: 0;
-  transform: translateX(-30px);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.fade-in-left.animate-in {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.fade-in-right {
-  opacity: 0;
-  transform: translateX(30px);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.fade-in-right.animate-in {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.scale-in {
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.scale-in.animate-in {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.stagger-animation {
-  transition-delay: 0.1s;
-}
-
-.stagger-animation:nth-child(2) {
-  transition-delay: 0.2s;
-}
-
-.stagger-animation:nth-child(3) {
-  transition-delay: 0.3s;
-}
-
-.stagger-animation:nth-child(4) {
-  transition-delay: 0.4s;
-}
-
-.stagger-animation:nth-child(5) {
-  transition-delay: 0.5s;
-}
-
-.stagger-animation:nth-child(6) {
-  transition-delay: 0.6s;
-}
-
-/* Enhanced section animations */
-section[data-animate] {
-  opacity: 0;
-  transform: translateY(50px);
-  transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-section[data-animate].animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Card animations */
-.card-animate {
-  opacity: 0;
-  transform: translateY(30px) scale(0.95);
-  transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.card-animate.animate-in {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Premium Bus Image Styling */
-.premium-bus-container {
-  position: relative;
-  width: 36rem;
-  height: 32rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(to bottom right, #fb923c, #dc2626);
-  transform-style: preserve-3d;
-  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  margin: 2rem;
-  z-index: 1;
-}
-
-.premium-bus-container:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 35px 70px -12px rgb(0 0 0 / 0.35);
-}
-
-.premium-bus-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 10;
-}
-
-.premium-bus-image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.premium-bus-fallback {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom right, #fb923c, #dc2626);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  z-index: 5;
-}
-
-.premium-bus-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-  z-index: 15;
-  pointer-events: none;
-}
-
-/* Bus Fleet Image Styling */
-.bus-fleet-container {
-  position: relative;
-  height: 16rem;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
-  background: linear-gradient(to bottom right, #60a5fa, #a855f7);
-}
-
-.bus-fleet-container img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 10;
-}
-
-.bus-fleet-fallback {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom right, #60a5fa, #a855f7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  z-index: 5;
-}
-
-.bus-fleet-text-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-  padding: 2rem;
-  color: white;
-  z-index: 15;
-}
-
-/* Floating Elements for Premium Bus */
-.floating-element {
-  position: absolute;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  animation: float 3s ease-in-out infinite;
-  z-index: 20;
-}
-
-.floating-crown {
-  top: -1rem;
-  left: -1rem;
-  background: linear-gradient(to right, #facc15, #fb923c);
-}
-
-.floating-award {
-  bottom: -1rem;
-  right: -1rem;
-  background: linear-gradient(to right, #f87171, #ec4899);
-  animation-delay: 1s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
   }
   50% {
-    transform: translateY(-10px);
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
-
-/* Scale-in animation for containers */
-.scale-in-container {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.scale-in-container.animate-in {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Modern card styling */
-.modern-card {
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 
-    20px 20px 60px rgba(0, 0, 0, 0.1),
-    -20px -20px 60px rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  transition: all 0.4s ease;
-}
-
-.modern-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 
-    25px 25px 80px rgba(0, 0, 0, 0.15),
-    -25px -25px 80px rgba(255, 255, 255, 1);
-}
-
-/* Background Image Classes */
-.hero-bg-livery1 {
-  background-image: url('/images/livery1.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-.features-bg-livery2 {
-  background-image: url('/images/livery2.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-.footer-bg-buses {
-  background-image: url('/images/buses2.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-.footer-bg-livery1 {
-  background-image: url('/images/livery1.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-.interior-bg {
-  background-image: url('/images/interior.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.scenic-bg {
-  background-image: url('/images/scenery.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* Interior showcase styles */
-.interior-showcase {
-  background-image: url('/images/luxury-interior.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.interior-showcase::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 1;
-}
-
-.interior-showcase > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Overlay for better text readability */
-.bg-overlay {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.bg-overlay-light {
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.bg-overlay-orange {
-  background: rgba(251, 146, 60, 0.9);
-}
-
-/* Remove debug styles */
 
 /* Booking Section Background */
 .booking-bg-livery2 {
@@ -1279,9 +1264,405 @@ section[data-animate].animate-in {
   opacity: 1;
 }
 
-/* Responsive grid adjustments */
-@media (max-width: 1024px) {
-  .amenities-image-container {
-    margin-bottom: 2rem;
+/* Floating Elements for Icons */
+.floating-element {
+  position: absolute;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.9), rgba(239, 68, 68, 0.9));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: float 3s ease-in-out infinite;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.floating-element:hover {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 1), rgba(239, 68, 68, 1));
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.floating-crown {
+  top: -1rem;
+  right: 2rem;
+  animation-delay: 0s;
+}
+
+.floating-award {
+  bottom: 2rem;
+  left: -1rem;
+  animation-delay: 1.5s;
+}
+
+/* Enhanced icon styling for better visibility */
+.floating-element .lucide {
+  color: #ffffff !important;
+  stroke-width: 2.5;
+  opacity: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.floating-element:hover .lucide {
+  color: #fff7ed !important;
+  opacity: 1;
+  stroke-width: 3;
+}
+
+/* Crown icon specific styling */
+.floating-crown .lucide-crown {
+  color: #fbbf24 !important; /* Golden color for crown */
+}
+
+.floating-crown:hover .lucide-crown {
+  color: #f59e0b !important;
+}
+
+/* Award icon specific styling */
+.floating-award .lucide-award {
+  color: #ffffff !important;
+}
+
+.floating-award:hover .lucide-award {
+  color: #fff7ed !important;
+}
+
+/* Background Image Classes */
+.hero-bg-livery1 {
+  background-image: url('/images/livery1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.hero-bg-livery1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.hero-bg-livery1 > * {
+  position: relative;
+  z-index: 2;
+}
+
+.features-bg-livery2 {
+  background-image: url('/images/livery2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.features-bg-livery2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
+}
+
+.features-bg-livery2 > * {
+  position: relative;
+  z-index: 2;
+}
+
+.footer-bg-livery1 {
+  background-image: url('/images/livery1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.footer-bg-livery1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+}
+
+.footer-bg-livery1 > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Premium Bus Container - Main Definition */
+.premium-bus-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(239, 68, 68, 0.1));
+  border-radius: 2rem;
+  padding: 2rem;
+  overflow: visible; /* Allow floating elements to show outside */
+}
+
+.premium-bus-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-bus-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 35px 70px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Enhanced float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
   }
+  33% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-2deg);
+  }
+}
+
+/* Hero section text improvements */
+.hero-content-left {
+  padding-right: 2rem;
+}
+
+.hero-content-right {
+  padding-left: 2rem;
+}
+
+/* Responsive adjustments for hero section */
+@media (max-width: 1024px) {
+  .premium-bus-container {
+    max-width: 500px;
+    height: 350px;
+    padding: 1.5rem;
+  }
+  
+  .floating-element {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .floating-crown {
+    top: 0rem;
+    right: 1rem;
+  }
+  
+  .floating-award {
+    bottom: 1rem;
+    left: 0rem;
+  }
+  
+  .hero-content-left {
+    padding-right: 1rem;
+  }
+  
+  .hero-content-right {
+    padding-left: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .premium-bus-container {
+    max-width: 350px;
+    height: 280px;
+    padding: 1rem;
+  }
+  
+  .floating-element {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .floating-crown {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  .floating-award {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .hero-content-left,
+  .hero-content-right {
+    padding: 0;
+  }
+}
+
+/* Theme Color Text Gradient */
+.text-gradient-orange {
+  background: linear-gradient(135deg, #ff6b35, #f7931e, #ffb347, #ea580c);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease-in-out infinite;
+  text-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+}
+
+/* Text Glow Animation */
+.animate-text-glow {
+  animation: text-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes text-glow {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.6)) drop-shadow(0 0 20px rgba(255, 107, 53, 0.4));
+    transform: scale(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 30px rgba(255, 107, 53, 0.6)) drop-shadow(0 0 40px rgba(255, 107, 53, 0.4));
+    transform: scale(1.02);
+  }
+}
+
+/* Enhanced text shadow for better visibility */
+.text-gradient-orange::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Subtle bounce animation for brand name */
+.animate-brand-bounce {
+  animation: brand-bounce 4s ease-in-out infinite;
+}
+
+@keyframes brand-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Hover effect for brand name */
+.text-gradient-orange:hover {
+  animation-duration: 1s;
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+/* Enhanced Orange Theme Overlay */
+.hero-orange-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.9) 0%,
+    rgba(249, 115, 22, 0.85) 25%,
+    rgba(234, 88, 12, 0.8) 50%,
+    rgba(220, 38, 38, 0.85) 75%,
+    rgba(239, 68, 68, 0.9) 100%
+  );
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* Enhanced Orange Text Gradient */
+.text-gradient-orange-enhanced {
+  background: linear-gradient(
+    135deg,
+    #f97316 0%,
+    #ea580c 25%,
+    #dc2626 50%,
+    #ef4444 75%,
+    #f59e0b 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Orange Glow Effect */
+.orange-glow {
+  box-shadow: 
+    0 0 20px rgba(251, 146, 60, 0.4),
+    0 0 40px rgba(249, 115, 22, 0.3),
+    0 0 60px rgba(234, 88, 12, 0.2);
+}
+
+/* Orange Theme Background Pattern */
+.orange-pattern-overlay {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(251, 146, 60, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(234, 88, 12, 0.05) 0%, transparent 50%);
+  background-size: 100px 100px, 150px 150px, 200px 200px;
+  animation: patternMove 20s linear infinite;
+}
+
+@keyframes patternMove {
+  0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  100% { background-position: 100% 100%, -100% -100%, 50% 50%; }
+}
+
+/* Feature card icon styling - ensure orange theme color */
+.tilt-card .text-orange-600,
+.tilt-card .text-orange-600 svg,
+.tilt-card .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
+/* Override tilt-card gray color for orange theme icons */
+.card-3d .text-orange-600,
+.card-3d .text-orange-600 svg,
+.card-3d .text-orange-600 .lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
 }

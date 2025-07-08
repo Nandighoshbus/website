@@ -60,6 +60,8 @@ type RouteType = {
 };
 
 export default function NandighoshAdvancedLanding() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadingProgress, setLoadingProgress] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState("en")
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -69,6 +71,22 @@ export default function NandighoshAdvancedLanding() {
   const [seatAvailability, setSeatAvailability] = useState<Record<string, number>>({})
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const heroRef = useRef(null)
+
+  // Loading animation effect
+  useEffect(() => {
+    const loadingInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(loadingInterval)
+          setTimeout(() => setIsLoading(false), 500) // Small delay before hiding loader
+          return 100
+        }
+        return prev + 2
+      })
+    }, 80) // Adjust speed as needed
+
+    return () => clearInterval(loadingInterval)
+  }, [])
 
   // Mouse tracking for parallax effects
   useEffect(() => {
@@ -82,8 +100,8 @@ export default function NandighoshAdvancedLanding() {
   // Scroll animation setup
   useEffect(() => {
     const observerOptions = {
-      threshold: 0.15,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -20px 0px'
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -96,7 +114,7 @@ export default function NandighoshAdvancedLanding() {
           staggerElements.forEach((child, index) => {
             setTimeout(() => {
               child.classList.add('animate-in')
-            }, index * 100)
+            }, index * 80) // Reduced delay for smoother effect
           })
         }
       })
@@ -117,10 +135,10 @@ export default function NandighoshAdvancedLanding() {
 
   // Real-time updates and intersection observer
   useEffect(() => {
-    // Real-time updates
+    // Real-time updates - update every minute
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 30000)
+    }, 60000)
 
     // Simulate real-time seat availability
     const seatInterval = setInterval(() => {
@@ -136,6 +154,22 @@ export default function NandighoshAdvancedLanding() {
       clearInterval(interval)
       clearInterval(seatInterval)
     }
+  }, [])
+
+  // Loading animation effect
+  useEffect(() => {
+    const loadingInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(loadingInterval)
+          setTimeout(() => setIsLoading(false), 500) // Small delay before hiding loader
+          return 100
+        }
+        return prev + 2
+      })
+    }, 80) // Adjust speed as needed
+
+    return () => clearInterval(loadingInterval)
   }, [])
 
   // Language translations
@@ -249,7 +283,7 @@ export default function NandighoshAdvancedLanding() {
       googlePlay: "Google Play",
 
       // Footer
-      footerDescription: "Connecting Odisha with comfortable and reliable bus services since 2008.",
+      footerDescription: "Connecting Odisha, Comfortably",
       quickLinks: "Quick Links",
       services: "Services",
       onlineBooking: "Online Booking",
@@ -505,10 +539,10 @@ export default function NandighoshAdvancedLanding() {
   }
 
   useEffect(() => {
-    // Real-time updates
+    // Real-time updates - update every minute
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 30000)
+    }, 60000)
 
     // Intersection Observer for animations
     const observer = new IntersectionObserver(
@@ -685,7 +719,53 @@ export default function NandighoshAdvancedLanding() {
   const currentLang = languages[currentLanguage as keyof typeof languages]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 relative overflow-hidden">
+    <>
+      {/* Loading Screen */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 z-[9999] flex items-center justify-center loading-container">
+          <div className="text-center">
+            {/* Logo */}
+            <div className="mb-8 loading-logo">
+              <Image
+                src="/images/nandighosh-logo-updated.png"
+                alt="Nandighosh Logo"
+                width={150}
+                height={150}
+                className="mx-auto object-contain animate-float"
+              />
+            </div>
+            
+            {/* Loading Text */}
+            <h2 className="text-2xl font-bold text-orange-600 mb-6 loading-text">
+              Loading Nandighosh Experience...
+            </h2>
+            
+            {/* Progress Bar Container */}
+            <div className="w-80 mx-auto">
+              <div className="bg-orange-100 rounded-full h-3 mb-3 overflow-hidden loading-progress shadow-inner">
+                <div 
+                  className="h-full rounded-full transition-all duration-500 ease-out relative loading-progress-fill"
+                  style={{ width: `${loadingProgress}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent shimmer-wave"></div>
+                </div>
+              </div>
+              <p className="text-sm text-orange-600 font-semibold loading-text">{loadingProgress}%</p>
+            </div>
+            
+            {/* Loading dots animation */}
+            <div className="flex justify-center space-x-2 mt-6">
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce animation-delay-1000"></div>
+              <div className="w-2 h-2 bg-orange-600 rounded-full animate-bounce animation-delay-2000"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 relative overflow-hidden">
       {/* Animated Background Particles */}
       <div className="fixed inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => {
@@ -725,7 +805,6 @@ export default function NandighoshAdvancedLanding() {
               </div>
               <div>
                 <span className="text-3xl font-bold text-white drop-shadow-lg">Nandighosh</span>
-                <div className="text-sm text-orange-100 font-medium tracking-wide">Premium Travel</div>
               </div>
             </div>
 
@@ -750,7 +829,7 @@ export default function NandighoshAdvancedLanding() {
               </select>
 
               <div className="text-sm text-white/90 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 font-mono breathe">
-                {currentTime.toLocaleTimeString()}
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
 
@@ -861,11 +940,15 @@ export default function NandighoshAdvancedLanding() {
       >
         {/* Premium Background Effects */}
         <div className="absolute inset-0">
-          {/* Background overlay for better text readability */}
-          <div className="absolute inset-0 bg-overlay-orange"></div>
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-100/30 via-transparent to-red-100/30"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-white/20"></div>
+          {/* Enhanced Orange overlay for better visibility */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/85 via-orange-400/80 to-red-500/85"></div>
+          {/* Additional Orange overlay */}
+          <div className="absolute inset-0 bg-orange-600/25"></div>
+          {/* Orange pattern overlay */}
+          <div className="absolute inset-0 orange-pattern-overlay"></div>
+          {/* Enhanced Orange Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-200/40 via-orange-300/30 to-red-200/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-orange-400/15 via-orange-300/20 to-orange-500/25"></div>
 
           {/* Animated Geometric Shapes */}
           <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-orange-200/30 to-red-200/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse morph-bg"></div>
@@ -880,35 +963,35 @@ export default function NandighoshAdvancedLanding() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between">
-            <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
+            <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0 hero-content-left">
               <div className="mb-6">
                 <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight stagger-child fade-in-up">
-                  <span className="bg-gradient-to-r from-orange-600 via-red-600 to-orange-700 bg-clip-text text-transparent">
+                  <span className="text-gradient-orange animate-text-glow animate-brand-bounce drop-shadow-2xl cursor-pointer">
                     Nandighosh
                   </span>
                 </h1>
 
                 <div className="space-y-3 mb-6">
-                  <p className="text-xl lg:text-2xl text-orange-700 font-light tracking-wide stagger-child fade-in-up">{currentLang.tagline}</p>
-                  <p className="text-lg lg:text-xl text-gray-700 font-medium stagger-child fade-in-up">{currentLang.subtitle}</p>
-                  <p className="text-sm lg:text-base text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed stagger-child fade-in-up">
+                  <p className="text-xl lg:text-2xl text-white font-light tracking-wide stagger-child fade-in-up drop-shadow-md">{currentLang.tagline}</p>
+                  <p className="text-lg lg:text-xl text-white/95 font-medium stagger-child fade-in-up drop-shadow-md">{currentLang.subtitle}</p>
+                  <p className="text-sm lg:text-base text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed stagger-child fade-in-up drop-shadow-sm">
                     {currentLang.premiumSubtitle}
                   </p>
                 </div>
 
                 {/* Premium Features */}
                 <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-6 stagger-child fade-in-up">
-                  <div className="flex items-center space-x-2 bg-orange-100 backdrop-blur-sm rounded-full px-3 py-1.5">
-                    <Award className="w-3 h-3 text-orange-600" />
-                    <span className="text-xs text-gray-700">Award Winning</span>
+                  <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
+                    <Award className="w-3 h-3 text-blue-600" />
+                    <span className="text-xs text-gray-800 font-medium">Award Winning</span>
                   </div>
-                  <div className="flex items-center space-x-2 bg-green-100 backdrop-blur-sm rounded-full px-3 py-1.5">
+                  <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
                     <Shield className="w-3 h-3 text-green-600" />
-                    <span className="text-xs text-gray-700">100% Safe</span>
+                    <span className="text-xs text-gray-800 font-medium">100% Safe</span>
                   </div>
-                  <div className="flex items-center space-x-2 bg-yellow-100 backdrop-blur-sm rounded-full px-3 py-1.5">
+                  <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
                     <Star className="w-3 h-3 text-yellow-600" />
-                    <span className="text-xs text-gray-700">5-Star Rated</span>
+                    <span className="text-xs text-gray-800 font-medium">5-Star Rated</span>
                   </div>
                 </div>
               </div>
@@ -920,14 +1003,14 @@ export default function NandighoshAdvancedLanding() {
                   className="btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ripple"
                   onClick={() => scrollToSection("booking")}
                 >
-                  <Rocket className="mr-2 w-5 h-5 text-orange-600" />
+                  <Rocket className="mr-2 w-5 h-5 text-blue-600" />
                   {currentLang.bookSeat}
-                  <ArrowRight className="ml-2 w-5 h-5 text-orange-600" />
+                  <ArrowRight className="ml-2 w-5 h-5 text-blue-600" />
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-2 border-orange-400/50 text-gray-700 hover:bg-orange-500/20 hover:text-white px-6 py-3 text-lg font-semibold rounded-xl transition-all duration-300 bg-white/5 backdrop-blur-sm tilt-card"
+                  className="border-2 border-white/80 text-white hover:bg-white/20 hover:text-white px-6 py-3 text-lg font-semibold rounded-xl transition-all duration-300 bg-white/10 backdrop-blur-sm tilt-card shadow-lg"
                   onClick={() => scrollToSection("routes")}
                 >
                   <MapPin className="mr-2 w-5 h-5" />
@@ -937,27 +1020,27 @@ export default function NandighoshAdvancedLanding() {
 
               {/* Premium Statistics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-xl mx-auto lg:mx-0 stagger-child fade-in-up">
-                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                <div className="text-center card-3d rounded-lg p-4 bg-white/95 backdrop-blur-sm border border-white/30 stagger-animation shadow-lg">
                   <div className="text-2xl font-bold text-orange-600 mb-1 breathe">50+</div>
-                  <div className="text-xs text-gray-600 font-medium">{currentLang.dailyRoutes}</div>
+                  <div className="text-xs text-gray-700 font-medium">{currentLang.dailyRoutes}</div>
                 </div>
-                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                <div className="text-center card-3d rounded-lg p-4 bg-white/95 backdrop-blur-sm border border-white/30 stagger-animation shadow-lg">
                   <div className="text-2xl font-bold text-red-600 mb-1 breathe">10K+</div>
-                  <div className="text-xs text-gray-600 font-medium">{currentLang.happyCustomers}</div>
+                  <div className="text-xs text-gray-700 font-medium">{currentLang.happyCustomers}</div>
                 </div>
-                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                <div className="text-center card-3d rounded-lg p-4 bg-white/95 backdrop-blur-sm border border-white/30 stagger-animation shadow-lg">
                   <div className="text-2xl font-bold text-yellow-600 mb-1 breathe">15+</div>
-                  <div className="text-xs text-gray-600 font-medium">{currentLang.yearsExperience}</div>
+                  <div className="text-xs text-gray-700 font-medium">{currentLang.yearsExperience}</div>
                 </div>
-                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                <div className="text-center card-3d rounded-lg p-4 bg-white/95 backdrop-blur-sm border border-white/30 stagger-animation shadow-lg">
                   <div className="text-2xl font-bold text-green-600 mb-1 breathe">99.8%</div>
-                  <div className="text-xs text-gray-600 font-medium">{currentLang.onTime}</div>
+                  <div className="text-xs text-gray-700 font-medium">{currentLang.onTime}</div>
                 </div>
               </div>
             </div>
 
             {/* Premium Bus Image */}
-            <div className="lg:w-1/2 flex justify-center stagger-child fade-in-right">
+            <div className="lg:w-1/2 flex justify-center stagger-child fade-in-right hero-content-right">
               <div className="scale-in-container" data-animate>
                 <div className="premium-bus-container">
                   {/* Image - now using simple positioning */}
@@ -1041,7 +1124,7 @@ export default function NandighoshAdvancedLanding() {
                     </div>
                   </div>
                   <Button className="w-full btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-3 text-lg font-semibold ripple">
-                    <Navigation className="mr-2 w-5 h-5 text-orange-600" />
+                    <Navigation className="mr-2 w-5 h-5 text-blue-600" />
                     {currentLang.searchRoutes}
                   </Button>
                 </TabsContent>
@@ -1049,12 +1132,12 @@ export default function NandighoshAdvancedLanding() {
                 <TabsContent value="track" className="space-y-6">
                   <div className="text-center">
                     <div className="w-32 h-32 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center card-3d">
-                      <MapPin className="w-16 h-16 text-orange-600 animate-pulse" />
+                      <MapPin className="w-16 h-16 text-blue-600 animate-pulse" />
                     </div>
                     <h3 className="text-xl font-bold mb-4">{currentLang.liveTracking}</h3>
                     <Input placeholder={currentLang.enterTicket} className="max-w-md mx-auto mb-4 tilt-card" />
                     <Button className="bg-green-600 hover:bg-green-700 btn-interactive">
-                      <Navigation className="mr-2 w-4 h-4 text-orange-600" />
+                      <Navigation className="mr-2 w-4 h-4 text-blue-600" />
                       {currentLang.trackBus}
                     </Button>
                   </div>
@@ -1063,12 +1146,12 @@ export default function NandighoshAdvancedLanding() {
                 <TabsContent value="qr" className="space-y-6">
                   <div className="text-center">
                     <div className="w-32 h-32 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mx-auto mb-6 flex items-center justify-center card-3d">
-                      <QrCode className="w-16 h-16 text-orange-600 animate-spin-slow" />
+                      <QrCode className="w-16 h-16 text-blue-600 animate-spin-slow" />
                     </div>
                     <h3 className="text-xl font-bold mb-4">{currentLang.qrBooking}</h3>
                     <p className="text-gray-600 mb-4">{currentLang.qrDescription}</p>
                     <Button className="bg-purple-600 hover:bg-purple-700 btn-interactive">
-                      <QrCode className="mr-2 w-4 h-4 text-orange-600" />
+                      <QrCode className="mr-2 w-4 h-4 text-blue-600" />
                       {currentLang.openScanner}
                     </Button>
                   </div>
@@ -1104,7 +1187,7 @@ export default function NandighoshAdvancedLanding() {
 
                 <CardHeader className="text-center pb-4">
                   <div className="text-5xl mb-4 animate-float">{route.icon}</div>
-                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                     {route.from[currentLanguage as keyof typeof route.from]} → {route.to[currentLanguage as keyof typeof route.to]}
                   </CardTitle>
                   <CardDescription className="text-orange-600 font-medium">{route.description[currentLanguage as keyof typeof route.description]}</CardDescription>
@@ -1232,7 +1315,7 @@ export default function NandighoshAdvancedLanding() {
               
               {/* Image */}
               <img 
-                src="/images/bus-fleet.jpg" 
+                src="/images/buses2.jpeg" 
                 alt="Nandighosh Bus Fleet"
               />
               
@@ -1432,19 +1515,18 @@ export default function NandighoshAdvancedLanding() {
                       <div className="text-2xl">🤖</div>
                       <div className="text-white">
                         <div className="text-xs opacity-75">Get it on</div>
-                        <div className="font-semibold">{currentLang.googlePlay}</div>
+                        <div className="font-semibold">Google Play</div>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Weather Info */}
+              {/* Service Status */}
               <Card className="card-ultra-3d border-0 text-gray-900">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4 flex items-center text-gray-900">
-                    <CheckCircle className="mr-2 w-5 h-5 text-green-600" />
-                    Travel Updates
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-bold mb-6 text-gray-900 text-center">
+                    Service Status
                   </h3>
                   <div className="space-y-3 text-sm text-gray-700">
                     <div className="flex items-center space-x-2 tilt-card">
@@ -1504,7 +1586,6 @@ export default function NandighoshAdvancedLanding() {
                 />
                 <div>
                   <span className="text-xl font-bold text-white">Nandighosh</span>
-                  <div className="text-sm text-orange-200">Premium Travel</div>
                 </div>
               </div>
               <p className="text-orange-200 mb-4">{currentLang.footerDescription}</p>
@@ -1619,6 +1700,7 @@ export default function NandighoshAdvancedLanding() {
           <MessageCircle className="w-8 h-8 text-orange-600" />
         </Button>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
