@@ -28,6 +28,18 @@ import {
   Coffee,
   Rocket,
   Award,
+  ChevronLeft,
+  ChevronRight,
+  Snowflake,
+  Bed,
+  Monitor,
+  Zap,
+  Heart,
+  Palette,
+  Eye,
+  Armchair,
+  Lightbulb,
+  Volume2,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -135,10 +147,10 @@ export default function NandighoshAdvancedLanding() {
 
   // Real-time updates and intersection observer
   useEffect(() => {
-    // Real-time updates - update every minute
+    // Real-time updates
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 60000)
+    }, 30000)
 
     // Simulate real-time seat availability
     const seatInterval = setInterval(() => {
@@ -539,10 +551,10 @@ export default function NandighoshAdvancedLanding() {
   }
 
   useEffect(() => {
-    // Real-time updates - update every minute
+    // Real-time updates
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 60000)
+    }, 30000)
 
     // Intersection Observer for animations
     const observer = new IntersectionObserver(
@@ -829,7 +841,7 @@ export default function NandighoshAdvancedLanding() {
               </select>
 
               <div className="text-sm text-white/90 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 font-mono breathe">
-                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {currentTime.toLocaleTimeString()}
               </div>
             </div>
 
@@ -982,7 +994,7 @@ export default function NandighoshAdvancedLanding() {
                 {/* Premium Features */}
                 <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-6 stagger-child fade-in-up">
                   <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
-                    <Award className="w-3 h-3 text-blue-600" />
+                    <Award className="w-3 h-3 text-orange-600" />
                     <span className="text-xs text-gray-800 font-medium">Award Winning</span>
                   </div>
                   <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
@@ -1003,9 +1015,9 @@ export default function NandighoshAdvancedLanding() {
                   className="btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ripple"
                   onClick={() => scrollToSection("booking")}
                 >
-                  <Rocket className="mr-2 w-5 h-5 text-blue-600" />
+                  <Rocket className="mr-2 w-5 h-5 text-orange-600" />
                   {currentLang.bookSeat}
-                  <ArrowRight className="ml-2 w-5 h-5 text-blue-600" />
+                  <ArrowRight className="ml-2 w-5 h-5 text-orange-600" />
                 </Button>
                 <Button
                   variant="outline"
@@ -1124,7 +1136,7 @@ export default function NandighoshAdvancedLanding() {
                     </div>
                   </div>
                   <Button className="w-full btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 py-3 text-lg font-semibold ripple">
-                    <Navigation className="mr-2 w-5 h-5 text-blue-600" />
+                    <Navigation className="mr-2 w-5 h-5 text-orange-600" />
                     {currentLang.searchRoutes}
                   </Button>
                 </TabsContent>
@@ -1132,12 +1144,12 @@ export default function NandighoshAdvancedLanding() {
                 <TabsContent value="track" className="space-y-6">
                   <div className="text-center">
                     <div className="w-32 h-32 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center card-3d">
-                      <MapPin className="w-16 h-16 text-blue-600 animate-pulse" />
+                      <MapPin className="w-16 h-16 text-orange-600 animate-pulse" />
                     </div>
                     <h3 className="text-xl font-bold mb-4">{currentLang.liveTracking}</h3>
                     <Input placeholder={currentLang.enterTicket} className="max-w-md mx-auto mb-4 tilt-card" />
                     <Button className="bg-green-600 hover:bg-green-700 btn-interactive">
-                      <Navigation className="mr-2 w-4 h-4 text-blue-600" />
+                      <Navigation className="mr-2 w-4 h-4 text-orange-600" />
                       {currentLang.trackBus}
                     </Button>
                   </div>
@@ -1146,12 +1158,12 @@ export default function NandighoshAdvancedLanding() {
                 <TabsContent value="qr" className="space-y-6">
                   <div className="text-center">
                     <div className="w-32 h-32 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full mx-auto mb-6 flex items-center justify-center card-3d">
-                      <QrCode className="w-16 h-16 text-blue-600 animate-spin-slow" />
+                      <QrCode className="w-16 h-16 text-orange-600 animate-spin-slow" />
                     </div>
                     <h3 className="text-xl font-bold mb-4">{currentLang.qrBooking}</h3>
                     <p className="text-gray-600 mb-4">{currentLang.qrDescription}</p>
                     <Button className="bg-purple-600 hover:bg-purple-700 btn-interactive">
-                      <QrCode className="mr-2 w-4 h-4 text-blue-600" />
+                      <QrCode className="mr-2 w-4 h-4 text-orange-600" />
                       {currentLang.openScanner}
                     </Button>
                   </div>
@@ -1187,7 +1199,7 @@ export default function NandighoshAdvancedLanding() {
 
                 <CardHeader className="text-center pb-4">
                   <div className="text-5xl mb-4 animate-float">{route.icon}</div>
-                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
                     {route.from[currentLanguage as keyof typeof route.from]} → {route.to[currentLanguage as keyof typeof route.to]}
                   </CardTitle>
                   <CardDescription className="text-orange-600 font-medium">{route.description[currentLanguage as keyof typeof route.description]}</CardDescription>
@@ -1300,29 +1312,121 @@ export default function NandighoshAdvancedLanding() {
             </div>
           </Card>
 
-          {/* Bus Fleet Showcase */}
-          <div className="mt-16 modern-card">
+          {/* Bus Fleet Showcase - Horizontal Sliding Carousel */}
+          <div className="mt-16">
             <h3 className="text-3xl font-bold text-center text-gray-900 mb-8">Our Premium Fleet</h3>
-            <div className="bus-fleet-container">
-              {/* Fallback content */}
-              <div className="bus-fleet-fallback">
-                <div className="text-center">
-                  <Bus className="w-16 h-16 mx-auto mb-2" />
-                  <h4 className="text-xl font-bold">Bus Fleet</h4>
-                  <p className="text-sm">Modern & Comfortable</p>
+            
+            <div className="fleet-carousel-container">
+              {/* Navigation Buttons */}
+              <button 
+                onClick={() => {
+                  const container = document.querySelector('.fleet-cards-container') as HTMLElement;
+                  if (container) {
+                    container.scrollBy({ left: -320, behavior: 'smooth' });
+                  }
+                }}
+                className="fleet-nav-btn fleet-nav-prev"
+                aria-label="Previous fleet vehicles"
+                title="Previous"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <button 
+                onClick={() => {
+                  const container = document.querySelector('.fleet-cards-container') as HTMLElement;
+                  if (container) {
+                    container.scrollBy({ left: 320, behavior: 'smooth' });
+                  }
+                }}
+                className="fleet-nav-btn fleet-nav-next"
+                aria-label="Next fleet vehicles"
+                title="Next"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Fleet Cards Container */}
+              <div className="fleet-cards-container">
+                {/* AC Sleeper Bus */}
+                <div className="fleet-card">
+                  <div className="fleet-card-image">
+                    <Image
+                      src="/images/bus-fleet.jpg"
+                      alt="AC Sleeper Bus"
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="fleet-card-badge">
+                      <Star className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              {/* Image */}
-              <img 
-                src="/images/buses2.jpeg" 
-                alt="Nandighosh Bus Fleet"
-              />
-              
-              {/* Text Overlay */}
-              <div className="bus-fleet-text-overlay">
-                <h4 className="text-2xl font-bold mb-2">Modern & Comfortable Fleet</h4>
-                <p className="text-lg opacity-90">Experience luxury travel with our state-of-the-art buses</p>
+
+                {/* Premium Bus */}
+                <div className="fleet-card">
+                  <div className="fleet-card-image">
+                    <Image
+                      src="/images/premium-bus.jpg"
+                      alt="Premium Bus"
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="fleet-card-badge">
+                      <Crown className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Express Bus */}
+                <div className="fleet-card">
+                  <div className="fleet-card-image">
+                    <Image
+                      src="/images/buses2.jpeg"
+                      alt="Express Bus"
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="fleet-card-badge">
+                      <Zap className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nandighosh Livery Bus */}
+                <div className="fleet-card">
+                  <div className="fleet-card-image">
+                    <Image
+                      src="/images/livery1.png"
+                      alt="Nandighosh Livery Bus"
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="fleet-card-badge">
+                      <Heart className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interior View */}
+                <div className="fleet-card">
+                  <div className="fleet-card-image">
+                    <Image
+                      src="/images/interior.jpeg"
+                      alt="Bus Interior"
+                      width={300}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="fleet-card-badge">
+                      <Eye className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1486,12 +1590,12 @@ export default function NandighoshAdvancedLanding() {
                   </div>
                   <div className="flex items-center space-x-4 tilt-card">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center card-3d">
-                      <Mail className="w-6 h-6 text-blue-600" />
+                      <Mail className="w-6 h-6 text-orange-600" />
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{currentLang.emailService}</div>
                       <div className="text-gray-600">info@nandighoshbus.com</div>
-                      <div className="text-sm text-blue-600">{currentLang.correspondence}</div>
+                      <div className="text-sm text-orange-600">{currentLang.correspondence}</div>
                     </div>
                   </div>
                 </CardContent>

@@ -202,21 +202,6 @@
   color: #fff;
 }
 
-/* Ensure orange icons override btn-interactive defaults */
-.btn-interactive .text-orange-600,
-.btn-interactive .text-orange-600 svg,
-.btn-interactive .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
-}
-
-.btn-interactive:hover .text-orange-600,
-.btn-interactive:hover .text-orange-600 svg,
-.btn-interactive:hover .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
-}
-
 /* Styling for outline buttons with tilt-card class */
 .tilt-card {
   color: #374151 !important;
@@ -235,17 +220,7 @@
   color: white !important;
 }
 
-/* Icon styling for interactive buttons */
-.btn-interactive svg {
-  color: #1f2937 !important;
-  transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.btn-interactive:hover svg {
-  color: #ffffff !important;
-}
-
-/* Preserve orange color for specific icon classes - HIGHEST PRIORITY */
+/* Preserve orange color for specific icon classes on hover */
 .text-orange-600 {
   color: #ea580c !important;
 }
@@ -258,19 +233,14 @@
   color: #ea580c !important;
 }
 
-/* Ensure orange icons override btn-interactive defaults */
-.btn-interactive .text-orange-600,
-.btn-interactive .text-orange-600 svg,
-.btn-interactive .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
+/* Icon styling for interactive buttons */
+.btn-interactive svg {
+  color: #1f2937 !important;
+  transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.btn-interactive:hover .text-orange-600,
-.btn-interactive:hover .text-orange-600 svg,
-.btn-interactive:hover .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
+.btn-interactive:hover svg {
+  color: #ffffff !important;
 }
 
 /* General Lucide icon improvements */
@@ -290,14 +260,40 @@ svg.lucide {
 /* Icon color fixes */
 .text-white .lucide,
 .text-white svg {
-  color: #ffffff;
-  stroke: #ffffff;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .text-orange-600 .lucide,
 .text-orange-600 svg {
-  color: #ea580c;
-  stroke: #ea580c;
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
+/* Additional icon color overrides for better specificity */
+.text-orange-400 svg,
+.text-orange-400 .lucide {
+  color: #fb923c !important;
+  stroke: #fb923c !important;
+}
+
+.text-orange-500 svg,
+.text-orange-500 .lucide {
+  color: #f97316 !important;
+  stroke: #f97316 !important;
+}
+
+/* Ensure SVG icons inherit proper colors */
+svg.lucide.text-orange-600,
+.text-orange-600 > svg.lucide {
+  color: #ea580c !important;
+  stroke: #ea580c !important;
+}
+
+svg.lucide.text-orange-400,
+.text-orange-400 > svg.lucide {
+  color: #fb923c !important;
+  stroke: #fb923c !important;
 }
 
 /* Floating Animations */
@@ -374,7 +370,6 @@ html {
 /* Improved scroll performance */
 .scroll-container {
   will-change: scroll-position;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Enhanced intersection observer animations */
@@ -851,35 +846,6 @@ body {
 .bus-fleet-fallback p {
   opacity: 0.9;
   font-size: 0.875rem;
-}
-
-/* Bus Fleet Text Overlay */
-.bus-fleet-text-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
-  padding: 2rem;
-  z-index: 2;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bus-fleet-container:hover .bus-fleet-text-overlay {
-  transform: translateY(0);
-}
-
-.bus-fleet-text-overlay h4 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.bus-fleet-text-overlay p {
-  font-size: 1.125rem;
-  opacity: 0.9;
 }
 
 /* Enhanced scroll-triggered animations */
@@ -1651,18 +1617,167 @@ section[data-animate].animate-in {
   100% { background-position: 100% 100%, -100% -100%, 50% 50%; }
 }
 
-/* Feature card icon styling - ensure orange theme color */
-.tilt-card .text-orange-600,
-.tilt-card .text-orange-600 svg,
-.tilt-card .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
+/* Fleet Carousel Styles */
+.fleet-carousel-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: transparent;
+  padding: 1.5rem;
 }
 
-/* Override tilt-card gray color for orange theme icons */
-.card-3d .text-orange-600,
-.card-3d .text-orange-600 svg,
-.card-3d .text-orange-600 .lucide {
-  color: #ea580c !important;
-  stroke: #ea580c !important;
+.fleet-cards-container {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem 0;
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none; /* stylelint-disable-line */
+  /* Hide scrollbar for IE/Edge */
+  -ms-overflow-style: none;
+}
+
+.fleet-cards-container::-webkit-scrollbar {
+  display: none;
+}
+
+.fleet-card {
+  flex: 0 0 300px;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.fleet-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.fleet-card-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.fleet-card-image img {
+  transition: transform 0.3s ease;
+}
+
+.fleet-card:hover .fleet-card-image img {
+  transform: scale(1.1);
+}
+
+.fleet-card-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+}
+
+.fleet-card-content {
+  padding: 1.5rem;
+}
+
+.fleet-card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.fleet-card-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.fleet-card-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fleet-feature-tag {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  border: 1px solid #f59e0b;
+}
+
+.fleet-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid #ea580c;
+  color: #ea580c;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
+}
+
+.fleet-nav-btn:hover {
+  background: #ea580c;
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+}
+
+.fleet-nav-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.fleet-nav-prev {
+  left: 1rem;
+}
+
+.fleet-nav-next {
+  right: 1rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .fleet-card {
+    flex: 0 0 280px;
+  }
+  
+  .fleet-nav-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .fleet-nav-prev {
+    left: 0.5rem;
+  }
+  
+  .fleet-nav-next {
+    right: 0.5rem;
+  }
+  
+  .fleet-carousel-container {
+    padding: 1rem;
+  }
 }
