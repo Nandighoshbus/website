@@ -750,7 +750,7 @@ export default function NandighoshAdvancedLanding() {
               </select>
 
               <div className="text-sm text-white/90 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 font-mono breathe">
-                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {currentTime.toLocaleTimeString()}
               </div>
             </div>
 
@@ -856,11 +856,13 @@ export default function NandighoshAdvancedLanding() {
       <section
         id="hero"
         ref={heroRef}
-        className="pt-24 pb-20 bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 relative overflow-hidden min-h-screen flex items-center parallax-hero"
+        className="pt-24 pb-20 hero-bg-livery1 relative overflow-hidden min-h-screen flex items-center parallax-hero"
         data-animate
       >
         {/* Premium Background Effects */}
         <div className="absolute inset-0">
+          {/* Background overlay for better text readability */}
+          <div className="absolute inset-0 bg-overlay-orange"></div>
           {/* Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-r from-orange-100/30 via-transparent to-red-100/30"></div>
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-white/20"></div>
@@ -879,77 +881,77 @@ export default function NandighoshAdvancedLanding() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between">
             <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
-              <div className="mb-8">
-                <h1 className="text-7xl lg:text-9xl font-bold mb-6 leading-tight stagger-child fade-in-up">
+              <div className="mb-6">
+                <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight stagger-child fade-in-up">
                   <span className="bg-gradient-to-r from-orange-600 via-red-600 to-orange-700 bg-clip-text text-transparent">
                     Nandighosh
                   </span>
                 </h1>
 
-                <div className="space-y-4 mb-8">
-                  <p className="text-3xl lg:text-4xl text-orange-700 font-light tracking-wide stagger-child fade-in-up">{currentLang.tagline}</p>
-                  <p className="text-xl lg:text-2xl text-gray-700 font-medium stagger-child fade-in-up">{currentLang.subtitle}</p>
-                  <p className="text-lg text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed stagger-child fade-in-up">
+                <div className="space-y-3 mb-6">
+                  <p className="text-xl lg:text-2xl text-orange-700 font-light tracking-wide stagger-child fade-in-up">{currentLang.tagline}</p>
+                  <p className="text-lg lg:text-xl text-gray-700 font-medium stagger-child fade-in-up">{currentLang.subtitle}</p>
+                  <p className="text-sm lg:text-base text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed stagger-child fade-in-up">
                     {currentLang.premiumSubtitle}
                   </p>
                 </div>
 
                 {/* Premium Features */}
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-8 stagger-child fade-in-up">
-                  <div className="flex items-center space-x-2 bg-orange-100 backdrop-blur-sm rounded-full px-4 py-2">
-                    <Award className="w-4 h-4 text-orange-600" />
-                    <span className="text-sm text-gray-700">Award Winning</span>
+                <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-6 stagger-child fade-in-up">
+                  <div className="flex items-center space-x-2 bg-orange-100 backdrop-blur-sm rounded-full px-3 py-1.5">
+                    <Award className="w-3 h-3 text-orange-600" />
+                    <span className="text-xs text-gray-700">Award Winning</span>
                   </div>
-                  <div className="flex items-center space-x-2 bg-green-100 backdrop-blur-sm rounded-full px-4 py-2">
-                    <Shield className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-gray-700">100% Safe</span>
+                  <div className="flex items-center space-x-2 bg-green-100 backdrop-blur-sm rounded-full px-3 py-1.5">
+                    <Shield className="w-3 h-3 text-green-600" />
+                    <span className="text-xs text-gray-700">100% Safe</span>
                   </div>
-                  <div className="flex items-center space-x-2 bg-yellow-100 backdrop-blur-sm rounded-full px-4 py-2">
-                    <Star className="w-4 h-4 text-yellow-600" />
-                    <span className="text-sm text-gray-700">5-Star Rated</span>
+                  <div className="flex items-center space-x-2 bg-yellow-100 backdrop-blur-sm rounded-full px-3 py-1.5">
+                    <Star className="w-3 h-3 text-yellow-600" />
+                    <span className="text-xs text-gray-700">5-Star Rated</span>
                   </div>
                 </div>
               </div>
 
               {/* Premium CTA Section */}
-              <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start mb-12 stagger-child fade-in-up">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8 stagger-child fade-in-up">
                 <Button
                   size="lg"
-                  className="btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-10 py-5 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 ripple"
+                  className="btn-interactive bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ripple"
                   onClick={() => scrollToSection("booking")}
                 >
-                  <Rocket className="mr-3 w-6 h-6 text-orange-600" />
+                  <Rocket className="mr-2 w-5 h-5 text-orange-600" />
                   {currentLang.bookSeat}
-                  <ArrowRight className="ml-3 w-6 h-6 text-orange-600" />
+                  <ArrowRight className="ml-2 w-5 h-5 text-orange-600" />
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-2 border-orange-400/50 text-gray-700 hover:bg-orange-500/20 hover:text-white px-10 py-5 text-xl font-semibold rounded-2xl transition-all duration-300 bg-white/5 backdrop-blur-sm tilt-card"
+                  className="border-2 border-orange-400/50 text-gray-700 hover:bg-orange-500/20 hover:text-white px-6 py-3 text-lg font-semibold rounded-xl transition-all duration-300 bg-white/5 backdrop-blur-sm tilt-card"
                   onClick={() => scrollToSection("routes")}
                 >
-                  <MapPin className="mr-3 w-6 h-6" />
+                  <MapPin className="mr-2 w-5 h-5" />
                   {currentLang.exploreRoutes}
                 </Button>
               </div>
 
               {/* Premium Statistics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto lg:mx-0 stagger-child fade-in-up">
-                <div className="text-center card-3d rounded-2xl p-6 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
-                  <div className="text-4xl font-bold text-orange-600 mb-2 breathe">50+</div>
-                  <div className="text-sm text-gray-600 font-medium">{currentLang.dailyRoutes}</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-xl mx-auto lg:mx-0 stagger-child fade-in-up">
+                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                  <div className="text-2xl font-bold text-orange-600 mb-1 breathe">50+</div>
+                  <div className="text-xs text-gray-600 font-medium">{currentLang.dailyRoutes}</div>
                 </div>
-                <div className="text-center card-3d rounded-2xl p-6 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
-                  <div className="text-4xl font-bold text-red-600 mb-2 breathe">10K+</div>
-                  <div className="text-sm text-gray-600 font-medium">{currentLang.happyCustomers}</div>
+                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                  <div className="text-2xl font-bold text-red-600 mb-1 breathe">10K+</div>
+                  <div className="text-xs text-gray-600 font-medium">{currentLang.happyCustomers}</div>
                 </div>
-                <div className="text-center card-3d rounded-2xl p-6 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
-                  <div className="text-4xl font-bold text-yellow-600 mb-2 breathe">15+</div>
-                  <div className="text-sm text-gray-600 font-medium">{currentLang.yearsExperience}</div>
+                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                  <div className="text-2xl font-bold text-yellow-600 mb-1 breathe">15+</div>
+                  <div className="text-xs text-gray-600 font-medium">{currentLang.yearsExperience}</div>
                 </div>
-                <div className="text-center card-3d rounded-2xl p-6 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
-                  <div className="text-4xl font-bold text-green-600 mb-2 breathe">99.8%</div>
-                  <div className="text-sm text-gray-600 font-medium">{currentLang.onTime}</div>
+                <div className="text-center card-3d rounded-lg p-4 bg-white backdrop-blur-sm border border-gray-200 stagger-animation">
+                  <div className="text-2xl font-bold text-green-600 mb-1 breathe">99.8%</div>
+                  <div className="text-xs text-gray-600 font-medium">{currentLang.onTime}</div>
                 </div>
               </div>
             </div>
@@ -960,8 +962,8 @@ export default function NandighoshAdvancedLanding() {
                 <div className="premium-bus-container">
                   {/* Image - now using simple positioning */}
                   <img 
-                    src="/test-images/premium-bus-copy.jpg" 
-                    alt="Premium Nandighosh Bus"
+                    src="/images/homepage.jpeg" 
+                    alt="Premium Nandighosh Bus with Traditional Odisha Artwork"
                     className="premium-bus-image"
                   />
                 </div>
@@ -980,7 +982,7 @@ export default function NandighoshAdvancedLanding() {
       </section>
 
       {/* Booking Section */}
-      <section id="booking" className="py-20 bg-white" data-animate>
+      <section id="booking" className="py-20 booking-bg-livery2" data-animate>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-orange-100 text-orange-800 hover:bg-orange-100 magnetic stagger-child fade-in-up">
@@ -1184,7 +1186,7 @@ export default function NandighoshAdvancedLanding() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white" data-animate>
+      <section id="features" className="py-20 features-bg-livery2 relative" data-animate>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-yellow-100 text-yellow-800 hover:bg-yellow-100 magnetic stagger-child fade-in-up">
@@ -1230,7 +1232,7 @@ export default function NandighoshAdvancedLanding() {
               
               {/* Image */}
               <img 
-                src="/test-images/bus-fleet-copy.jpg" 
+                src="/images/bus-fleet.jpg" 
                 alt="Nandighosh Bus Fleet"
               />
               
@@ -1242,28 +1244,53 @@ export default function NandighoshAdvancedLanding() {
             </div>
           </div>
 
-          {/* Additional Features Grid */}
-          <div className="mt-16 card-ultra-3d rounded-3xl p-8 shadow-lg">
-            <h3 className="text-3xl font-bold text-center text-gray-900 mb-8">{currentLang.additionalAmenities}</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { icon: <Coffee className="w-5 h-5 text-orange-600" />, text: "Refreshments" },
-                { icon: <Wifi className="w-5 h-5 text-orange-600" />, text: "Free WiFi" },
-                { icon: <CheckCircle className="w-5 h-5 text-orange-600" />, text: "Clean Toilets" },
-                { icon: <Shield className="w-5 h-5 text-orange-600" />, text: "GPS Tracking" },
-                { icon: <Bus className="w-5 h-5 text-orange-600" />, text: "Comfortable Seats" },
-                { icon: <Clock className="w-5 h-5 text-orange-600" />, text: "On-Time Service" },
-                { icon: <Phone className="w-5 h-5 text-orange-600" />, text: "24/7 Support" },
-                { icon: <Star className="w-5 h-5 text-orange-600" />, text: "Premium Service" },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="text-center card-3d rounded-xl p-4 shadow-lg hover:shadow-xl transition-shadow magnetic"
-                >
-                  <div className="mb-2 flex justify-center">{item.icon}</div>
-                  <div className="font-semibold text-gray-800 text-sm">{item.text}</div>
+          {/* Additional Features Grid with Interior Image */}
+          <div className="mt-16 bg-gradient-to-br from-orange-900 to-red-900 rounded-3xl p-12 shadow-lg relative overflow-hidden">
+            <h3 className="text-3xl font-bold text-center text-white mb-8">{currentLang.additionalAmenities}</h3>
+            
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left side - Interior Image */}
+              <div className="amenities-image-container">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                  <Image
+                    src="/images/interior.jpeg"
+                    alt="Luxury Bus Interior"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h4 className="text-xl font-bold mb-1">Luxury Interior</h4>
+                    <p className="text-sm opacity-90">Premium comfort & style</p>
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Right side - Amenities Grid */}
+              <div>
+                <p className="text-orange-200 mb-8 text-lg text-center lg:text-left">Experience luxury and comfort in our premium bus interiors</p>
+                <div className="grid grid-cols-2 gap-6">
+                  {[
+                    { icon: <Coffee className="w-5 h-5 text-orange-400" />, text: "Refreshments" },
+                    { icon: <Wifi className="w-5 h-5 text-orange-400" />, text: "Free WiFi" },
+                    { icon: <CheckCircle className="w-5 h-5 text-orange-400" />, text: "Clean Toilets" },
+                    { icon: <Shield className="w-5 h-5 text-orange-400" />, text: "GPS Tracking" },
+                    { icon: <Bus className="w-5 h-5 text-orange-400" />, text: "Comfortable Seats" },
+                    { icon: <Clock className="w-5 h-5 text-orange-400" />, text: "On-Time Service" },
+                    { icon: <Phone className="w-5 h-5 text-orange-400" />, text: "24/7 Support" },
+                    { icon: <Star className="w-5 h-5 text-orange-400" />, text: "Premium Service" },
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="text-center bg-white/20 backdrop-blur-sm rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/30 magnetic border border-white/20"
+                    >
+                      <div className="mb-2 flex justify-center">{item.icon}</div>
+                      <div className="font-semibold text-white text-sm">{item.text}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1365,8 +1392,8 @@ export default function NandighoshAdvancedLanding() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4 tilt-card">
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center card-3d">
-                      <MessageCircle className="w-6 h-6 text-orange-600" />
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center card-3d">
+                      <MessageCircle className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{currentLang.whatsappService}</div>
@@ -1443,10 +1470,10 @@ export default function NandighoshAdvancedLanding() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-orange-900 via-red-900 to-yellow-900 text-white py-16 relative overflow-hidden">
+      <footer className="footer-bg-livery1 text-white py-16 relative overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse morph-bg"></div>
+        <div className="absolute inset-0 bg-overlay">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-orange-400/20 to-red-500/20 animate-pulse morph-bg"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -1461,7 +1488,7 @@ export default function NandighoshAdvancedLanding() {
                 className="w-20 h-20 object-contain animate-pulse-glow"
               />
             </div>
-            <h3 className="text-2xl font-bold mb-2">Nandighosh</h3>
+            <h3 className="text-2xl font-bold mb-2 text-white">Nandighosh</h3>
             <p className="text-orange-200">{currentLang.tagline}</p>
           </div>
 
@@ -1476,7 +1503,7 @@ export default function NandighoshAdvancedLanding() {
                   className="w-10 h-10 object-contain"
                 />
                 <div>
-                  <span className="text-xl font-bold">Nandighosh</span>
+                  <span className="text-xl font-bold text-white">Nandighosh</span>
                   <div className="text-sm text-orange-200">Premium Travel</div>
                 </div>
               </div>
@@ -1495,7 +1522,7 @@ export default function NandighoshAdvancedLanding() {
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center">
+              <h4 className="text-lg font-semibold mb-4 flex items-center text-white">
                 <Navigation className="mr-2 w-5 h-5 text-orange-600" />
                 {currentLang.quickLinks}
               </h4>
@@ -1536,7 +1563,7 @@ export default function NandighoshAdvancedLanding() {
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center">
+              <h4 className="text-lg font-semibold mb-4 flex items-center text-white">
                 {currentLang.services}
               </h4>
               <ul className="space-y-2 text-orange-200">
@@ -1554,7 +1581,7 @@ export default function NandighoshAdvancedLanding() {
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center">
+              <h4 className="text-lg font-semibold mb-4 flex items-center text-white">
                 <Phone className="mr-2 w-5 h-5" />
                 {currentLang.contactInfoFooter}
               </h4>

@@ -637,16 +637,6 @@ html {
     width: 3rem;
     height: 3rem;
   }
-  
-  .floating-crown {
-    top: -1rem;
-    left: -1rem;
-  }
-  
-  .floating-award {
-    bottom: -1rem;
-    right: -1rem;
-  }
 }
 
 /* Accessibility improvements */
@@ -980,9 +970,8 @@ section[data-animate].animate-in {
 /* Premium Bus Image Styling */
 .premium-bus-container {
   position: relative;
-  width: 100%;
-  max-width: 28rem;
-  height: 24rem;
+  width: 36rem;
+  height: 32rem;
   border-radius: 1.5rem;
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   overflow: hidden;
@@ -990,28 +979,8 @@ section[data-animate].animate-in {
   background: linear-gradient(to bottom right, #fb923c, #dc2626);
   transform-style: preserve-3d;
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  margin: 1rem auto;
+  margin: 2rem;
   z-index: 1;
-}
-
-/* Tablet view - reduce size */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .premium-bus-container {
-    max-width: 22rem;
-    height: 20rem;
-    margin: 1.5rem auto;
-  }
-}
-
-/* Laptop/Desktop view - prevent overlap */
-@media (min-width: 1024px) {
-  .premium-bus-container {
-    max-width: 32rem;
-    height: 28rem;
-    margin: 2rem 0;
-    margin-left: auto;
-    margin-right: 0;
-  }
 }
 
 .premium-bus-container:hover {
@@ -1172,4 +1141,147 @@ section[data-animate].animate-in {
     -25px -25px 80px rgba(255, 255, 255, 1);
 }
 
+/* Background Image Classes */
+.hero-bg-livery1 {
+  background-image: url('/images/livery1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.features-bg-livery2 {
+  background-image: url('/images/livery2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.footer-bg-buses {
+  background-image: url('/images/buses2.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.footer-bg-livery1 {
+  background-image: url('/images/livery1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.interior-bg {
+  background-image: url('/images/interior.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.scenic-bg {
+  background-image: url('/images/scenery.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Interior showcase styles */
+.interior-showcase {
+  background-image: url('/images/luxury-interior.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.interior-showcase::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.interior-showcase > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Overlay for better text readability */
+.bg-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.bg-overlay-light {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.bg-overlay-orange {
+  background: rgba(251, 146, 60, 0.9);
+}
+
 /* Remove debug styles */
+
+/* Booking Section Background */
+.booking-bg-livery2 {
+  background-image: url('/images/livery2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.booking-bg-livery2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1;
+}
+
+.booking-bg-livery2 > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Amenities Image Container */
+.amenities-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.amenities-image-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(251, 146, 60, 0.1), rgba(239, 68, 68, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.amenities-image-container:hover::before {
+  opacity: 1;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+  .amenities-image-container {
+    margin-bottom: 2rem;
+  }
+}
