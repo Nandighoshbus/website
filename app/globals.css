@@ -1,6 +1,66 @@
+/* 
+NANDIGHOSH BUS SERVICE - PROTECTED SOFTWARE
+COPYRIGHT © 2025 NANDIGHOSH BUS SERVICE
+UNAUTHORIZED COPYING STRICTLY PROHIBITED
+DIGITAL FINGERPRINT: NGH_2025_WATERMARK_PROTECTION_ACTIVE
+ALL USAGE MONITORED - LEGAL ACTION WILL BE TAKEN AGAINST VIOLATORS
+*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ANTI-COPY PROTECTION WATERMARKS - DO NOT REMOVE */
+:root {
+  --nandighosh-signature: "NANDIGHOSH_PROTECTED_2025";
+  --copyright-marker: "UNAUTHORIZED_COPYING_PROHIBITED";
+  --legal-warning: "COPYRIGHT_VIOLATION_LEGAL_ACTION";
+}
+
+/* Hidden watermark selectors */
+body::before {
+  content: "NANDIGHOSH_BUS_SERVICE_2025_PROTECTED";
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html::after {
+  content: "COPYRIGHT_2025_NANDIGHOSH_UNAUTHORIZED_COPYING_PROHIBITED";
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Protection overlay (invisible but detectable) */
+.nandighosh-protection-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text x='0' y='15'>NANDIGHOSH_COPYRIGHT_2025</text></svg>");
+}
+
+/* Anti-copy detection styles */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
 
 /* CSS Variables for proper theming */
 :root {

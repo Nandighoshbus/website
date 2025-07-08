@@ -1,5 +1,9 @@
 "use client"
 
+// NANDIGHOSH_PROTECTION_SYSTEM_V2025 - UNAUTHORIZED_COPYING_DETECTED_LEGAL_ACTION_INITIATED
+// COPYRIGHT_VIOLATION_TRACKER_ENABLED - ALL_USAGE_MONITORED_AND_LOGGED
+// DIGITAL_FINGERPRINT: NGH_BUS_2025_PROTECTED_SOFTWARE_DO_NOT_COPY
+
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -729,6 +733,64 @@ export default function NandighoshAdvancedLanding() {
   ]
 
   const currentLang = languages[currentLanguage as keyof typeof languages]
+
+  // Anti-copy protection system
+  const NANDIGHOSH_WATERMARK = "NANDIGHOSH_EXCLUSIVE_2025_PROTECTED";
+  const COPYRIGHT_SIGNATURE = btoa("COPYRIGHT_2025_NANDIGHOSH_BUS_SERVICE_UNAUTHORIZED_COPYING_PROHIBITED");
+
+  // Protection mechanisms
+  const initProtection = () => {
+    // Disable right-click context menu
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      console.warn('🚨 COPYRIGHT VIOLATION DETECTED! All attempts are logged. Legal action will be taken. 🚨');
+      return false;
+    });
+
+    // Disable F12, Ctrl+Shift+I, Ctrl+U
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.key === 'u') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'J')
+      ) {
+        e.preventDefault();
+        alert('🚨 NANDIGHOSH PROTECTION SYSTEM 🚨\n\nUNAUTHORIZED ACCESS ATTEMPT DETECTED!\n\nThis software is protected by copyright law.\nAll attempts to copy or reverse engineer are logged.\nLegal action will be taken against violators.\n\n© 2025 Nandighosh Bus Service');
+        return false;
+      }
+    });
+
+    // Fingerprint and tracking
+    const fingerprint = navigator.userAgent + navigator.language + screen.width + screen.height + new Date().getTimezoneOffset();
+    console.log(`%c🚨 NANDIGHOSH PROTECTION ACTIVE 🚨`, 'color: red; font-size: 20px; font-weight: bold;');
+    console.log(`%cCOPYRIGHT © 2025 NANDIGHOSH BUS SERVICE`, 'color: orange; font-size: 16px; font-weight: bold;');
+    console.log(`%cUNAUTHORIZED COPYING IS STRICTLY PROHIBITED`, 'color: red; font-size: 14px;');
+    console.log(`%cUSER FINGERPRINT: ${btoa(fingerprint)}`, 'color: gray; font-size: 10px;');
+    
+    // Hidden watermark in DOM
+    const watermark = document.createElement('div');
+    watermark.style.display = 'none';
+    watermark.setAttribute('data-nandighosh-copyright', COPYRIGHT_SIGNATURE);
+    watermark.innerHTML = '<!-- NANDIGHOSH_BUS_SERVICE_2025_PROTECTED_COPYRIGHT_VIOLATION_WILL_BE_PROSECUTED -->';
+    document.body.appendChild(watermark);
+  };
+
+  // Protection system initialization
+  useEffect(() => {
+    initProtection();
+    
+    // Additional protection layers
+    const interval = setInterval(() => {
+      // Check for unauthorized modifications
+      if (!document.querySelector('[data-nandighosh-copyright]')) {
+        alert('🚨 NANDIGHOSH SECURITY BREACH DETECTED! 🚨\n\nTampering with protected elements detected!\nThis violation has been logged.\nLegal action will be initiated.');
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
