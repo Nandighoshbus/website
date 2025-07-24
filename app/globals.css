@@ -1010,7 +1010,7 @@ section[data-animate].animate-in {
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .bg-gradient-to-r {
-    background: #000;
+    background: #fff;
     color: #fff;
   }
 }
@@ -1030,10 +1030,20 @@ section[data-animate].animate-in {
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .bg-white {
+  .bg-white:not([data-radix-popper-content-wrapper] .bg-white):not([data-radix-select-content] .bg-white):not(.rdp) {
     background-color: #1a1a1a;
     color: #ffffff;
   }
+}
+
+/* Force white background for calendar and dropdown components */
+[data-radix-popper-content-wrapper] .bg-white,
+[data-radix-select-content] .bg-white,
+.rdp,
+[data-radix-popper-content-wrapper],
+[data-radix-select-content] {
+  background-color: white !important;
+  color: #1f2937 !important;
 }
 
 /* Custom Scrollbar */

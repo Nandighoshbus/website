@@ -1,10 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Rocket, MapPin, Award, Shield, Star } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { ArrowRight, Rocket, MapPin, Award, Shield, Star, Bus, Calendar as CalendarIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { format } from "date-fns"
 
 const languages = {
   en: {
@@ -48,6 +54,29 @@ interface HomePageProps {
 
 export default function HomePage({ currentLanguage }: HomePageProps) {
   const currentLang = languages[currentLanguage as keyof typeof languages]
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [isMainBookingExpanded, setIsMainBookingExpanded] = useState(true)
+  const [onwardDate, setOnwardDate] = useState<Date>(new Date(2025, 6, 25)) // July 25, 2025
+  const [returnDate, setReturnDate] = useState<Date | undefined>(undefined)
+  const [linkTicketForm, setLinkTicketForm] = useState({ date: new Date(2025, 6, 25) })
+
+  const handleSectionToggle = (section: string) => {
+    console.log('Toggling section:', section, 'Current expanded:', expandedSection)
+    // If clicking the same section that's already expanded, collapse it
+    if (expandedSection === section) {
+      setExpandedSection(null)
+      console.log('Collapsed section:', section)
+    } else {
+      // Otherwise, expand the clicked section and collapse all others
+      setExpandedSection(section)
+      console.log('Expanded section:', section)
+    }
+    
+    // Also ensure main booking section is closed when other sections are opened
+    if (section !== 'mainBooking' && isMainBookingExpanded) {
+      setIsMainBookingExpanded(false)
+    }
+  }
 
   return (
     <div className="pt-24 min-h-screen">
@@ -67,7 +96,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
         
         {/* Video Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-600/30 z-10"></div>
-        <div className="absolute inset-0 bg-black/30 z-20"></div>
+        <div className="absolute inset-0 bg-black/1 z-20"></div>
         
         <div className="container mx-auto px-4 relative z-30">
           <div className="flex flex-col lg:flex-row items-center justify-between">
@@ -110,20 +139,20 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 <Link href="/booking">
                   <Button
                     size="lg"
-                    className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                    className="bg-white text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 hover:[&>svg]:text-orange-700"
                   >
-                    <Rocket className="mr-2 w-5 h-5" />
+                    <Rocket className="mr-2 w-5 h-5 transition-colors duration-300" />
                     {currentLang.bookSeat}
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                    <ArrowRight className="ml-2 w-5 h-5 transition-colors duration-300" />
                   </Button>
                 </Link>
                 <Link href="/routes">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg font-semibold rounded-xl bg-white/10 backdrop-blur-sm"
+                    className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:[&>svg]:text-orange-600 transition-all duration-300"
                   >
-                    <MapPin className="mr-2 w-5 h-5" />
+                    <MapPin className="mr-2 w-5 h-5 transition-colors duration-300" />
                     {currentLang.exploreRoutes}
                   </Button>
                 </Link>
@@ -150,17 +179,280 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
             </div>
 
-            {/* Bus Image */}
-            <div className="lg:w-1/2 flex justify-center">
-              <div className="relative">
-                <img 
-                  src="/images/homepage.jpeg" 
-                  alt="Premium Nandighosh Bus"
-                  className="w-full max-w-lg h-96 object-cover rounded-xl shadow-2xl"
-                />
-                <div className="absolute -top-4 -right-4 bg-yellow-400 text-orange-800 rounded-full p-3">
-                  <Award className="w-6 h-6" />
-                </div>
+            {/* Bus Booking Form */}
+            <div className="lg:w-1/2 flex justify-center lg:justify-end">
+              <div className="w-full max-w-md">
+                <Card className="shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 overflow-hidden">
+                  {/* Bus Booking Header */}
+                  <div className="bg-white/20 backdrop-blur-sm px-6 py-4 flex items-center justify-between border-b border-white/10">
+                    <div className="flex items-center space-x-2">
+                      <Bus className="w-6 h-6 text-white" />
+                      <span className="text-xl font-bold text-white">BUS BOOKING</span>
+                    </div>
+                    <button 
+                      className="text-white hover:text-white/80 transition-colors"
+                      onClick={() => {
+                        setIsMainBookingExpanded(!isMainBookingExpanded)
+                        // Close other expanded sections when main booking is opened
+                        if (!isMainBookingExpanded) {
+                          setExpandedSection(null)
+                        }
+                      }}
+                    >
+                      <div className="text-white hover:text-white/80 transition-all duration-200">
+                        {isMainBookingExpanded ? (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
+                        ) : (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                  
+                  {/* Booking Form */}
+                  {isMainBookingExpanded && (
+                    <CardContent className="p-6 space-y-4 bg-white/5 backdrop-blur-sm">
+                      {/* From Field */}
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-white">
+                          <MapPin className="w-4 h-4 text-orange-400" />
+                          <label className="text-sm font-medium">From:</label>
+                        </div>
+                        <Select>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Indore" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="indore">Indore</SelectItem>
+                            <SelectItem value="bhopal">Bhopal</SelectItem>
+                            <SelectItem value="mumbai">Mumbai</SelectItem>
+                            <SelectItem value="delhi">Delhi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                    {/* To Field */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-white">
+                        <MapPin className="w-4 h-4 text-orange-400" />
+                        <label className="text-sm font-medium">To:</label>
+                      </div>
+                      <Select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Bhopal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bhopal">Bhopal</SelectItem>
+                          <SelectItem value="indore">Indore</SelectItem>
+                          <SelectItem value="mumbai">Mumbai</SelectItem>
+                          <SelectItem value="delhi">Delhi</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Onward Date */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-white">Onward:</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="relative cursor-pointer">
+                            <Input 
+                              type="text" 
+                              value={format(onwardDate, "EEE, dd-MMM-yyyy")}
+                              readOnly
+                              className="pr-10 cursor-pointer"
+                            />
+                            <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={onwardDate}
+                            onSelect={(date) => date && setOnwardDate(date)}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Return Date */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-white">Return:</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div className="relative cursor-pointer">
+                            <Input 
+                              type="text" 
+                              value={returnDate ? format(returnDate, "EEE, dd-MMM-yyyy") : "Optional"}
+                              className="pr-10 cursor-pointer text-gray-500"
+                              readOnly
+                            />
+                            <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={returnDate}
+                            onSelect={setReturnDate}
+                            disabled={(date) => date < onwardDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Search Button */}
+                    <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 text-lg font-semibold mt-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                      SEARCH
+                    </Button>
+                  </CardContent>
+                  )}
+
+                  {/* Link Ticket Section */}
+                  <div className="border-t border-white/10">
+                    <button 
+                      type="button"
+                      className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-colors cursor-pointer focus:outline-none"
+                      onClick={() => handleSectionToggle('linkTicket')}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Bus className="w-5 h-5 text-white" />
+                        <span className="font-semibold text-white">Link Ticket</span>
+                      </div>
+                      <div className="text-white">
+                        {expandedSection === 'linkTicket' ? (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
+                        ) : (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
+                        )}
+                      </div>
+                    </button>
+                    
+                    {/* Link Ticket Form */}
+                    {expandedSection === 'linkTicket' && (
+                      <div className="bg-white/10 backdrop-blur-sm px-6 py-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                        <div className="space-y-2">
+                          <Select>
+                            <SelectTrigger className="w-full border-gray-300 focus:border-orange-500 focus:ring-orange-200">
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="w-4 h-4 text-gray-500" />
+                                <span className="text-gray-700">From:</span>
+                                <SelectValue placeholder="select departure city" />
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="indore">Indore</SelectItem>
+                              <SelectItem value="bhopal">Bhopal</SelectItem>
+                              <SelectItem value="mumbai">Mumbai</SelectItem>
+                              <SelectItem value="delhi">Delhi</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Select>
+                            <SelectTrigger className="w-full border-gray-300 focus:border-orange-500 focus:ring-orange-200">
+                              <div className="flex items-center space-x-2">
+                                <MapPin className="w-4 h-4 text-gray-500" />
+                                <span className="text-gray-700">To:</span>
+                                <SelectValue placeholder="select destination city" />
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bhopal">Bhopal</SelectItem>
+                              <SelectItem value="indore">Indore</SelectItem>
+                              <SelectItem value="mumbai">Mumbai</SelectItem>
+                              <SelectItem value="delhi">Delhi</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <div className="relative cursor-pointer">
+                                <Input 
+                                  type="text" 
+                                  value={`Date: ${format(linkTicketForm.date, "EEE, dd-MMM-yyyy")}`}
+                                  readOnly
+                                  className="pr-10 cursor-pointer border-gray-300 focus:border-orange-500 focus:ring-orange-200"
+                                />
+                                <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
+                              </div>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={linkTicketForm.date}
+                                onSelect={(date) => date && setLinkTicketForm({...linkTicketForm, date})}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 text-sm font-semibold mt-4">
+                          SEARCH
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bus Hire Section */}
+                  <div className="border-t border-white/10">
+                    <button 
+                      type="button"
+                      className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-colors cursor-pointer focus:outline-none"
+                      onClick={() => handleSectionToggle('busHire')}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Bus className="w-5 h-5 text-white" />
+                        <span className="font-semibold text-white">BUS HIRE</span>
+                      </div>
+                      <div className="text-white">
+                        {expandedSection === 'busHire' ? (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
+                        ) : (
+                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
+                        )}
+                      </div>
+                    </button>
+                    
+                    {/* Bus Hire Form */}
+                    {expandedSection === 'busHire' && (
+                      <div className="bg-white/10 backdrop-blur-sm px-6 py-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-white">City of Hire eg: Bangalore</label>
+                          <Input 
+                            type="text" 
+                            placeholder="Enter city of hire"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-white">Starting Point eg: Railway station</label>
+                          <Input 
+                            type="text" 
+                            placeholder="Enter starting point"
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-white">Destination: eg: Airport/Pune</label>
+                          <Input 
+                            type="text" 
+                            placeholder="Enter destination"
+                            className="w-full"
+                          />
+                        </div>
+                        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-2 text-sm font-semibold mt-4">
+                          HIRE BUSES
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </Card>
               </div>
             </div>
           </div>
@@ -180,87 +472,99 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-                <Award className="w-8 h-8 text-orange-600" />
+            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
+                  <Award className="w-8 h-8 text-white drop-shadow-lg" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 drop-shadow-lg">Award Winning Service</h3>
+                <p className="text-white/90 drop-shadow-md">
+                  Recognized for excellence in passenger service and safety standards across Odisha
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Award Winning Service</h3>
-              <p className="text-gray-600">
-                Recognized for excellence in passenger service and safety standards across Odisha
-              </p>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                <Shield className="w-8 h-8 text-green-600" />
+            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
+                  <Shield className="w-8 h-8 text-white drop-shadow-lg" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 drop-shadow-lg">100% Safe Travel</h3>
+                <p className="text-white/90 drop-shadow-md">
+                  Advanced safety features, GPS tracking, and experienced drivers ensure secure journeys
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4">100% Safe Travel</h3>
-              <p className="text-gray-600">
-                Advanced safety features, GPS tracking, and experienced drivers ensure secure journeys
-              </p>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
-                <Star className="w-8 h-8 text-yellow-600" />
+            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
+              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
+                  <Star className="w-8 h-8 text-white drop-shadow-lg" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 drop-shadow-lg">5-Star Comfort</h3>
+                <p className="text-white/90 drop-shadow-md">
+                  Luxury AC coaches with reclining seats, entertainment, and premium amenities
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4">5-Star Comfort</h3>
-              <p className="text-gray-600">
-                Luxury AC coaches with reclining seats, entertainment, and premium amenities
-              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Fleet Preview */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">
               Our Premium Fleet
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-white/90 drop-shadow-md">
               Modern buses equipped with the latest amenities for your comfort
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-red-400/20 rounded-xl backdrop-blur-sm border border-white/10"></div>
               <img 
                 src="/images/bus-fleet.jpg" 
                 alt="Nandighosh Bus Fleet"
-                className="w-full h-96 object-cover rounded-xl shadow-2xl"
+                className="w-full h-96 object-cover rounded-xl shadow-2xl relative z-10"
               />
             </div>
-            <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-gray-800">
+            <div className="space-y-6 backdrop-blur-sm bg-white/10 p-8 rounded-xl border border-white/20 shadow-2xl">
+              <h3 className="text-3xl font-bold text-white drop-shadow-lg">
                 Experience Luxury Travel
               </h3>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-white/90 drop-shadow-md">
                 Our fleet features state-of-the-art buses with traditional Odisha artwork, 
                 combining cultural heritage with modern comfort.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>Premium AC Sleeper & Semi-Sleeper coaches</span>
+                  <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full shadow-lg"></div>
+                  <span className="text-white/95 drop-shadow-sm">Premium AC Sleeper & Semi-Sleeper coaches</span>
                 </li>
                 <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>GPS tracking and real-time updates</span>
+                  <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full shadow-lg"></div>
+                  <span className="text-white/95 drop-shadow-sm">GPS tracking and real-time updates</span>
                 </li>
                 <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>Entertainment systems and WiFi</span>
+                  <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full shadow-lg"></div>
+                  <span className="text-white/95 drop-shadow-sm">Entertainment systems and WiFi</span>
                 </li>
                 <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>24/7 customer support</span>
+                  <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full shadow-lg"></div>
+                  <span className="text-white/95 drop-shadow-sm">24/7 customer support</span>
                 </li>
               </ul>
               <Link href="/features">
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg">
+                <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-3 rounded-lg shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
                   Learn More About Our Features
                 </Button>
               </Link>
