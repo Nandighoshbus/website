@@ -34,7 +34,7 @@ export default function SimpleFooter() {
               href="https://wa.me/1234567890" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center space-x-2 bg-white hover:bg-white text-orange-600 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg border border-orange-600"
               title="Contact us on WhatsApp"
               aria-label="Contact us on WhatsApp"
             >

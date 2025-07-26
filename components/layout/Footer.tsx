@@ -126,12 +126,12 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
       {/* Floating WhatsApp Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
-          className="bg-green-500 hover:bg-green-600 rounded-full w-16 h-16 shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 card-3d animate-pulse-glow flex items-center justify-center"
+          className="bg-white hover:bg-white rounded-full w-16 h-16 shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 card-3d animate-pulse-glow flex items-center justify-center"
           onClick={() => window.open("https://wa.me/919876543210", "_blank")}
           title="Contact us on WhatsApp"
           aria-label="Contact us on WhatsApp"
         >
-          <MessageCircle className="w-8 h-8 text-white" />
+          <MessageCircle className="w-8 h-8 text-orange-600" />
         </button>
       </div>
     </>
