@@ -2,13 +2,14 @@
 
 import ClientLayout from "@/components/layout/ClientLayout"
 import HomePage from "@/components/pages/HomePage"
+import { useLanguage } from "@/components/context/LanguageContext"
 
 export default function Home() {
+  const { currentLanguage } = useLanguage()
+
   return (
     <ClientLayout>
-      {({ currentLanguage, currentLang }) => (
-        <HomePage currentLanguage={currentLanguage} />
-      )}
+      <HomePage currentLanguage={currentLanguage} />
     </ClientLayout>
   )
 }

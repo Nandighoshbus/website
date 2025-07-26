@@ -492,8 +492,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+            <div className="card-glass relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
               <div className="relative z-10">
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
                   <Award className="w-8 h-8 text-white drop-shadow-lg" />
@@ -505,8 +504,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+            <div className="card-glass relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
               <div className="relative z-10">
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
                   <Shield className="w-8 h-8 text-white drop-shadow-lg" />
@@ -518,8 +516,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+            <div className="card-glass relative overflow-hidden rounded-xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
               <div className="relative z-10">
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center mb-6">
                   <Star className="w-8 h-8 text-white drop-shadow-lg" />
@@ -535,9 +532,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
       </section>
 
       {/* Fleet Preview */}
-      <section className="py-20 bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+      <section className="py-20 section-glass relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">

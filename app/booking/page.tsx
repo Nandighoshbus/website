@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import ClientLayout from "@/components/layout/ClientLayout"
 import BookingPage from "@/components/pages/BookingPage"
+import { useLanguage } from "@/components/context/LanguageContext"
 
 export default function Booking() {
-  const [currentLanguage, setCurrentLanguage] = useState("en")
+  const { currentLanguage } = useLanguage()
 
   return (
     <ClientLayout>

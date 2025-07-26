@@ -109,6 +109,32 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+/* Glass Card Effect */
+.card-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.95) 0%,
+    rgba(239, 68, 68, 0.95) 35%,
+    rgba(245, 158, 11, 0.95) 100%
+  );
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Glass Effect */
+.section-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.95) 0%,
+    rgba(239, 68, 68, 0.95) 35%,
+    rgba(245, 158, 11, 0.95) 100%
+  );
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
 /* Interactive Button Effects */
 .btn-interactive {
   position: relative;

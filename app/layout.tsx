@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ClientRootLayout from '@/components/layout/ClientRootLayout'
 
 export const metadata: Metadata = {
   title: 'Nandighosh Bus - Premium Travel Experience Across Odisha',
@@ -8,6 +9,15 @@ export const metadata: Metadata = {
   authors: [{ name: 'Nandighosh Bus Service' }],
   creator: 'Nandighosh Bus Service',
   publisher: 'Nandighosh Bus Service',
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/favicon-32x32.png', sizes: '180x180', type: 'image/png' }
+    ]
+  },
   openGraph: {
     title: 'Nandighosh Bus - Premium Travel Experience',
     description: 'Connecting Odisha with comfortable and reliable bus services',
@@ -26,6 +36,8 @@ export const metadata: Metadata = {
 export function generateViewport() {
   return {
     themeColor: '#ea580c',
+    width: 'device-width',
+    initialScale: 1,
   }
 }
 
@@ -36,7 +48,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ClientRootLayout>
+          {children}
+        </ClientRootLayout>
+      </body>
     </html>
   )
 }

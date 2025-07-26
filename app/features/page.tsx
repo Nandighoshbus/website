@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import ClientLayout from "@/components/layout/ClientLayout"
 import FeaturesPage from "@/components/pages/FeaturesPage"
+import { useLanguage } from "@/components/context/LanguageContext"
 
 export default function Features() {
-  const [currentLanguage, setCurrentLanguage] = useState("en")
+  const { currentLanguage } = useLanguage()
 
   return (
     <ClientLayout>
