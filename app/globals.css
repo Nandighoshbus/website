@@ -67,93 +67,32 @@
   }
 }
 
-/* Enhanced 3D Card Effects */
+/* Simplified Card Effects */
 .card-3d {
-  transform-style: preserve-3d;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
-  box-shadow:
-    20px 20px 60px rgba(0, 0, 0, 0.1),
-    -20px -20px 60px rgba(255, 255, 255, 0.8),
-    inset 5px 5px 15px rgba(255, 255, 255, 0.6),
-    inset -5px -5px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  background: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   position: relative;
-  overflow: hidden;
-}
-
-.card-3d::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.8s ease;
-  z-index: 1;
-}
-
-.card-3d:hover::before {
-  left: 100%;
 }
 
 .card-3d:hover {
-  transform: translateY(-20px) translateZ(50px) scale(1.05);
-  box-shadow:
-    40px 40px 100px rgba(0, 0, 0, 0.15),
-    -40px -40px 100px rgba(255, 255, 255, 0.9),
-    inset 8px 8px 20px rgba(255, 255, 255, 0.7),
-    inset -8px -8px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Ultra 3D Card Effect */
+/* Simplified Ultra Card Effect */
 .card-ultra-3d {
-  transform-style: preserve-3d;
-  transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: linear-gradient(145deg, #ffffff, #f1f5f9);
-  box-shadow:
-    25px 25px 80px rgba(0, 0, 0, 0.12),
-    -25px -25px 80px rgba(255, 255, 255, 0.9),
-    inset 8px 8px 25px rgba(255, 255, 255, 0.8),
-    inset -8px -8px 25px rgba(0, 0, 0, 0.06);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
+  transition: all 0.3s ease;
+  background: #ffffff;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   position: relative;
-  overflow: hidden;
-}
-
-.card-ultra-3d::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(from 0deg, transparent, rgba(251, 146, 60, 0.1), transparent);
-  animation: rotate-gradient 4s linear infinite;
-  z-index: -1;
 }
 
 .card-ultra-3d:hover {
-  transform: translateY(-30px) translateZ(80px) scale(1.08);
-  box-shadow:
-    50px 50px 120px rgba(0, 0, 0, 0.2),
-    -50px -50px 120px rgba(255, 255, 255, 1),
-    inset 12px 12px 30px rgba(255, 255, 255, 0.9),
-    inset -12px -12px 30px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes rotate-gradient {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Navbar Glass Effect */
@@ -199,25 +138,25 @@
 .btn-interactive:hover {
   transform: translateY(-5px) scale(1.05);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  color: #fff;
 }
 
 /* Styling for outline buttons with tilt-card class */
 .tilt-card {
   color: #374151 !important;
+  transition: all 0.3s ease;
 }
 
 .tilt-card svg {
   color: #374151 !important;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .tilt-card:hover {
-  color: white !important;
+  transform: translateY(-2px);
 }
 
 .tilt-card:hover svg {
-  color: white !important;
+  transform: scale(1.05);
 }
 
 /* Preserve orange color for specific icon classes on hover */
@@ -349,8 +288,6 @@ html {
 /* Enhanced intersection observer animations */
 [data-animate] {
   will-change: transform, opacity;
-  backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 /* Smooth transitions for all animated elements */
@@ -488,9 +425,8 @@ body {
   animation: morph-bg 8s ease-in-out infinite;
 }
 
-/* Parallax Effect */
+/* Simplified Parallax Effect */
 .parallax {
-  transform-style: preserve-3d;
   transition: transform 0.1s ease-out;
 }
 
@@ -552,14 +488,13 @@ body {
   animation: liquid 4s ease-in-out infinite;
 }
 
-/* Tilt Effect */
+/* Simplified Tilt Effect */
 .tilt-card {
-  transform-style: preserve-3d;
   transition: all 0.3s ease;
 }
 
 .tilt-card:hover {
-  transform: perspective(1000px) rotateX(10deg) rotateY(10deg) translateZ(20px);
+  transform: translateY(-2px);
 }
 
 /* Magnetic Effect */
@@ -700,11 +635,11 @@ body {
   }
 
   .card-3d:hover {
-    transform: translateY(-10px) translateZ(25px) scale(1.02);
+    transform: translateY(-2px);
   }
 
   .card-ultra-3d:hover {
-    transform: translateY(-15px) translateZ(40px) scale(1.04);
+    transform: translateY(-3px);
   }
 
   .premium-bus-container {
@@ -1028,12 +963,31 @@ section[data-animate].animate-in {
   border: 1px solid rgba(0,0,0,0.03);
 }
 
-/* Dark mode support */
+/* White footer specific styling */
+footer.bg-white {
+  background-color: white;
+}
+
+footer.bg-white .text-gray-900 {
+  color: #111827;
+}
+
+footer.bg-white .text-orange-200 {
+  color: #ea580c;
+  opacity: 0.8;
+}
+
+footer.bg-white .tilt-card {
+  color: #1f2937;
+}
+
+footer.bg-white .hover\:text-white:hover {
+  color: #ea580c !important;
+}
+
+/* Dark mode support - disabled for bg-white elements */
 @media (prefers-color-scheme: dark) {
-  .bg-white:not([data-radix-popper-content-wrapper] .bg-white):not([data-radix-select-content] .bg-white):not(.rdp) {
-    background-color: #1a1a1a;
-    color: #ffffff;
-  }
+  /* .bg-white elements will maintain their white background */
 }
 
 /* Force white background for calendar and dropdown components */
@@ -1044,6 +998,33 @@ section[data-animate].animate-in {
 [data-radix-select-content] {
   background-color: white !important;
   color: #1f2937 !important;
+}
+
+/* Ensure sections and all bg-white elements stay white */
+section.bg-white,
+.bg-white {
+  background-color: white !important;
+  color: inherit;
+}
+
+/* Force white background with maximum specificity */
+html body section.py-8.bg-white.shadow-sm,
+html body section.bg-white,
+html body .bg-white {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Override the problematic dark mode rule specifically */
+section.py-8.bg-white.shadow-sm {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+/* Ensure all section elements with bg-white are white */
+section.bg-white:not([data-radix-popper-content-wrapper] .bg-white):not([data-radix-select-content] .bg-white):not(.rdp) {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
 }
 
 /* Custom Scrollbar */
@@ -1267,8 +1248,7 @@ section[data-animate].animate-in {
 }
 
 .floating-element:hover {
-  background: linear-gradient(135deg, rgba(251, 146, 60, 1), rgba(239, 68, 68, 1));
-  transform: translateY(-5px) scale(1.1);
+  transform: translateY(-5px) scale(1.15);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -1290,10 +1270,11 @@ section[data-animate].animate-in {
   stroke-width: 2.5;
   opacity: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease;
 }
 
 .floating-element:hover .lucide {
-  color: #fff7ed !important;
+  transform: scale(1.2);
   opacity: 1;
   stroke-width: 3;
 }
@@ -1303,17 +1284,9 @@ section[data-animate].animate-in {
   color: #fbbf24 !important; /* Golden color for crown */
 }
 
-.floating-crown:hover .lucide-crown {
-  color: #f59e0b !important;
-}
-
 /* Award icon specific styling */
 .floating-award .lucide-award {
   color: #ffffff !important;
-}
-
-.floating-award:hover .lucide-award {
-  color: #fff7ed !important;
 }
 
 /* Background Image Classes */
@@ -1363,31 +1336,6 @@ section[data-animate].animate-in {
 }
 
 .features-bg-livery2 > * {
-  position: relative;
-  z-index: 2;
-}
-
-.footer-bg-livery1 {
-  background-image: url('/images/livery1.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  position: relative;
-}
-
-.footer-bg-livery1::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1;
-}
-
-.footer-bg-livery1 > * {
   position: relative;
   z-index: 2;
 }
@@ -1649,8 +1597,6 @@ section[data-animate].animate-in {
   overflow-x: auto;
   scroll-behavior: smooth;
   padding: 1rem 0;
-  /* Hide scrollbar for Firefox */
-  scrollbar-width: none; /* stylelint-disable-line */
   /* Hide scrollbar for IE/Edge */
   -ms-overflow-style: none;
 }
@@ -1797,4 +1743,9 @@ section[data-animate].animate-in {
   .fleet-carousel-container {
     padding: 1rem;
   }
+}
+
+/* Custom Tailwind CSS Override */
+.pt-24 {
+  padding-top: 4rem !important;
 }

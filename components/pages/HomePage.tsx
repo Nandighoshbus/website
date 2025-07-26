@@ -139,20 +139,20 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 <Link href="/booking">
                   <Button
                     size="lg"
-                    className="bg-white text-orange-600 hover:bg-orange-50 hover:text-orange-700 px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 hover:[&>svg]:text-orange-700"
+                    className="bg-white text-orange-600 px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300"
                   >
-                    <Rocket className="mr-2 w-5 h-5 transition-colors duration-300" />
+                    <Rocket className="mr-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                     {currentLang.bookSeat}
-                    <ArrowRight className="ml-2 w-5 h-5 transition-colors duration-300" />
+                    <ArrowRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                   </Button>
                 </Link>
                 <Link href="/routes">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:[&>svg]:text-orange-600 transition-all duration-300"
+                    className="border-2 border-white text-white px-8 py-4 text-lg font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-2xl"
                   >
-                    <MapPin className="mr-2 w-5 h-5 transition-colors duration-300" />
+                    <MapPin className="mr-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                     {currentLang.exploreRoutes}
                   </Button>
                 </Link>
@@ -190,7 +190,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                       <span className="text-xl font-bold text-white">BUS BOOKING</span>
                     </div>
                     <button 
-                      className="text-white hover:text-white/80 transition-colors"
+                      className="text-white hover:scale-110 transition-all duration-200"
                       onClick={() => {
                         setIsMainBookingExpanded(!isMainBookingExpanded)
                         // Close other expanded sections when main booking is opened
@@ -199,7 +199,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                         }
                       }}
                     >
-                      <div className="text-white hover:text-white/80 transition-all duration-200">
+                      <div className="text-white hover:scale-110 transition-all duration-200">
                         {isMainBookingExpanded ? (
                           <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
                         ) : (
@@ -220,13 +220,18 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                         </div>
                         <Select>
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Indore" />
+                            <SelectValue placeholder="Select departure city" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="indore">Indore</SelectItem>
-                            <SelectItem value="bhopal">Bhopal</SelectItem>
-                            <SelectItem value="mumbai">Mumbai</SelectItem>
-                            <SelectItem value="delhi">Delhi</SelectItem>
+                            <SelectItem value="balasore">Balasore</SelectItem>
+                            <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                            <SelectItem value="cuttack">Cuttack</SelectItem>
+                            <SelectItem value="puri">Puri</SelectItem>
+                            <SelectItem value="berhampur">Berhampur</SelectItem>
+                            <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                            <SelectItem value="kolkata">Kolkata</SelectItem>
+                            <SelectItem value="rourkela">Rourkela</SelectItem>
+                            <SelectItem value="koraput">Koraput</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -239,13 +244,18 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                       </div>
                       <Select>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Bhopal" />
+                          <SelectValue placeholder="Select destination city" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="bhopal">Bhopal</SelectItem>
-                          <SelectItem value="indore">Indore</SelectItem>
-                          <SelectItem value="mumbai">Mumbai</SelectItem>
-                          <SelectItem value="delhi">Delhi</SelectItem>
+                          <SelectItem value="balasore">Balasore</SelectItem>
+                          <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                          <SelectItem value="cuttack">Cuttack</SelectItem>
+                          <SelectItem value="puri">Puri</SelectItem>
+                          <SelectItem value="berhampur">Berhampur</SelectItem>
+                          <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                          <SelectItem value="kolkata">Kolkata</SelectItem>
+                          <SelectItem value="rourkela">Rourkela</SelectItem>
+                          <SelectItem value="koraput">Koraput</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -315,7 +325,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                   <div className="border-t border-white/10">
                     <button 
                       type="button"
-                      className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-colors cursor-pointer focus:outline-none"
+                      className="w-full bg-white/20 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-all cursor-pointer focus:outline-none hover:scale-105 hover:shadow-lg"
                       onClick={() => handleSectionToggle('linkTicket')}
                     >
                       <div className="flex items-center space-x-2">
@@ -344,10 +354,15 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                               </div>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="indore">Indore</SelectItem>
-                              <SelectItem value="bhopal">Bhopal</SelectItem>
-                              <SelectItem value="mumbai">Mumbai</SelectItem>
-                              <SelectItem value="delhi">Delhi</SelectItem>
+                              <SelectItem value="balasore">Balasore</SelectItem>
+                              <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                              <SelectItem value="cuttack">Cuttack</SelectItem>
+                              <SelectItem value="puri">Puri</SelectItem>
+                              <SelectItem value="berhampur">Berhampur</SelectItem>
+                              <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                              <SelectItem value="kolkata">Kolkata</SelectItem>
+                              <SelectItem value="rourkela">Rourkela</SelectItem>
+                              <SelectItem value="koraput">Koraput</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -361,10 +376,15 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                               </div>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="bhopal">Bhopal</SelectItem>
-                              <SelectItem value="indore">Indore</SelectItem>
-                              <SelectItem value="mumbai">Mumbai</SelectItem>
-                              <SelectItem value="delhi">Delhi</SelectItem>
+                              <SelectItem value="balasore">Balasore</SelectItem>
+                              <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                              <SelectItem value="cuttack">Cuttack</SelectItem>
+                              <SelectItem value="puri">Puri</SelectItem>
+                              <SelectItem value="berhampur">Berhampur</SelectItem>
+                              <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                              <SelectItem value="kolkata">Kolkata</SelectItem>
+                              <SelectItem value="rourkela">Rourkela</SelectItem>
+                              <SelectItem value="koraput">Koraput</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -403,7 +423,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                   <div className="border-t border-white/10">
                     <button 
                       type="button"
-                      className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-colors cursor-pointer focus:outline-none"
+                      className="w-full bg-white/20 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-all cursor-pointer focus:outline-none hover:scale-105 hover:shadow-lg"
                       onClick={() => handleSectionToggle('busHire')}
                     >
                       <div className="flex items-center space-x-2">

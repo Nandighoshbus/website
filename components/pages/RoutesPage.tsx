@@ -101,6 +101,24 @@ const routes = [
     frequency: "3 times daily",
     busType: "AC Sleeper", 
     popularity: "medium"
+  },
+  {
+    from: "Bhubaneswar",
+    to: "Rourkela",
+    duration: "6h 00m",
+    fare: "₹550",
+    frequency: "3 times daily",
+    busType: "AC Sleeper",
+    popularity: "medium"
+  },
+  {
+    from: "Berhampur",
+    to: "Koraput",
+    duration: "3h 45m",
+    fare: "₹350",
+    frequency: "4 times daily",
+    busType: "Semi Sleeper",
+    popularity: "medium"
   }
 ]
 
@@ -136,7 +154,7 @@ export default function RoutesPage({ currentLanguage }: RoutesPageProps) {
       </section>
 
       {/* Filter Buttons */}
-      <section className="py-8 bg-white shadow-sm">
+      <section className="py-8 bg-gray-50 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap gap-4 justify-center">
             <button
