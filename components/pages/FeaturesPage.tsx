@@ -88,7 +88,7 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
   return (
     <div className="pt-24 py-20 bg-gray-50 relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 mt-8">
           <Badge className="mb-4 bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
             {currentLang.whyChooseUs}
           </Badge>
@@ -118,19 +118,22 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
         </Card>
 
         {/* Bus Fleet Showcase */}
-        <div className="mt-16">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-8">Our Premium Fleet</h3>
+        <div className="mt-20 mx-6">
+          <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">Our Premium Fleet</h3>
           
           <div className="relative">
-            {/* Fleet Cards Container */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Fleet Cards Container with Horizontal Scroll */}
+            <div 
+              id="fleet-carousel" 
+              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 scrollbar-hide"
+            >
               {/* AC Sleeper Bus */}
-              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
                 <div className="relative">
                   <img
                     src="/images/bus-fleet.jpg"
                     alt="AC Sleeper Bus"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-cover"
                   />
                   <div className="absolute top-4 right-4 bg-yellow-500 text-white rounded-full p-2">
                     <Star className="w-4 h-4" />
@@ -143,12 +146,12 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
               </div>
 
               {/* Premium Bus */}
-              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
                 <div className="relative">
                   <img
                     src="/images/premium-bus.jpg"
                     alt="Premium Bus"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-cover"
                   />
                   <div className="absolute top-4 right-4 bg-purple-500 text-white rounded-full p-2">
                     <Crown className="w-4 h-4" />
@@ -161,12 +164,12 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
               </div>
 
               {/* Express Bus */}
-              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
                 <div className="relative">
                   <img
                     src="/images/buses2.jpeg"
                     alt="Express Bus"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-cover"
                   />
                   <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full p-2">
                     <Zap className="w-4 h-4" />
@@ -177,7 +180,84 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
                   <p className="text-gray-600 text-sm">Fast and efficient</p>
                 </div>
               </div>
+
+              {/* Interior View */}
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
+                <div className="relative">
+                  <img
+                    src="/images/interior.jpeg"
+                    alt="Bus Interior"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-green-500 text-white rounded-full p-2">
+                    <Eye className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg mb-2">Luxury Interior</h4>
+                  <p className="text-gray-600 text-sm">Spacious and comfortable seating</p>
+                </div>
+              </div>
+
+              {/* Custom Livery 1 */}
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
+                <div className="relative">
+                  <img
+                    src="/images/livery1.png"
+                    alt="Custom Livery Bus"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2">
+                    <Heart className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg mb-2">Custom Design</h4>
+                  <p className="text-gray-600 text-sm">Unique branded fleet</p>
+                </div>
+              </div>
+
+              {/* Custom Livery 2 */}
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow min-w-[320px] flex-shrink-0">
+                <div className="relative">
+                  <img
+                    src="/images/livery2.png"
+                    alt="Modern Fleet"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-indigo-500 text-white rounded-full p-2">
+                    <Bus className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg mb-2">Modern Fleet</h4>
+                  <p className="text-gray-600 text-sm">Latest technology buses</p>
+                </div>
+              </div>
             </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => {
+                const carousel = document.getElementById('fleet-carousel');
+                if (carousel) carousel.scrollBy({ left: -340, behavior: 'smooth' });
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 z-10"
+              aria-label="Scroll fleet carousel left"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-700" />
+            </button>
+            
+            <button
+              onClick={() => {
+                const carousel = document.getElementById('fleet-carousel');
+                if (carousel) carousel.scrollBy({ left: 340, behavior: 'smooth' });
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 z-10"
+              aria-label="Scroll fleet carousel right"
+            >
+              <ChevronRight className="w-6 h-6 text-gray-700" />
+            </button>
           </div>
         </div>
 

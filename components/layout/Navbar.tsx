@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import Image from "next/image"
@@ -15,22 +15,14 @@ interface NavbarProps {
 
 export default function Navbar({ currentLanguage, setCurrentLanguage, currentLang }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
-
-  useEffect(() => {
-    setMounted(true)
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   const navLinks = [
     { href: "/", label: currentLang.home, id: "home" },
+    { href: "/about", label: currentLang.about, id: "about" },
     { href: "/routes", label: currentLang.routes, id: "routes" },
     { href: "/features", label: currentLang.features, id: "features" },
+    { href: "/offers", label: currentLang.offers, id: "offers" },
     { href: "/contact", label: currentLang.contact, id: "contact" },
   ]
 
@@ -39,18 +31,6 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
       return pathname === '/'
     }
     return pathname.startsWith(href)
-  }
-
-  const formatTime = (date: Date) => {
-    if (!mounted) return "--:--:--"
-    try {
-      const hours = date.getHours().toString().padStart(2, '0')
-      const minutes = date.getMinutes().toString().padStart(2, '0')
-      const seconds = date.getSeconds().toString().padStart(2, '0')
-      return `${hours}:${minutes}:${seconds}`
-    } catch (error) {
-      return "--:--:--"
-    }
   }
 
   return (
@@ -71,11 +51,11 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
               <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-gradient-to-r from-red-400 to-pink-500 rounded-full animate-bounce"></div>
             </div>
             <div>
-              <span className="text-3xl font-bold text-white drop-shadow-lg">Nandighosh</span>
+              <span className="text-2xl font-bold text-white drop-shadow-lg">Nandighosh Travels</span>
             </div>
           </Link>
 
-          {/* Language Selector & Time */}
+          {/* Language Selector */}
           <div className="hidden lg:flex items-center space-x-6">
             <select
               value={currentLanguage}
@@ -94,10 +74,6 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                 🏛️ ଓଡ଼ିଆ
               </option>
             </select>
-
-            <div className="text-sm text-white/90 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 font-mono breathe">
-              {formatTime(currentTime)}
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -106,14 +82,13 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
               <Link
                 key={link.id}
                 href={link.href}
-                className={`text-white/90 hover:text-white transition-all duration-300 font-semibold hover:scale-110 transform relative group magnetic ${
-                  pathname === link.href ? 'text-white' : ''
+                className={`transition-all duration-300 font-semibold hover:scale-110 transform relative group magnetic ${
+                  pathname === link.href 
+                    ? 'text-white bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/30 shadow-lg' 
+                    : 'text-white/90 hover:text-white px-2 py-1'
                 }`}
               >
                 {link.label}
-                <span className={`absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300 ${
-                  pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'
-                }`}></span>
               </Link>
             ))}
             <Link href="/booking">

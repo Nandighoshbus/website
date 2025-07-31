@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Navigation, MapPin, QrCode, Calendar, Users, ArrowRight, Clock, Shield, Smartphone, ArrowUpDown, Wind, Bed, IndianRupee } from "lucide-react"
+import { Navigation, MapPin, QrCode, Calendar, Users, ArrowRight, Clock, Shield, Smartphone, ArrowUpDown, Wind, Bed, IndianRupee, Bus } from "lucide-react"
 
 const languages = {
   en: {
@@ -15,6 +15,7 @@ const languages = {
     search: "Search",
     track: "Track",
     qrScan: "QR Scan",
+    hireBus: "Hire Bus",
     from: "From",
     to: "To", 
     date: "Date",
@@ -42,6 +43,7 @@ const languages = {
     search: "खोजें",
     track: "ट्रैक करें",
     qrScan: "क्यूआर स्कैन",
+    hireBus: "बस किराए पर लें",
     from: "से",
     to: "तक",
     date: "तारीख",
@@ -69,6 +71,7 @@ const languages = {
     search: "ଖୋଜନ୍ତୁ",
     track: "ଟ୍ରାକ୍ କରନ୍ତୁ",
     qrScan: "କ୍ୟୁଆର୍ ସ୍କାନ୍",
+    hireBus: "ବସ୍ ଭଡ଼ାରେ ନିଅନ୍ତୁ",
     from: "ଠାରୁ",
     to: "ପର୍ଯ୍ୟନ୍ତ",
     date: "ତାରିଖ",
@@ -243,7 +246,7 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
         <Card className="max-w-4xl mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
           <CardContent className="p-0">
             <Tabs defaultValue="search" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 p-1 h-auto bg-gray-100 rounded-t-lg">
+              <TabsList className="grid w-full grid-cols-4 p-1 h-auto bg-gray-100 rounded-t-lg">
                 <TabsTrigger 
                   value="search" 
                   className="flex items-center gap-2 py-4 px-6 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -257,6 +260,13 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
                 >
                   <MapPin className="w-4 h-4" />
                   {currentLang.track}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="hire" 
+                  className="flex items-center gap-2 py-4 px-6 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  <Bus className="w-4 h-4" />
+                  {currentLang.hireBus}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="qr" 
@@ -458,6 +468,125 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
                       >
                         <Navigation className="mr-2 w-5 h-5" />
                         {currentLang.trackBus}
+                      </Button>
+                    </form>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="hire" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-red-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+                        <Bus className="w-10 h-10 text-orange-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-3 text-gray-900">
+                        Hire Bus for Events & Groups
+                      </h3>
+                      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+                        Need a bus for corporate events, school trips, or family gatherings? Get customized bus rental solutions.
+                      </p>
+                    </div>
+                    
+                    <form className="space-y-6 max-w-2xl mx-auto">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-orange-500" />
+                            Pickup Location
+                          </label>
+                          <Input 
+                            placeholder="Enter pickup location" 
+                            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-orange-500" />
+                            Destination
+                          </label>
+                          <Input 
+                            placeholder="Enter destination" 
+                            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-orange-500" />
+                            Journey Date
+                          </label>
+                          <Input 
+                            type="date" 
+                            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Users className="w-4 h-4 text-orange-500" />
+                            Number of Passengers
+                          </label>
+                          <select 
+                            className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500"
+                            aria-label="Number of passengers"
+                          >
+                            <option value="">Select passengers</option>
+                            <option value="10-20">10-20 passengers</option>
+                            <option value="21-35">21-35 passengers</option>
+                            <option value="36-50">36-50 passengers</option>
+                            <option value="50+">More than 50</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Bus className="w-4 h-4 text-orange-500" />
+                            Bus Type
+                          </label>
+                          <select 
+                            className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500"
+                            aria-label="Bus type"
+                          >
+                            <option value="">Select bus type</option>
+                            <option value="ac-seater">AC Seater</option>
+                            <option value="non-ac-seater">Non-AC Seater</option>
+                            <option value="ac-sleeper">AC Sleeper</option>
+                            <option value="luxury">Luxury Coach</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-orange-500" />
+                            Duration
+                          </label>
+                          <select 
+                            className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500"
+                            aria-label="Duration"
+                          >
+                            <option value="">Select duration</option>
+                            <option value="one-way">One Way</option>
+                            <option value="round-trip">Round Trip</option>
+                            <option value="multi-day">Multi-day Trip</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Additional Requirements
+                        </label>
+                        <textarea 
+                          placeholder="Tell us about your specific requirements, event details, or any special requests..."
+                          className="w-full h-24 px-3 py-2 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 resize-none"
+                        ></textarea>
+                      </div>
+                      
+                      <Button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold h-12">
+                        <Bus className="mr-2 w-5 h-5" />
+                        Get Quote for Bus Hire
                       </Button>
                     </form>
                   </div>

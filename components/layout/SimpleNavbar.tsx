@@ -25,6 +25,7 @@ export default function SimpleNavbar() {
     { href: "/", label: "Home", id: "home" },
     { href: "/routes", label: "Routes", id: "routes" },
     { href: "/features", label: "Features", id: "features" },
+    { href: "/offers", label: "Offers", id: "offers" },
     { href: "/contact", label: "Contact", id: "contact" },
   ]
 
@@ -65,7 +66,7 @@ export default function SimpleNavbar() {
               <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-gradient-to-r from-red-400 to-pink-500 rounded-full animate-bounce"></div>
             </div>
             <div>
-              <span className="text-3xl font-bold text-white drop-shadow-lg">Nandighosh</span>
+              <span className="text-2xl font-bold text-white drop-shadow-lg">Nandighosh Travels</span>
               <div className="text-sm text-orange-200 font-medium">Bus Service</div>
             </div>
           </Link>

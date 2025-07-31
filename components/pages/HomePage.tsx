@@ -23,6 +23,15 @@ const languages = {
     happyCustomers: "Happy Customers", 
     yearsExperience: "Years Experience",
     onTime: "On Time",
+    aboutUsTitle: "About Nandighosh Travels",
+    aboutUsShort: "Your trusted travel partner since 1998, connecting hearts across Odisha",
+    aboutUsDescription: "Nandighosh Travels has been proudly serving the people of Odisha for over 25 years. We started with a vision to provide safe, comfortable, and reliable transportation services that connect every corner of our beautiful state. Today, we stand as one of Odisha's most trusted bus service providers.",
+    readMore: "Read More About Us",
+    testimonialsTitle: "What Our Passengers Say",
+    testimonialsSubtitle: "Real experiences from thousands of satisfied travelers",
+    testimonial1: "Nandighosh has been my go-to choice for business travels. Their punctuality and comfort are unmatched. The staff is courteous and the buses are well-maintained.",
+    testimonial2: "I've been traveling with Nandighosh for my family trips for years. The safety measures and cleanliness give me peace of mind, especially when traveling with children.",
+    testimonial3: "As a frequent traveler, I appreciate the modern amenities and reliable service. The online booking system is user-friendly and the customer support is excellent.",
   },
   hi: {
     tagline: "ओडिशा को आराम से जोड़ना",
@@ -34,6 +43,15 @@ const languages = {
     happyCustomers: "खुश ग्राहक",
     yearsExperience: "वर्षों का अनुभव",
     onTime: "समय पर",
+    aboutUsTitle: "नंदीघोष ट्रैवल्स के बारे में",
+    aboutUsShort: "1998 से आपका विश्वसनीय यात्रा साथी, ओडिशा भर में दिलों को जोड़ता है",
+    aboutUsDescription: "नंदीघोष ट्रैवल्स 25 से अधिक वर्षों से ओडिशा के लोगों की गर्व से सेवा कर रहा है। हमने सुरक्षित, आरामदायक और विश्वसनीय परिवहन सेवाएं प्रदान करने के दृष्टिकोण के साथ शुरुआत की थी।",
+    readMore: "हमारे बारे में और पढ़ें",
+    testimonialsTitle: "हमारे यात्री क्या कहते हैं",
+    testimonialsSubtitle: "हजारों संतुष्ट यात्रियों के वास्तविक अनुभव",
+    testimonial1: "नंदीघोष मेरी व्यावसायिक यात्राओं के लिए मेरी पहली पसंद रहा है। उनकी समय की पाबंदी और आराम बेजोड़ है।",
+    testimonial2: "मैं वर्षों से अपनी पारिवारिक यात्राओं के लिए नंदीघोष के साथ यात्रा कर रहा हूं। सुरक्षा उपाय और स्वच्छता मुझे मानसिक शांति देती है।",
+    testimonial3: "एक नियमित यात्री के रूप में, मैं आधुनिक सुविधाओं और विश्वसनीय सेवा की सराहना करता हूं।",
   },
   or: {
     tagline: "ଓଡ଼ିଶାକୁ ଆରାମରେ ସଂଯୋଗ କରିବା",
@@ -45,6 +63,15 @@ const languages = {
     happyCustomers: "ଖୁସି ଗ୍ରାହକ",
     yearsExperience: "ବର୍ଷର ଅଭିଜ୍ଞତା",
     onTime: "ସମୟରେ",
+    aboutUsTitle: "ନନ୍ଦିଘୋଷ ଟ୍ରାଭେଲ୍ସ ବିଷୟରେ",
+    aboutUsShort: "1998 ଠାରୁ ଆପଣଙ୍କର ବିଶ୍ୱସ୍ତ ଯାତ୍ରା ସାଥୀ, ଓଡ଼ିଶା ଭରିରେ ହୃଦୟ ସଂଯୋଗ କରୁଛି",
+    aboutUsDescription: "ନନ୍ଦିଘୋଷ ଟ୍ରାଭେଲ୍ସ 25 ବର୍ଷରୁ ଅଧିକ ସମୟ ଧରି ଓଡ଼ିଶାର ଲୋକମାନଙ୍କର ଗର୍ବର ସହିତ ସେବା କରିଆସୁଛି। ଆମେ ନିରାପଦ, ଆରାମଦାୟକ ଏବଂ ବିଶ୍ୱସନୀୟ ପରିବହନ ସେବା ପ୍ରଦାନ କରିବାର ଦୃଷ୍ଟିଭଙ୍ଗୀ ସହିତ ଆରମ୍ଭ କରିଥିଲୁ।",
+    readMore: "ଆମ ବିଷୟରେ ଅଧିକ ପଢ଼ନ୍ତୁ",
+    testimonialsTitle: "ଆମର ଯାତ୍ରୀମାନେ କ'ଣ କୁହନ୍ତି",
+    testimonialsSubtitle: "ହଜାରେ ସନ୍ତୁଷ୍ଟ ଯାତ୍ରୀଙ୍କ ପ୍ରକୃତ ଅଭିଜ୍ଞତା",
+    testimonial1: "ନନ୍ଦିଘୋଷ ମୋର ବ୍ୟବସାୟିକ ଯାତ୍ରା ପାଇଁ ମୋର ପ୍ରଥମ ପସନ୍ଦ। ସେମାନଙ୍କର ସମୟନିଷ୍ଠତା ଏବଂ ଆରାମ ଅତୁଳନୀୟ।",
+    testimonial2: "ମୁଁ ବର୍ଷ ବର୍ଷ ଧରି ମୋର ପାରିବାରିକ ଯାତ୍ରା ପାଇଁ ନନ୍ଦିଘୋଷ ସହିତ ଯାତ୍ରା କରୁଛି। ନିରାପତ୍ତା ବ୍ୟବସ୍ଥା ଏବଂ ପରିଷ୍କାରତା ମୋତେ ମାନସିକ ଶାନ୍ତି ଦିଏ।",
+    testimonial3: "ଜଣେ ନିୟମିତ ଯାତ୍ରୀ ଭାବରେ, ମୁଁ ଆଧୁନିକ ସୁବିଧା ଏବଂ ବିଶ୍ୱସନୀୟ ସେବାକୁ ପ୍ରଶଂସା କରେ।",
   }
 }
 
@@ -96,25 +123,18 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
         
         {/* Video Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-600/30 z-10"></div>
-        <div className="absolute inset-0 bg-black/1 z-20"></div>
         
         <div className="container mx-auto px-4 relative z-30">
           <div className="flex flex-col lg:flex-row items-center justify-between">
             {/* Content */}
             <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-                Nandighosh
+                Welcome to Nandighosh Travels
               </h1>
               
               <div className="space-y-4 mb-8">
                 <p className="text-xl lg:text-2xl text-white/95 font-light">
                   {currentLang.tagline}
-                </p>
-                <p className="text-lg lg:text-xl text-white/90 font-medium">
-                  {currentLang.subtitle}
-                </p>
-                <p className="text-base text-white/85 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  {currentLang.premiumSubtitle}
                 </p>
               </div>
 
@@ -169,7 +189,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                   <div className="text-sm text-white/80">{currentLang.happyCustomers}</div>
                 </div>
                 <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-white mb-1">15+</div>
+                  <div className="text-2xl font-bold text-white mb-1">25+</div>
                   <div className="text-sm text-white/80">{currentLang.yearsExperience}</div>
                 </div>
                 <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
@@ -178,301 +198,116 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Bus Booking Form */}
-            <div className="lg:w-1/2 flex justify-center lg:justify-end">
-              <div className="w-full max-w-md">
-                <Card className="shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 overflow-hidden">
-                  {/* Bus Booking Header */}
-                  <div className="bg-white/20 backdrop-blur-sm px-6 py-4 flex items-center justify-between border-b border-white/10">
-                    <div className="flex items-center space-x-2">
-                      <Bus className="w-6 h-6 text-white" />
-                      <span className="text-xl font-bold text-white">BUS BOOKING</span>
-                    </div>
-                    <button 
-                      className="text-white hover:scale-110 transition-all duration-200"
-                      onClick={() => {
-                        setIsMainBookingExpanded(!isMainBookingExpanded)
-                        // Close other expanded sections when main booking is opened
-                        if (!isMainBookingExpanded) {
-                          setExpandedSection(null)
-                        }
-                      }}
+      {/* Booking Search Bar */}
+      <section className="relative -mt-12 z-40 mb-12">
+        <div className="container mx-auto px-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-xl p-4 border border-orange-100">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+              {/* From City */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-orange-500" />
+                  From
+                </label>
+                <Select>
+                  <SelectTrigger className="w-full h-10 border-orange-200 focus:border-orange-500 text-sm">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                    <SelectItem value="cuttack">Cuttack</SelectItem>
+                    <SelectItem value="puri">Puri</SelectItem>
+                    <SelectItem value="berhampur">Berhampur</SelectItem>
+                    <SelectItem value="rourkela">Rourkela</SelectItem>
+                    <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* To City */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-red-500" />
+                  To
+                </label>
+                <Select>
+                  <SelectTrigger className="w-full h-10 border-orange-200 focus:border-orange-500 text-sm">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
+                    <SelectItem value="cuttack">Cuttack</SelectItem>
+                    <SelectItem value="puri">Puri</SelectItem>
+                    <SelectItem value="berhampur">Berhampur</SelectItem>
+                    <SelectItem value="rourkela">Rourkela</SelectItem>
+                    <SelectItem value="sambalpur">Sambalpur</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Departure Date */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <CalendarIcon className="w-3 h-3 text-orange-500" />
+                  Departure
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full h-10 justify-start text-left font-normal border-orange-200 focus:border-orange-500 text-sm"
                     >
-                      <div className="text-white hover:scale-110 transition-all duration-200">
-                        {isMainBookingExpanded ? (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
-                        ) : (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
-                        )}
-                      </div>
-                    </button>
-                  </div>
-                  
-                  {/* Booking Form */}
-                  {isMainBookingExpanded && (
-                    <CardContent className="p-6 space-y-4 bg-white/5 backdrop-blur-sm">
-                      {/* From Field */}
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-white">
-                          <MapPin className="w-4 h-4 text-orange-400" />
-                          <label className="text-sm font-medium">From:</label>
-                        </div>
-                        <Select>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select departure city" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="balasore">Balasore</SelectItem>
-                            <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
-                            <SelectItem value="cuttack">Cuttack</SelectItem>
-                            <SelectItem value="puri">Puri</SelectItem>
-                            <SelectItem value="berhampur">Berhampur</SelectItem>
-                            <SelectItem value="sambalpur">Sambalpur</SelectItem>
-                            <SelectItem value="kolkata">Kolkata</SelectItem>
-                            <SelectItem value="rourkela">Rourkela</SelectItem>
-                            <SelectItem value="koraput">Koraput</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                    {/* To Field */}
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-white">
-                        <MapPin className="w-4 h-4 text-orange-400" />
-                        <label className="text-sm font-medium">To:</label>
-                      </div>
-                      <Select>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select destination city" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="balasore">Balasore</SelectItem>
-                          <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
-                          <SelectItem value="cuttack">Cuttack</SelectItem>
-                          <SelectItem value="puri">Puri</SelectItem>
-                          <SelectItem value="berhampur">Berhampur</SelectItem>
-                          <SelectItem value="sambalpur">Sambalpur</SelectItem>
-                          <SelectItem value="kolkata">Kolkata</SelectItem>
-                          <SelectItem value="rourkela">Rourkela</SelectItem>
-                          <SelectItem value="koraput">Koraput</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Onward Date */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">Onward:</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div className="relative cursor-pointer">
-                            <Input 
-                              type="text" 
-                              value={format(onwardDate, "EEE, dd-MMM-yyyy")}
-                              readOnly
-                              className="pr-10 cursor-pointer"
-                            />
-                            <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={onwardDate}
-                            onSelect={(date) => date && setOnwardDate(date)}
-                            disabled={(date) => date < new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    {/* Return Date */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">Return:</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div className="relative cursor-pointer">
-                            <Input 
-                              type="text" 
-                              value={returnDate ? format(returnDate, "EEE, dd-MMM-yyyy") : "Optional"}
-                              className="pr-10 cursor-pointer text-gray-500"
-                              readOnly
-                            />
-                            <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={returnDate}
-                            onSelect={setReturnDate}
-                            disabled={(date) => date < onwardDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    {/* Search Button */}
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 text-lg font-semibold mt-6 shadow-lg hover:shadow-xl transition-all duration-300">
-                      SEARCH
+                      <CalendarIcon className="mr-2 h-3 w-3 text-gray-500" />
+                      {format(new Date(), "dd MMM")}
                     </Button>
-                  </CardContent>
-                  )}
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                  {/* Link Ticket Section */}
-                  <div className="border-t border-white/10">
-                    <button 
-                      type="button"
-                      className="w-full bg-white/20 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-all cursor-pointer focus:outline-none hover:scale-105 hover:shadow-lg"
-                      onClick={() => handleSectionToggle('linkTicket')}
+              {/* Return Date */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <CalendarIcon className="w-3 h-3 text-orange-500" />
+                  Return
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full h-10 justify-start text-left font-normal border-orange-200 focus:border-orange-500 text-sm"
                     >
-                      <div className="flex items-center space-x-2">
-                        <Bus className="w-5 h-5 text-white" />
-                        <span className="font-semibold text-white">Link Ticket</span>
-                      </div>
-                      <div className="text-white">
-                        {expandedSection === 'linkTicket' ? (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
-                        ) : (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
-                        )}
-                      </div>
-                    </button>
-                    
-                    {/* Link Ticket Form */}
-                    {expandedSection === 'linkTicket' && (
-                      <div className="bg-white/10 backdrop-blur-sm px-6 py-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                        <div className="space-y-2">
-                          <Select>
-                            <SelectTrigger className="w-full border-gray-300 focus:border-orange-500 focus:ring-orange-200">
-                              <div className="flex items-center space-x-2">
-                                <MapPin className="w-4 h-4 text-gray-500" />
-                                <span className="text-gray-700">From:</span>
-                                <SelectValue placeholder="select departure city" />
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="balasore">Balasore</SelectItem>
-                              <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
-                              <SelectItem value="cuttack">Cuttack</SelectItem>
-                              <SelectItem value="puri">Puri</SelectItem>
-                              <SelectItem value="berhampur">Berhampur</SelectItem>
-                              <SelectItem value="sambalpur">Sambalpur</SelectItem>
-                              <SelectItem value="kolkata">Kolkata</SelectItem>
-                              <SelectItem value="rourkela">Rourkela</SelectItem>
-                              <SelectItem value="koraput">Koraput</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Select>
-                            <SelectTrigger className="w-full border-gray-300 focus:border-orange-500 focus:ring-orange-200">
-                              <div className="flex items-center space-x-2">
-                                <MapPin className="w-4 h-4 text-gray-500" />
-                                <span className="text-gray-700">To:</span>
-                                <SelectValue placeholder="select destination city" />
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="balasore">Balasore</SelectItem>
-                              <SelectItem value="bhubaneswar">Bhubaneswar</SelectItem>
-                              <SelectItem value="cuttack">Cuttack</SelectItem>
-                              <SelectItem value="puri">Puri</SelectItem>
-                              <SelectItem value="berhampur">Berhampur</SelectItem>
-                              <SelectItem value="sambalpur">Sambalpur</SelectItem>
-                              <SelectItem value="kolkata">Kolkata</SelectItem>
-                              <SelectItem value="rourkela">Rourkela</SelectItem>
-                              <SelectItem value="koraput">Koraput</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <div className="relative cursor-pointer">
-                                <Input 
-                                  type="text" 
-                                  value={`Date: ${format(linkTicketForm.date, "EEE, dd-MMM-yyyy")}`}
-                                  readOnly
-                                  className="pr-10 cursor-pointer border-gray-300 focus:border-orange-500 focus:ring-orange-200"
-                                />
-                                <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
-                              </div>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={linkTicketForm.date}
-                                onSelect={(date) => date && setLinkTicketForm({...linkTicketForm, date})}
-                                disabled={(date) => date < new Date()}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 text-sm font-semibold mt-4">
-                          SEARCH
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                      <CalendarIcon className="mr-2 h-3 w-3 text-gray-500" />
+                      Optional
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                  {/* Bus Hire Section */}
-                  <div className="border-t border-white/10">
-                    <button 
-                      type="button"
-                      className="w-full bg-white/20 backdrop-blur-sm px-6 py-3 flex items-center justify-between transition-all cursor-pointer focus:outline-none hover:scale-105 hover:shadow-lg"
-                      onClick={() => handleSectionToggle('busHire')}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Bus className="w-5 h-5 text-white" />
-                        <span className="font-semibold text-white">BUS HIRE</span>
-                      </div>
-                      <div className="text-white">
-                        {expandedSection === 'busHire' ? (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-45">+</span>
-                        ) : (
-                          <span className="text-xl inline-block transition-all duration-300 transform rotate-0">+</span>
-                        )}
-                      </div>
-                    </button>
-                    
-                    {/* Bus Hire Form */}
-                    {expandedSection === 'busHire' && (
-                      <div className="bg-white/10 backdrop-blur-sm px-6 py-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-white">City of Hire eg: Bangalore</label>
-                          <Input 
-                            type="text" 
-                            placeholder="Enter city of hire"
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-white">Starting Point eg: Railway station</label>
-                          <Input 
-                            type="text" 
-                            placeholder="Enter starting point"
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-white">Destination: eg: Airport/Pune</label>
-                          <Input 
-                            type="text" 
-                            placeholder="Enter destination"
-                            className="w-full"
-                          />
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-2 text-sm font-semibold mt-4">
-                          HIRE BUSES
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </Card>
+              {/* Search Button */}
+              <div className="md:col-span-2">
+                <Button 
+                  size="sm" 
+                  className="w-full h-10 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-sm"
+                >
+                  SEARCH BUSES
+                </Button>
               </div>
             </div>
           </div>
@@ -583,6 +418,101 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                   Learn More About Our Features
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{currentLang.aboutUsTitle}</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">{currentLang.aboutUsShort}</p>
+          </div>
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              {currentLang.aboutUsDescription}
+            </p>
+            <Link href="/about">
+              <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-3 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
+                {currentLang.readMore}
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 section-glass relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">{currentLang.testimonialsTitle}</h2>
+            <p className="text-xl text-white/90 drop-shadow-md">{currentLang.testimonialsSubtitle}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Testimonial 1 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-2xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  R
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-semibold">Rajesh Kumar</h4>
+                  <p className="text-white/70 text-sm">Business Executive</p>
+                </div>
+              </div>
+              <p className="text-white/90 italic">"{currentLang.testimonial1}"</p>
+              <div className="flex text-yellow-400 mt-4">
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-2xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  P
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-semibold">Priya Sharma</h4>
+                  <p className="text-white/70 text-sm">Teacher</p>
+                </div>
+              </div>
+              <p className="text-white/90 italic">"{currentLang.testimonial2}"</p>
+              <div className="flex text-yellow-400 mt-4">
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-2xl">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  A
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-semibold">Amit Patel</h4>
+                  <p className="text-white/70 text-sm">Software Engineer</p>
+                </div>
+              </div>
+              <p className="text-white/90 italic">"{currentLang.testimonial3}"</p>
+              <div className="flex text-yellow-400 mt-4">
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+                <Star className="w-4 h-4 fill-current" />
+              </div>
             </div>
           </div>
         </div>
