@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { ArrowRight, Rocket, MapPin, Award, Shield, Star, Bus, Calendar as CalendarIcon } from "lucide-react"
+import { ArrowRight, Rocket, MapPin, Award, Shield, Star, Bus, Calendar as CalendarIcon, X, Gift } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { format } from "date-fns"
@@ -32,6 +32,11 @@ const languages = {
     testimonial1: "Nandighosh has been my go-to choice for business travels. Their punctuality and comfort are unmatched. The staff is courteous and the buses are well-maintained.",
     testimonial2: "I've been traveling with Nandighosh for my family trips for years. The safety measures and cleanliness give me peace of mind, especially when traveling with children.",
     testimonial3: "As a frequent traveler, I appreciate the modern amenities and reliable service. The online booking system is user-friendly and the customer support is excellent.",
+    // Offer Alert
+    offerTitle: "🎉 Special Offer!",
+    offerText: "Get 20% OFF on your first booking with code WELCOME20",
+    offerButton: "Book Now",
+    offerClose: "Close"
   },
   hi: {
     tagline: "ओडिशा को आराम से जोड़ना",
@@ -52,6 +57,11 @@ const languages = {
     testimonial1: "नंदीघोष मेरी व्यावसायिक यात्राओं के लिए मेरी पहली पसंद रहा है। उनकी समय की पाबंदी और आराम बेजोड़ है।",
     testimonial2: "मैं वर्षों से अपनी पारिवारिक यात्राओं के लिए नंदीघोष के साथ यात्रा कर रहा हूं। सुरक्षा उपाय और स्वच्छता मुझे मानसिक शांति देती है।",
     testimonial3: "एक नियमित यात्री के रूप में, मैं आधुनिक सुविधाओं और विश्वसनीय सेवा की सराहना करता हूं।",
+    // Offer Alert
+    offerTitle: "🎉 विशेष ऑफर!",
+    offerText: "कोड WELCOME20 के साथ अपनी पहली बुकिंग पर 20% छूट पाएं",
+    offerButton: "अभी बुक करें",
+    offerClose: "बंद करें"
   },
   or: {
     tagline: "ଓଡ଼ିଶାକୁ ଆରାମରେ ସଂଯୋଗ କରିବା",
@@ -72,6 +82,11 @@ const languages = {
     testimonial1: "ନନ୍ଦିଘୋଷ ମୋର ବ୍ୟବସାୟିକ ଯାତ୍ରା ପାଇଁ ମୋର ପ୍ରଥମ ପସନ୍ଦ। ସେମାନଙ୍କର ସମୟନିଷ୍ଠତା ଏବଂ ଆରାମ ଅତୁଳନୀୟ।",
     testimonial2: "ମୁଁ ବର୍ଷ ବର୍ଷ ଧରି ମୋର ପାରିବାରିକ ଯାତ୍ରା ପାଇଁ ନନ୍ଦିଘୋଷ ସହିତ ଯାତ୍ରା କରୁଛି। ନିରାପତ୍ତା ବ୍ୟବସ୍ଥା ଏବଂ ପରିଷ୍କାରତା ମୋତେ ମାନସିକ ଶାନ୍ତି ଦିଏ।",
     testimonial3: "ଜଣେ ନିୟମିତ ଯାତ୍ରୀ ଭାବରେ, ମୁଁ ଆଧୁନିକ ସୁବିଧା ଏବଂ ବିଶ୍ୱସନୀୟ ସେବାକୁ ପ୍ରଶଂସା କରେ।",
+    // Offer Alert
+    offerTitle: "🎉 ବିଶେଷ ଅଫର!",
+    offerText: "WELCOME20 କୋଡ୍ ସହିତ ଆପଣଙ୍କର ପ୍ରଥମ ବୁକିଂରେ 20% ଛାଡ଼ ପାଆନ୍ତୁ",
+    offerButton: "ବର୍ତ୍ତମାନ ବୁକ୍ କରନ୍ତୁ",
+    offerClose: "ବନ୍ଦ କରନ୍ତୁ"
   }
 }
 
@@ -86,6 +101,16 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
   const [onwardDate, setOnwardDate] = useState<Date>(new Date(2025, 6, 25)) // July 25, 2025
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined)
   const [linkTicketForm, setLinkTicketForm] = useState({ date: new Date(2025, 6, 25) })
+  const [showOfferAlert, setShowOfferAlert] = useState(false)
+
+  // Show offer alert after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowOfferAlert(true)
+    }, 2000) // Show after 2 seconds
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleSectionToggle = (section: string) => {
     console.log('Toggling section:', section, 'Current expanded:', expandedSection)
@@ -107,6 +132,80 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
 
   return (
     <div className="pt-24 min-h-screen">
+      {/* Offer Alert */}
+      {showOfferAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <Card className="w-[500px] max-w-lg mx-4 shadow-2xl border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50 animate-in zoom-in-95 duration-300 overflow-hidden">
+            <CardContent className="p-0">
+              {/* Bus Image Header */}
+              <div className="relative h-32 bg-gradient-to-r from-orange-400 to-red-500 overflow-hidden">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <img 
+                  src="/images/premium-bus.jpg" 
+                  alt="Nandighosh Premium Bus"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 right-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-white hover:text-gray-200 hover:bg-white/20 rounded-full"
+                    onClick={() => setShowOfferAlert(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h4 className="font-bold text-xl mb-1">
+                    {currentLang.offerTitle}
+                  </h4>
+                </div>
+              </div>
+              
+              {/* Content */}
+              <div className="p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Gift className="w-7 h-7 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h5 className="font-semibold text-gray-900 text-lg mb-2">
+                      Limited Time Special Deal!
+                    </h5>
+                    <p className="text-gray-700 text-base mb-3 leading-relaxed">
+                      {currentLang.offerText}
+                    </p>
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                      Book your comfortable journey with our premium AC buses. Experience luxury travel across Odisha with world-class amenities and unmatched service quality.
+                    </p>
+                    <div className="flex space-x-3">
+                      <Link href="/booking">
+                        <Button 
+                          size="lg" 
+                          className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-base px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                          onClick={() => setShowOfferAlert(false)}
+                        >
+                          <Bus className="mr-2 w-4 h-4" />
+                          {currentLang.offerButton}
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="outline"
+                        size="lg"
+                        className="border-orange-300 text-orange-700 hover:bg-orange-50 px-6 py-3"
+                        onClick={() => setShowOfferAlert(false)}
+                      >
+                        Maybe Later
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden text-white py-20 min-h-screen flex items-center">
         {/* Background Video */}
@@ -125,9 +224,9 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-red-600/30 z-10"></div>
         
         <div className="container mx-auto px-4 relative z-30">
-          <div className="flex flex-col lg:flex-row items-center justify-between">
+          <div className="flex flex-col items-center justify-center">
             {/* Content */}
-            <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
+            <div className="w-full text-center mb-12">
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-white drop-shadow-lg">
                 Welcome to Nandighosh Travels
               </h1>
@@ -139,7 +238,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
 
               {/* Feature Badges */}
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-8">
+              <div className="flex flex-wrap gap-3 justify-center mb-8">
                 <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
                   <Award className="w-4 h-4 text-yellow-300" />
                   <span className="text-sm text-white font-medium">Award Winning</span>
@@ -155,31 +254,31 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <Link href="/booking">
                   <Button
                     size="lg"
-                    className="bg-white text-orange-600 px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300"
+                    className="bg-white text-orange-600 px-6 py-3 text-base font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 w-auto"
                   >
-                    <Rocket className="mr-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    <Rocket className="mr-2 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                     {currentLang.bookSeat}
-                    <ArrowRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                   </Button>
                 </Link>
                 <Link href="/routes">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-2 border-white text-white px-8 py-4 text-lg font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-2xl"
+                    className="border-2 border-white text-white px-6 py-3 text-base font-semibold rounded-xl bg-white/10 backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-2xl w-auto"
                   >
-                    <MapPin className="mr-2 w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    <MapPin className="mr-2 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                     {currentLang.exploreRoutes}
                   </Button>
                 </Link>
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto lg:mx-0">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
                 <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="text-2xl font-bold text-white mb-1">50+</div>
                   <div className="text-sm text-white/80">{currentLang.dailyRoutes}</div>

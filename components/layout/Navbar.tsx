@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { THEME_CLASSES } from "@/lib/theme"
 
 interface NavbarProps {
   currentLanguage: string
@@ -92,8 +93,18 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
               </Link>
             ))}
             <Link href="/booking">
-              <Button className="btn-interactive bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border border-white/30 hover:border-white/50 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-semibold ripple">
+              <Button className={THEME_CLASSES.BUTTON_SECONDARY}>
                 {currentLang.bookNow}
+              </Button>
+            </Link>
+            <Link href="/agent/login">
+              <Button className="bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white border border-orange-300/30 hover:border-orange-200/50 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-semibold btn-interactive ripple">
+                Agent Portal
+              </Button>
+            </Link>
+            <Link href="/signin">
+              <Button className={THEME_CLASSES.BUTTON_AUTH}>
+                {currentLang.signIn}
               </Button>
             </Link>
           </div>
@@ -141,8 +152,18 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                 </Link>
               ))}
               <Link href="/booking" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full btn-interactive bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border border-white/30 mt-3">
+                <Button className={THEME_CLASSES.BUTTON_SECONDARY + " w-full mt-3"}>
                   {currentLang.bookNow}
+                </Button>
+              </Link>
+              <Link href="/agent/login" onClick={() => setIsMenuOpen(false)}>
+                <Button className="w-full mt-3 bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white border border-orange-300/30 hover:border-orange-200/50 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-semibold btn-interactive ripple">
+                  Agent Portal
+                </Button>
+              </Link>
+              <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
+                <Button className={THEME_CLASSES.BUTTON_AUTH + " w-full mt-3"}>
+                  {currentLang.signIn}
                 </Button>
               </Link>
             </div>

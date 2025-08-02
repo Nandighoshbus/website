@@ -96,24 +96,64 @@ export default function FeaturesPage({ currentLanguage }: FeaturesPageProps) {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">{currentLang.featuresDescription}</p>
         </div>
 
-        <Card className="border-0 p-8 mb-16 shadow-lg">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="text-center group hover:scale-105 transition-transform duration-300"
-              >
+        <Card className="border-0 p-8 mb-16 shadow-lg overflow-hidden">
+          <div className="relative">
+            {/* Continuous scrolling animation container */}
+            <div className="flex animate-scroll-right space-x-8">
+              {/* First set of features */}
+              {features.map((feature, index) => (
                 <div
-                  className={`w-24 h-24 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
+                  key={`first-${index}`}
+                  className="text-center group hover:scale-105 transition-transform duration-300 flex-shrink-0 w-64"
                 >
-                  <div className="text-white">{feature.icon}</div>
+                  <div
+                    className={`w-24 h-24 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
+                  >
+                    <div className="text-white">{feature.icon}</div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
+                    {currentLang[feature.titleKey as keyof typeof currentLang]}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{currentLang[feature.descriptionKey as keyof typeof currentLang]}</p>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
-                  {currentLang[feature.titleKey as keyof typeof currentLang]}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">{currentLang[feature.descriptionKey as keyof typeof currentLang]}</p>
-              </div>
-            ))}
+              ))}
+              
+              {/* Duplicate set for seamless loop */}
+              {features.map((feature, index) => (
+                <div
+                  key={`second-${index}`}
+                  className="text-center group hover:scale-105 transition-transform duration-300 flex-shrink-0 w-64"
+                >
+                  <div
+                    className={`w-24 h-24 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
+                  >
+                    <div className="text-white">{feature.icon}</div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
+                    {currentLang[feature.titleKey as keyof typeof currentLang]}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{currentLang[feature.descriptionKey as keyof typeof currentLang]}</p>
+                </div>
+              ))}
+              
+              {/* Third set for extra smooth scrolling */}
+              {features.map((feature, index) => (
+                <div
+                  key={`third-${index}`}
+                  className="text-center group hover:scale-105 transition-transform duration-300 flex-shrink-0 w-64"
+                >
+                  <div
+                    className={`w-24 h-24 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
+                  >
+                    <div className="text-white">{feature.icon}</div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
+                    {currentLang[feature.titleKey as keyof typeof currentLang]}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{currentLang[feature.descriptionKey as keyof typeof currentLang]}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
 

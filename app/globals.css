@@ -8,20 +8,38 @@
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
+  
+  /* Primary theme - Blue to Purple gradient colors */
+  --primary: 220 91% 55%; /* Blue-600 equivalent */
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary theme - Purple accent */
+  --secondary: 271 91% 65%; /* Purple-600 equivalent */
+  --secondary-foreground: 0 0% 100%;
+  
+  /* Muted colors */
   --muted: 210 40% 96%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
+  
+  /* Accent colors - Orange/Yellow for Nandighosh brand */
+  --accent: 33 100% 52%; /* Orange-500 */
+  --accent-foreground: 0 0% 100%;
+  
+  /* Status colors */
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
+  
+  /* UI colors */
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --ring: 220 91% 55%; /* Matches primary */
   --radius: 0.5rem;
+  
+  /* Custom Nandighosh brand colors */
+  --nandighosh-primary: 220 91% 55%; /* Blue */
+  --nandighosh-secondary: 271 91% 65%; /* Purple */
+  --nandighosh-accent: 33 100% 52%; /* Orange */
+  --nandighosh-gold: 45 100% 51%; /* Golden yellow */
 }
 
 /* Custom animations for cultural theme */
@@ -52,6 +70,15 @@
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
   }
 }
 
