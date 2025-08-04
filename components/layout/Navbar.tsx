@@ -103,7 +103,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-3">
             {navLinks.map((link) => (
               <Link
                 key={link.id}
