@@ -49,7 +49,6 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
     { href: "/about", label: currentLang.about, id: "about" },
     { href: "/routes", label: currentLang.routes, id: "routes" },
     { href: "/features", label: currentLang.features, id: "features" },
-    { href: "/offers", label: currentLang.offers, id: "offers" },
     { href: "/contact", label: currentLang.contact, id: "contact" },
   ]
 
@@ -61,7 +60,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
   }
 
   return (
-    <nav className="fixed top-0 w-full navbar-glass z-50 shadow-2xl">
+    <nav className="fixed top-0 w-full navbar-glass z-40 shadow-2xl">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}

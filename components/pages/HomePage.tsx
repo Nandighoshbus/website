@@ -36,7 +36,8 @@ const languages = {
     offerTitle: "🎉 Special Offer!",
     offerText: "Get 20% OFF on your first booking with code WELCOME20",
     offerButton: "Book Now",
-    offerClose: "Close"
+    offerClose: "Close",
+    moreOffers: "More Offers"
   },
   hi: {
     tagline: "ओडिशा को आराम से जोड़ना",
@@ -61,7 +62,8 @@ const languages = {
     offerTitle: "🎉 विशेष ऑफर!",
     offerText: "कोड WELCOME20 के साथ अपनी पहली बुकिंग पर 20% छूट पाएं",
     offerButton: "अभी बुक करें",
-    offerClose: "बंद करें"
+    offerClose: "बंद करें",
+    moreOffers: "अधिक ऑफर"
   },
   or: {
     tagline: "ଓଡ଼ିଶାକୁ ଆରାମରେ ସଂଯୋଗ କରିବା",
@@ -86,7 +88,8 @@ const languages = {
     offerTitle: "🎉 ବିଶେଷ ଅଫର!",
     offerText: "WELCOME20 କୋଡ୍ ସହିତ ଆପଣଙ୍କର ପ୍ରଥମ ବୁକିଂରେ 20% ଛାଡ଼ ପାଆନ୍ତୁ",
     offerButton: "ବର୍ତ୍ତମାନ ବୁକ୍ କରନ୍ତୁ",
-    offerClose: "ବନ୍ଦ କରନ୍ତୁ"
+    offerClose: "ବନ୍ଦ କରନ୍ତୁ",
+    moreOffers: "ଅଧିକ ଅଫର"
   }
 }
 
@@ -112,6 +115,42 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
     return () => clearTimeout(timer)
   }, [])
 
+  // Control body scroll when offer alert is shown
+  useEffect(() => {
+    if (showOfferAlert) {
+      // Store the current scroll position
+      const scrollY = window.scrollY
+      
+      // Prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+    } else {
+      // Get the stored scroll position
+      const scrollY = document.body.style.top
+      
+      // Restore scrolling when modal is closed
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      
+      // Restore scroll position
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
+    }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+    }
+  }, [showOfferAlert])
+
   const handleSectionToggle = (section: string) => {
     console.log('Toggling section:', section, 'Current expanded:', expandedSection)
     // If clicking the same section that's already expanded, collapse it
@@ -134,7 +173,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
     <div className="pt-24 min-h-screen">
       {/* Offer Alert */}
       {showOfferAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <Card className="w-[500px] max-w-lg mx-4 shadow-2xl border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50 animate-in zoom-in-95 duration-300 overflow-hidden">
             <CardContent className="p-0">
               {/* Bus Image Header */}

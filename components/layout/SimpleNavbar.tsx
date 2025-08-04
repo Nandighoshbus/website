@@ -49,7 +49,7 @@ export default function SimpleNavbar() {
   }
 
   return (
-    <nav className="fixed top-0 w-full navbar-glass z-50 shadow-2xl">
+    <nav className="fixed top-0 w-full navbar-glass z-40 shadow-2xl">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}

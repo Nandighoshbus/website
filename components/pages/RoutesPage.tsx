@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Bus, MapPin, Clock, Star, ArrowRight, Navigation } from "lucide-react"
+import { Bus, MapPin, Clock, Star, ArrowRight, Navigation, Percent, Gift, Calendar, Users } from "lucide-react"
 
 const languages = {
   en: {
@@ -18,6 +18,9 @@ const languages = {
     daily: "Daily",
     acSleeper: "AC Sleeper",
     semiSleeper: "Semi Sleeper",
+    specialOffers: "Special Offers",
+    offersDescription: "Save more on your journey with our exclusive deals and discounts",
+    validTill: "Valid Till",
   },
   hi: {
     ourRoutes: "हमारे रूट्स",
@@ -31,6 +34,9 @@ const languages = {
     daily: "दैनिक",
     acSleeper: "एसी स्लीपर",
     semiSleeper: "सेमी स्लीपर",
+    specialOffers: "विशेष ऑफर",
+    offersDescription: "हमारे एक्सक्लूसिव डील्स और छूट के साथ अपनी यात्रा पर अधिक बचत करें",
+    validTill: "तक वैध",
   },
   or: {
     ourRoutes: "ଆମର ମାର୍ଗ",
@@ -44,6 +50,9 @@ const languages = {
     daily: "ଦୈନିକ",
     acSleeper: "ଏସି ସ୍ଲିପର",
     semiSleeper: "ସେମି ସ୍ଲିପର",
+    specialOffers: "ସ୍ପେଶାଲ ଅଫର",
+    offersDescription: "ଆମର ଏକ୍ସକ୍ଲୁସିଭ ଡିଲ ଏବଂ ରିହାତି ସହିତ ଆପଣଙ୍କ ଯାତ୍ରାରେ ଅଧିକ ସଞ୍ଚୟ କରନ୍ତୁ",
+    validTill: "ପର୍ଯ୍ୟନ୍ତ ବୈଧ",
   }
 }
 
@@ -119,6 +128,49 @@ const routes = [
     frequency: "4 times daily",
     busType: "Semi Sleeper",
     popularity: "medium"
+  }
+]
+
+const topOffers = [
+  {
+    id: 1,
+    title: "Early Bird Special",
+    description: "Book 7 days in advance and save up to 20%",
+    discount: "20%",
+    validTill: "31st Dec 2025",
+    icon: <Calendar className="w-5 h-5" />,
+    color: "from-blue-500 to-cyan-500",
+    badge: "LIMITED TIME"
+  },
+  {
+    id: 2,
+    title: "Weekend Getaway",
+    description: "Special weekend packages with 25% off on return journeys",
+    discount: "25%",
+    validTill: "Every Weekend",
+    icon: <MapPin className="w-5 h-5" />,
+    color: "from-orange-500 to-red-500",
+    badge: "WEEKEND ONLY"
+  },
+  {
+    id: 3,
+    title: "Group Booking",
+    description: "Book for 10+ passengers and get up to 30% group discount",
+    discount: "30%",
+    validTill: "Year Round",
+    icon: <Users className="w-5 h-5" />,
+    color: "from-teal-500 to-blue-500",
+    badge: "GROUP SPECIAL"
+  },
+  {
+    id: 4,
+    title: "Festival Special",
+    description: "Special discounts during festivals and holiday seasons",
+    discount: "Up to 35%",
+    validTill: "During Festivals",
+    icon: <Gift className="w-5 h-5" />,
+    color: "from-yellow-500 to-orange-500",
+    badge: "FESTIVAL OFFER"
   }
 ]
 
@@ -275,6 +327,62 @@ export default function RoutesPage({ currentLanguage }: RoutesPageProps) {
                   <button className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                     {currentLang.bookNow}
                   </button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Special Offers Section */}
+      <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              {currentLang.specialOffers}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              {currentLang.offersDescription}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topOffers.map((offer) => (
+              <Card key={offer.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-lg overflow-hidden">
+                <div className={`h-2 bg-gradient-to-r ${offer.color}`}></div>
+                
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-2 rounded-full bg-gradient-to-r ${offer.color} text-white`}>
+                      {offer.icon}
+                    </div>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800 text-xs font-semibold">
+                      {offer.badge}
+                    </Badge>
+                  </div>
+                  
+                  <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-orange-600 transition-colors">
+                    {offer.title}
+                  </CardTitle>
+                  
+                  <CardDescription className="text-gray-600 text-sm leading-relaxed">
+                    {offer.description}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
+                  {/* Discount Badge */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <Percent className="w-4 h-4 text-green-600" />
+                      <span className="text-2xl font-bold text-green-600">{offer.discount}</span>
+                      <span className="text-gray-500 text-sm">OFF</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">{currentLang.validTill}</p>
+                      <p className="text-xs font-semibold text-gray-800">{offer.validTill}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
