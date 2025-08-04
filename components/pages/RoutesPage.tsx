@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Bus, MapPin, Clock, Star, ArrowRight, Navigation, Percent, Gift, Calendar, Users } from "lucide-react"
+import RouteMap from "@/components/ui/RouteMap"
 
 const languages = {
   en: {
@@ -406,6 +407,9 @@ export default function RoutesPage({ currentLanguage }: RoutesPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Interactive Route Map */}
+      <RouteMap currentLanguage={currentLanguage} />
 
       {/* Map Section */}
       <section className="py-20 bg-white">
