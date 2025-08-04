@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { ArrowRight, Rocket, MapPin, Award, Shield, Star, Bus, Calendar as CalendarIcon, X, Gift } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 
 const languages = {
@@ -99,6 +100,7 @@ interface HomePageProps {
 
 export default function HomePage({ currentLanguage }: HomePageProps) {
   const currentLang = languages[currentLanguage as keyof typeof languages]
+  const router = useRouter()
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [isMainBookingExpanded, setIsMainBookingExpanded] = useState(true)
   const [onwardDate, setOnwardDate] = useState<Date>(new Date(2025, 6, 25)) // July 25, 2025
@@ -188,7 +190,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-white hover:text-gray-200 hover:bg-white/20 rounded-full"
+                    className="h-8 w-8 p-0 text-white bg-gradient-to-r from-orange-400 to-orange-600 hover:text-gray-200 hover:bg-orange-500/90 rounded-full shadow-md transition-colors duration-200"
                     onClick={() => setShowOfferAlert(false)}
                   >
                     <X className="w-4 h-4" />
@@ -232,9 +234,13 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                         variant="outline"
                         size="lg"
                         className="border-orange-300 text-orange-700 hover:bg-orange-50 px-6 py-3"
-                        onClick={() => setShowOfferAlert(false)}
+                        onClick={() => {
+                          setShowOfferAlert(false)
+                          // Navigate to routes page and scroll to offers section
+                          router.push('/routes#offers')
+                        }}
                       >
-                        Maybe Later
+                        {currentLang.moreOffers}
                       </Button>
                     </div>
                   </div>
@@ -552,7 +558,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 </li>
               </ul>
               <Link href="/features">
-                <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-3 rounded-lg shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+                <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-3 rounded-lg shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl mt-4">
                   Learn More About Our Features
                 </Button>
               </Link>

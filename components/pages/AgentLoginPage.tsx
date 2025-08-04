@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Mail, Lock, Shield, UserCheck, Building, Phone, Users } from "lucide-react"
+import { Eye, EyeOff, Lock, Shield, UserCheck, Building, Phone, Users } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { THEME_CLASSES } from "@/lib/theme"
@@ -14,7 +14,6 @@ export default function AgentLoginPage() {
   const [loginType, setLoginType] = useState<'agent' | 'admin'>('agent')
   const [formData, setFormData] = useState({
     agentId: "",
-    email: "",
     password: "",
     branchCode: ""
   })
@@ -104,40 +103,12 @@ export default function AgentLoginPage() {
                   placeholder={loginType === 'admin' ? "Admin ID" : "Agent ID"}
                   value={formData.agentId}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60"}
+                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-blue-300/60"}
                   required
                 />
               </div>
 
-              {/* Branch Code Field (only for agents) */}
-              {loginType === 'agent' && (
-                <div className="relative">
-                  <Building className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
-                  <Input
-                    type="text"
-                    name="branchCode"
-                    placeholder="Branch Code"
-                    value={formData.branchCode}
-                    onChange={handleInputChange}
-                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60"}
-                    required
-                  />
-                </div>
-              )}
-
-              {/* Email Field */}
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-blue-400" />
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Official Email Address"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60"}
-                  required
-                />
-              </div>
+              {/* Branch Code Field removed as requested */}
 
               {/* Password Field */}
               <div className="relative">
@@ -148,7 +119,7 @@ export default function AgentLoginPage() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 pr-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60"}
+                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 pr-10 text-white placeholder:text-white/70 border-white/30 focus:border-blue-300/60"}
                   required
                 />
                 <button

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Bus, MapPin, Clock, Star, ArrowRight, Navigation, Percent, Gift, Calendar, Users } from "lucide-react"
@@ -182,6 +182,23 @@ export default function RoutesPage({ currentLanguage }: RoutesPageProps) {
   const [selectedFilter, setSelectedFilter] = useState("all")
   const currentLang = languages[currentLanguage as keyof typeof languages]
 
+  // Handle hash navigation to scroll to offers section
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash === '#offers') {
+      // Small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        const offersSection = document.getElementById('offers')
+        if (offersSection) {
+          offersSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          })
+        }
+      }, 100)
+    }
+  }, [])
+
   const filteredRoutes = routes.filter(route => {
     if (selectedFilter === "all") return true
     if (selectedFilter === "popular") return route.popularity === "high"
@@ -335,7 +352,7 @@ export default function RoutesPage({ currentLanguage }: RoutesPageProps) {
       </section>
 
       {/* Special Offers Section */}
-      <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+      <section id="offers" className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">

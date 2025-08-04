@@ -61,7 +61,7 @@ export default function SignInPage() {
               </div>
             </div>
             <CardTitle className="text-3xl font-bold text-white drop-shadow-lg">
-              {isLogin ? "Welcome Back" : "Join Nandighosh"}
+              {isLogin ? "Welcome Back" : "Join Nandighosh Travels"}
             </CardTitle>
             <CardDescription className="text-white/90 text-lg font-medium drop-shadow-md">
               {isLogin 
@@ -76,26 +76,26 @@ export default function SignInPage() {
               {!isLogin && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                     <Input
                       type="text"
                       name="firstName"
                       placeholder="First Name"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-purple-300/60"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
                       required={!isLogin}
                     />
                   </div>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                     <Input
                       type="text"
                       name="lastName"
                       placeholder="Last Name"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-purple-300/60"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
                       required={!isLogin}
                     />
                   </div>
@@ -103,48 +103,48 @@ export default function SignInPage() {
               )}
 
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                 <Input
                   type="email"
                   name="email"
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-purple-300/60"}
+                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
                   required
                 />
               </div>
 
               {!isLogin && (
                 <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                   <Input
                     type="tel"
                     name="phone"
                     placeholder="Phone Number"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-purple-300/60"}
+                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
                     required={!isLogin}
                   />
                 </div>
               )}
 
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-600" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 pr-10 text-black placeholder:text-gray-500 border-white/30 focus:border-purple-300/60"}
+                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 pr-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  className="absolute right-3 top-3 text-white/70 hover:text-white transition-colors duration-200"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

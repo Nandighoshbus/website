@@ -17,6 +17,7 @@ export default function AgentRegisterPage() {
     phone: "",
     experience: "",
     branchPreference: "",
+    customBranch: "",
     address: "",
     reason: ""
   })
@@ -27,7 +28,12 @@ export default function AgentRegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Agent registration submitted:", formData)
+    // If 'Other' is selected, use customBranch as branchPreference for submission
+    const submissionData = {
+      ...formData,
+      branchPreference: formData.branchPreference === 'other' ? formData.customBranch : formData.branchPreference
+    }
+    console.log("Agent registration submitted:", submissionData)
   }
 
   return (
@@ -84,7 +90,7 @@ export default function AgentRegisterPage() {
                       placeholder="First Name"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-green-300/60 h-12"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-green-300/60 h-12"}
                       required
                     />
                   </div>
@@ -96,7 +102,7 @@ export default function AgentRegisterPage() {
                       placeholder="Last Name"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-green-300/60 h-12"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-green-300/60 h-12"}
                       required
                     />
                   </div>
@@ -118,7 +124,7 @@ export default function AgentRegisterPage() {
                       placeholder="Email Address"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60 h-12"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-blue-300/60 h-12"}
                       required
                     />
                   </div>
@@ -130,7 +136,7 @@ export default function AgentRegisterPage() {
                       placeholder="Phone Number"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-blue-300/60 h-12"}
+                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-blue-300/60 h-12"}
                       required
                     />
                   </div>
@@ -151,34 +157,50 @@ export default function AgentRegisterPage() {
                       value={formData.experience}
                       onChange={handleInputChange}
                       title="Select your experience in travel industry"
-                      className={THEME_CLASSES.INPUT_GLASS + " w-full pl-10 text-black border-white/30 focus:border-purple-300/60 h-12 appearance-none"}
+                      className={THEME_CLASSES.INPUT_GLASS + " w-full pl-10 text-white border-white/30 focus:border-purple-300/60 h-12 appearance-none font-medium"}
                       required
                     >
-                      <option value="" className="text-gray-500">Experience in Travel</option>
+                      <option value="" className="text-black">Experience in Travel</option>
                       <option value="0-1" className="text-black">0-1 years</option>
                       <option value="1-3" className="text-black">1-3 years</option>
                       <option value="3-5" className="text-black">3-5 years</option>
                       <option value="5+" className="text-black">5+ years</option>
                     </select>
                   </div>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400 z-10 pointer-events-none" />
-                    <select
-                      name="branchPreference"
-                      value={formData.branchPreference}
-                      onChange={handleInputChange}
-                      title="Select your preferred branch location"
-                      className={THEME_CLASSES.INPUT_GLASS + " w-full pl-10 text-black border-white/30 focus:border-purple-300/60 h-12 appearance-none"}
-                      required
-                    >
-                      <option value="" className="text-gray-500">Preferred Branch</option>
-                      <option value="bhubaneswar" className="text-black">Bhubaneswar</option>
-                      <option value="cuttack" className="text-black">Cuttack</option>
-                      <option value="puri" className="text-black">Puri</option>
-                      <option value="balasore" className="text-black">Balasore</option>
-                      <option value="berhampur" className="text-black">Berhampur</option>
-                      <option value="other" className="text-black">Other</option>
-                    </select>
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400 z-10 pointer-events-none" />
+                      <select
+                        name="branchPreference"
+                        value={formData.branchPreference}
+                        onChange={handleInputChange}
+                        title="Select your preferred branch location"
+                        className={THEME_CLASSES.INPUT_GLASS + " w-full pl-10 text-white border-white/30 focus:border-purple-300/60 h-12 appearance-none font-medium"}
+                        required
+                      >
+                        <option value="" className="text-black">Preferred Branch</option>
+                        <option value="bhubaneswar" className="text-black">Bhubaneswar</option>
+                        <option value="cuttack" className="text-black">Cuttack</option>
+                        <option value="puri" className="text-black">Puri</option>
+                        <option value="balasore" className="text-black">Balasore</option>
+                        <option value="berhampur" className="text-black">Berhampur</option>
+                        <option value="other" className="text-black">Other</option>
+                      </select>
+                    </div>
+                    {formData.branchPreference === 'other' && (
+                      <div className="relative">
+                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400 z-10 pointer-events-none" />
+                        <Input
+                          type="text"
+                          name="customBranch"
+                          placeholder="Enter your preferred branch location"
+                          value={formData.customBranch}
+                          onChange={handleInputChange}
+                          className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60 h-12"}
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -197,7 +219,7 @@ export default function AgentRegisterPage() {
                     placeholder="Full Address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-black placeholder:text-gray-500 border-white/30 focus:border-orange-300/60 h-12"}
+                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-orange-300/60 h-12"}
                     required
                   />
                 </div>
@@ -216,7 +238,7 @@ export default function AgentRegisterPage() {
                     value={formData.reason}
                     onChange={handleInputChange}
                     rows={4}
-                    className={THEME_CLASSES.INPUT_GLASS + " w-full p-4 text-black placeholder:text-gray-500 border-white/30 focus:border-yellow-300/60 resize-none"}
+                    className={THEME_CLASSES.INPUT_GLASS + " w-full p-4 text-white placeholder:text-white/70 border-white/30 focus:border-yellow-300/60 resize-none"}
                   />
                 </div>
               </div>
