@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, User, LogOut, Settings } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { THEME_CLASSES } from "@/lib/theme"
+import { useAuth } from "@/components/context/AuthContext"
 
 interface NavbarProps {
   currentLanguage: string
@@ -17,17 +18,35 @@ interface NavbarProps {
 export default function Navbar({ currentLanguage, setCurrentLanguage, currentLang }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
-  // Mock user state - in a real app, this would come from authentication context
-  const [user, setUser] = useState<{ name: string; email: string; avatar?: string } | null>(null)
-  // For demo purposes, you can uncomment the line below to simulate a signed-in user
-  // const [user, setUser] = useState<{ name: string; email: string; avatar?: string } | null>({ name: "John Doe", email: "john@example.com" })
+  // Use actual authentication context
+  const { user, signOut, loading } = useAuth()
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsUserMenuOpen(false)
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    try {
+      console.log('Navbar: Starting signOut...')
+      const { error } = await signOut()
+      
+      // Since we now handle "Auth session missing" as success in the auth layer,
+      // we only treat it as an error if it's a different type of error
+      if (error && !error.message?.includes('Auth session missing')) {
+        console.error('SignOut error:', error.message)
+        // Could add toast notification here for actual errors
+      } else {
+        console.log('Navbar: SignOut completed, redirecting...')
+        setIsUserMenuOpen(false)
+        router.push('/')
+      }
+    } catch (error) {
+      console.error('SignOut failed:', error)
+    } finally {
+      setIsSigningOut(false)
+    }
   }
 
   // Close user menu when clicking outside
@@ -138,13 +157,13 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center relative z-10">
                     <User className="w-5 h-5 text-white stroke-2" />
                   </div>
-                  <span className="font-medium text-sm">{user.name}</span>
+                  <span className="font-medium text-sm">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</span>
                 </button>
                 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-200/50">
-                      <p className="text-sm font-medium text-gray-800">{user.name}</p>
+                      <p className="text-sm font-medium text-gray-800">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</p>
                       <p className="text-xs text-gray-600">{user.email}</p>
                     </div>
                     <Link
@@ -157,10 +176,15 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50/50 transition-colors w-full text-left"
+                      disabled={isSigningOut}
+                      className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50/50 transition-colors w-full text-left disabled:opacity-50"
                     >
-                      <LogOut className="w-4 h-4 stroke-2" />
-                      <span className="text-sm">Sign Out</span>
+                      {isSigningOut ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                      ) : (
+                        <LogOut className="w-4 h-4 stroke-2" />
+                      )}
+                      <span className="text-sm">{isSigningOut ? 'Signing Out...' : 'Sign Out'}</span>
                     </button>
                   </div>
                 )}
@@ -236,7 +260,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                       <User className="w-5 h-5 text-white stroke-2" />
                     </div>
                     <div>
-                      <p className="text-white font-medium text-sm">{user.name}</p>
+                      <p className="text-white font-medium text-sm">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</p>
                       <p className="text-white/70 text-xs">{user.email}</p>
                     </div>
                   </div>
@@ -248,10 +272,15 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                   </Link>
                   <Button 
                     onClick={() => { handleSignOut(); setIsMenuOpen(false); }}
-                    className="w-full bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 hover:bg-red-500/30"
+                    disabled={isSigningOut}
+                    className="w-full bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 hover:bg-red-500/30 disabled:opacity-50"
                   >
-                    <LogOut className="w-4 h-4 mr-2 stroke-2" />
-                    Sign Out
+                    {isSigningOut ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-200 mr-2"></div>
+                    ) : (
+                      <LogOut className="w-4 h-4 mr-2 stroke-2" />
+                    )}
+                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
                   </Button>
                 </div>
               ) : (

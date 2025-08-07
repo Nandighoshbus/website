@@ -8,10 +8,15 @@ import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { THEME_CLASSES } from "@/lib/theme"
+import { useAuth } from "@/components/context/AuthContext"
+import { useRouter } from "next/navigation"
+import { db } from "@/lib/supabase"
 
 export default function SignInPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,14 +25,73 @@ export default function SignInPage() {
     phone: ""
   })
 
+  const { signIn, signUp, user } = useAuth()
+  const router = useRouter()
+
+  // Redirect if already logged in
+  if (user) {
+    router.push('/')
+    return null
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted:", formData)
+    setLoading(true)
+    setMessage("")
+
+    try {
+      if (isLogin) {
+        // Sign in
+        const { data, error } = await signIn(formData.email, formData.password)
+        
+        if (error) {
+          setMessage(error.message)
+        } else if (data?.user) {
+          setMessage("Signed in successfully!")
+          router.push('/')
+        }
+      } else {
+        // Sign up
+        if (!formData.firstName || !formData.lastName || !formData.phone) {
+          setMessage("Please fill in all required fields")
+          setLoading(false)
+          return
+        }
+
+        const fullName = `${formData.firstName} ${formData.lastName}`
+        const { data, error } = await signUp(
+          formData.email, 
+          formData.password, 
+          { full_name: fullName, phone: formData.phone }
+        )
+
+        if (error) {
+          setMessage(error.message)
+        } else if (data?.user) {
+          // Create user profile in database
+          const { error: profileError } = await db.createUserProfile(data.user.id, {
+            full_name: fullName,
+            email: formData.email,
+            phone: formData.phone,
+            role: 'passenger'
+          })
+
+          if (profileError) {
+            console.error('Profile creation error:', profileError)
+          }
+
+          setMessage("Account created successfully! Please check your email to verify your account.")
+        }
+      }
+    } catch (error: any) {
+      setMessage(error.message || "An error occurred")
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -83,7 +147,7 @@ export default function SignInPage() {
                       placeholder="First Name"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
+                      className="pl-10 h-12 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder:text-gray-300 focus:border-purple-400 focus:outline-none"
                       required={!isLogin}
                     />
                   </div>
@@ -95,7 +159,7 @@ export default function SignInPage() {
                       placeholder="Last Name"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
+                      className="pl-10 h-12 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder:text-gray-300 focus:border-purple-400 focus:outline-none"
                       required={!isLogin}
                     />
                   </div>
@@ -110,7 +174,7 @@ export default function SignInPage() {
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
+                  className="pl-10 h-12 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder:text-gray-300 focus:border-purple-400 focus:outline-none"
                   required
                 />
               </div>
@@ -124,7 +188,7 @@ export default function SignInPage() {
                     placeholder="Phone Number"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={THEME_CLASSES.INPUT_GLASS + " pl-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
+                    className="pl-10 h-12 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder:text-gray-300 focus:border-purple-400 focus:outline-none"
                     required={!isLogin}
                   />
                 </div>
@@ -138,7 +202,7 @@ export default function SignInPage() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={THEME_CLASSES.INPUT_GLASS + " pl-10 pr-10 text-white placeholder:text-white/70 border-white/30 focus:border-purple-300/60"}
+                  className="pl-10 pr-10 h-12 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder:text-gray-300 focus:border-purple-400 focus:outline-none"
                   required
                 />
                 <button
@@ -165,11 +229,29 @@ export default function SignInPage() {
                 </div>
               )}
 
+              {message && (
+                <div className={`p-3 rounded-lg text-sm font-medium ${
+                  message.includes('successfully') || message.includes('created')
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-200'
+                    : 'bg-red-500/20 border border-red-500/30 text-red-200'
+                }`}>
+                  {message}
+                </div>
+              )}
+
               <Button
                 type="submit"
+                disabled={loading}
                 className={THEME_CLASSES.BUTTON_AUTH + " w-full py-3"}
               >
-                {isLogin ? "Sign In" : "Create Account"}
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    {isLogin ? "Signing In..." : "Creating Account..."}
+                  </div>
+                ) : (
+                  isLogin ? "Sign In" : "Create Account"
+                )}
               </Button>
             </form>
 

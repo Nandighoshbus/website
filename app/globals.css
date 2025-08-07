@@ -1812,3 +1812,27 @@ section.bg-white:not([data-radix-popper-content-wrapper] .bg-white):not([data-ra
 .pt-24 {
   padding-top: 4rem !important;
 }
+
+/* Force input text visibility for sign-in page */
+.signin-form-input,
+.signin-form-input input,
+input[name="firstName"],
+input[name="lastName"], 
+input[name="email"],
+input[name="phone"],
+input[name="password"] {
+  color: #ffffff !important;
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border: 1px solid rgba(75, 85, 99, 0.5) !important;
+}
+
+.signin-form-input::placeholder,
+.signin-form-input input::placeholder,
+input[name="firstName"]::placeholder,
+input[name="lastName"]::placeholder,
+input[name="email"]::placeholder,
+input[name="phone"]::placeholder,
+input[name="password"]::placeholder {
+  color: #d1d5db !important;
+  opacity: 1 !important;
+}

@@ -76,8 +76,8 @@ export const nandighoshTheme = {
 
     input: {
       glass: `
-        bg-white/15 border-white/30 text-white font-medium
-        placeholder:text-white/70 focus:border-white/60 focus:bg-white/20
+        bg-gray-800/90 border-gray-600/50 text-white font-medium
+        placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90
         backdrop-blur-sm rounded-lg transition-all duration-200
         shadow-lg focus:shadow-xl
       `,

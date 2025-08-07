@@ -1,6 +1,7 @@
 "use client"
 
 import { LanguageProvider } from '@/components/context/LanguageContext'
+import { AuthProvider } from '@/components/context/AuthContext'
 
 interface ClientRootLayoutProps {
   children: React.ReactNode
@@ -8,8 +9,10 @@ interface ClientRootLayoutProps {
 
 export default function ClientRootLayout({ children }: ClientRootLayoutProps) {
   return (
-    <LanguageProvider>
-      {children}
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        {children}
+      </LanguageProvider>
+    </AuthProvider>
   )
 }
