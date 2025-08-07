@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+backend/node_modules
+**/node_modules
 
 # next.js
 /.next/
@@ -9,6 +11,8 @@
 
 # production
 /build
+backend/dist
+backend/build
 
 # debug
 npm-debug.log*
@@ -16,8 +20,14 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (IMPORTANT: Never commit these!)
 .env*
+backend/.env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -25,3 +35,34 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Backend specific
+backend/logs/
+backend/tmp/
+backend/temp/
+backend/uploads/
+backend/secrets.json
+backend/config.json
+
+# Database files
+*.sqlite
+*.db
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
