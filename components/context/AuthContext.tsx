@@ -34,7 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session)
+      // Only log the event type for security reasons
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Auth state change:', event)
+      }
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)

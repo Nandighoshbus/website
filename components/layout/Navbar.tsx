@@ -26,6 +26,14 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
   // Use actual authentication context
   const { user, signOut, loading } = useAuth()
 
+  // Helper function to get first name only
+  const getFirstName = (user: any) => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name.split(' ')[0]
+    }
+    return user?.email?.split('@')[0] || 'User'
+  }
+
   const handleSignOut = async () => {
     setIsSigningOut(true)
     try {
@@ -107,16 +115,16 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
               onChange={(e) => setCurrentLanguage(e.target.value)}
               aria-label="Select language"
               title="Language selection"
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-white/50 focus:bg-white/30 transition-all duration-300 tilt-card"
+              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-white/50 focus:bg-white/30 transition-all duration-300 tilt-card language-selector"
             >
               <option value="en" className="text-gray-800">
-                🇬🇧 English
+                EN
               </option>
               <option value="hi" className="text-gray-800">
-                🇮🇳 हिंदी
+                HIN
               </option>
               <option value="or" className="text-gray-800">
-                🏛️ ଓଡ଼ିଆ
+                OD
               </option>
             </select>
           </div>
@@ -157,13 +165,13 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center relative z-10">
                     <User className="w-5 h-5 text-white stroke-2" />
                   </div>
-                  <span className="font-medium text-sm">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</span>
+                  <span className="font-medium text-sm">{getFirstName(user)}</span>
                 </button>
                 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-200/50">
-                      <p className="text-sm font-medium text-gray-800">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-sm font-medium text-gray-800">{getFirstName(user)}</p>
                       <p className="text-xs text-gray-600">{user.email}</p>
                     </div>
                     <Link
@@ -217,16 +225,16 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                 onChange={(e) => setCurrentLanguage(e.target.value)}
                 aria-label="Select language (mobile)"
                 title="Language selection"
-                className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/50"
+                className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-white/50 language-selector"
               >
                 <option value="en" className="text-gray-800">
-                  🇬🇧 English
+                  EN
                 </option>
                 <option value="hi" className="text-gray-800">
-                  🇮🇳 हिंदी
+                  HIN
                 </option>
                 <option value="or" className="text-gray-800">
-                  🏛️ ଓଡ଼ିଆ
+                  OD
                 </option>
               </select>
               {navLinks.map((link) => (
@@ -260,7 +268,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                       <User className="w-5 h-5 text-white stroke-2" />
                     </div>
                     <div>
-                      <p className="text-white font-medium text-sm">{user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-white font-medium text-sm">{getFirstName(user)}</p>
                       <p className="text-white/70 text-xs">{user.email}</p>
                     </div>
                   </div>
