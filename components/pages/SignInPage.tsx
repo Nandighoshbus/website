@@ -25,15 +25,29 @@ export default function SignInPage() {
     phone: ""
   })
 
-  const { signIn, signUp, user } = useAuth()
+  const { signIn, signUp, user, loading: authLoading } = useAuth()
   const router = useRouter()
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       router.push('/')
     }
-  }, [user, router])
+  }, [user, router, authLoading])
+
+  // Show loading spinner while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white"></div>
+      </div>
+    )
+  }
+
+  // Don't render if user is already logged in
+  if (user) {
+    return null
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -64,7 +78,10 @@ export default function SignInPage() {
         } else if (data?.user) {
           console.log('Sign-in successful:', data.user)
           setMessage("Signed in successfully!")
-          router.push('/')
+          // Use setTimeout to avoid React state update warning
+          setTimeout(() => {
+            router.push('/')
+          }, 100)
         } else {
           console.log('No user data returned')
           setMessage("Sign-in failed - no user data returned")
