@@ -13,3 +13,5 @@ export default function Booking() {
     </ClientLayout>
   )
 }
+
+//page .jsx is done here
