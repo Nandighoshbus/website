@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,10 +29,11 @@ export default function SignInPage() {
   const router = useRouter()
 
   // Redirect if already logged in
-  if (user) {
-    router.push('/')
-    return null
-  }
+  useEffect(() => {
+    if (user) {
+      router.push('/')
+    }
+  }, [user, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -43,16 +44,30 @@ export default function SignInPage() {
     setLoading(true)
     setMessage("")
 
+    console.log('Form submitted with data:', { 
+      email: formData.email, 
+      password: formData.password ? '***' : 'empty',
+      isLogin 
+    })
+
     try {
       if (isLogin) {
         // Sign in
+        console.log('Attempting sign-in with email:', formData.email)
         const { data, error } = await signIn(formData.email, formData.password)
         
+        console.log('Sign-in result:', { data, error })
+        
         if (error) {
+          console.error('Sign-in error:', error)
           setMessage(error.message)
         } else if (data?.user) {
+          console.log('Sign-in successful:', data.user)
           setMessage("Signed in successfully!")
           router.push('/')
+        } else {
+          console.log('No user data returned')
+          setMessage("Sign-in failed - no user data returned")
         }
       } else {
         // Sign up

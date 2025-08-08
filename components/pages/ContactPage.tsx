@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Phone, Mail, MessageCircle, ArrowRight } from "lucide-react"
+import { Phone, Mail, MessageCircle, ArrowRight, Shield, Clock } from "lucide-react"
 
 const languages = {
   en: {
@@ -32,6 +32,18 @@ const languages = {
     mobileApp: "Download Our Mobile App",
     appDescription: "Get easy access to booking, tracking, and customer support on your mobile device",
     appStore: "App Store",
+    refundPolicy: "Refund & Cancellation Policy",
+    refundPolicyDescription: "Our commitment to transparent and fair refund practices",
+    refundRules: [
+      "Full refund for cancellations made 24 hours before departure",
+      "75% refund for cancellations made 12-24 hours before departure",
+      "50% refund for cancellations made 6-12 hours before departure",
+      "25% refund for cancellations made 2-6 hours before departure",
+      "No refund for cancellations made within 2 hours of departure",
+      "Refunds will be processed within 5-7 business days",
+      "Service charges and convenience fees are non-refundable",
+      "In case of bus breakdown or service cancellation by us, full refund will be provided"
+    ],
   },
   hi: {
     getInTouch: "संपर्क में रहें",
@@ -56,6 +68,18 @@ const languages = {
     mobileApp: "हमारा मोबाइल ऐप डाउनलोड करें",
     appDescription: "अपने मोबाइल डिवाइस पर बुकिंग, ट्रैकिंग और कस्टमर सपोर्ट तक आसान पहुंच प्राप्त करें",
     appStore: "ऐप स्टोर",
+    refundPolicy: "रिफंड और रद्दीकरण नीति",
+    refundPolicyDescription: "पारदर्शी और निष्पक्ष रिफंड प्रथाओं के लिए हमारी प्रतिबद्धता",
+    refundRules: [
+      "प्रस्थान से 24 घंटे पहले रद्दीकरण के लिए पूर्ण रिफंड",
+      "प्रस्थान से 12-24 घंटे पहले रद्दीकरण के लिए 75% रिफंड",
+      "प्रस्थान से 6-12 घंटे पहले रद्दीकरण के लिए 50% रिफंड",
+      "प्रस्थान से 2-6 घंटे पहले रद्दीकरण के लिए 25% रिफंड",
+      "प्रस्थान से 2 घंटे के भीतर रद्दीकरण के लिए कोई रिफंड नहीं",
+      "रिफंड 5-7 कार्य दिवसों में प्रोसेस किया जाएगा",
+      "सेवा शुल्क और सुविधा शुल्क गैर-वापसी योग्य हैं",
+      "हमारी तरफ से बस खराबी या सेवा रद्दीकरण के मामले में पूर्ण रिफंड प्रदान किया जाएगा"
+    ],
   },
   or: {
     getInTouch: "ସମ୍ପର୍କରେ ରୁହନ୍ତୁ",
@@ -80,6 +104,18 @@ const languages = {
     mobileApp: "ଆମର ମୋବାଇଲ ଆପ ଡାଉନଲୋଡ କରନ୍ତୁ",
     appDescription: "ଆପଣଙ୍କ ମୋବାଇଲ ଡିଭାଇସରେ ବୁକିଂ, ଟ୍ରାକିଂ ଏବଂ ଗ୍ରାହକ ସହାୟତାର ସହଜ ଅଭିଗମ ପାଆନ୍ତୁ",
     appStore: "ଆପ ଷ୍ଟୋର",
+    refundPolicy: "ରିଫଣ୍ଡ ଏବଂ ବାତିଲ ନୀତି",
+    refundPolicyDescription: "ସ୍ୱଚ୍ଛ ଏବଂ ନ୍ୟାୟସଙ୍ଗତ ରିଫଣ୍ଡ ପ୍ରଥା ପାଇଁ ଆମର ପ୍ରତିବଦ୍ଧତା",
+    refundRules: [
+      "ଯାତ୍ରା ଆରମ୍ଭର 24 ଘଣ୍ଟା ପୂର୍ବରୁ ବାତିଲ କଲେ ସମ୍ପୂର୍ଣ୍ଣ ରିଫଣ୍ଡ",
+      "ଯାତ୍ରା ଆରମ୍ଭର 12-24 ଘଣ୍ଟା ପୂର୍ବରୁ ବାତିଲ କଲେ 75% ରିଫଣ୍ଡ",
+      "ଯାତ୍ରା ଆରମ୍ଭର 6-12 ଘଣ୍ଟା ପୂର୍ବରୁ ବାତିଲ କଲେ 50% ରିଫଣ୍ଡ",
+      "ଯାତ୍ରା ଆରମ୍ଭର 2-6 ଘଣ୍ଟା ପୂର୍ବରୁ ବାତିଲ କଲେ 25% ରିଫଣ୍ଡ",
+      "ଯାତ୍ରା ଆରମ୍ଭର 2 ଘଣ୍ଟା ମଧ୍ୟରେ ବାତିଲ କଲେ କୌଣସି ରିଫଣ୍ଡ ନାହିଁ",
+      "ରିଫଣ୍ଡ 5-7 କାର୍ଯ୍ୟ ଦିନ ମଧ୍ୟରେ ପ୍ରକ୍ରିୟା ହେବ",
+      "ସେବା ଶୁଳ୍କ ଏବଂ ସୁବିଧା ଶୁଳ୍କ ଫେରସ୍ତ ଯୋଗ୍ୟ ନୁହେଁ",
+      "ଆମ ପକ୍ଷରୁ ବସ ଖରାପ କିମ୍ବା ସେବା ବାତିଲ ହେଲେ ସମ୍ପୂର୍ଣ୍ଣ ରିଫଣ୍ଡ ପ୍ରଦାନ କରାଯିବ"
+    ],
   }
 }
 
@@ -359,6 +395,55 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Have any query, reach out to us</span>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Refund Policy Section */}
+        <div className="max-w-5xl mx-auto mt-12">
+          <Card className="shadow-sm border">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
+                <Shield className="mr-2 w-5 h-5 text-blue-600" />
+                {currentLang.refundPolicy}
+              </CardTitle>
+              <CardDescription className="text-gray-600">{currentLang.refundPolicyDescription}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  {currentLang.refundRules.slice(0, 4).map((rule, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Clock className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <div className="text-sm text-gray-700 leading-relaxed">{rule}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {currentLang.refundRules.slice(4).map((rule, index) => (
+                    <div key={index + 4} className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Shield className="w-3 h-3 text-green-600" />
+                      </div>
+                      <div className="text-sm text-gray-700 leading-relaxed">{rule}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Mail className="w-5 h-5 text-orange-600" />
+                  <span className="font-medium text-orange-800">Need Help with Refunds?</span>
+                </div>
+                <p className="text-sm text-orange-700">
+                  For any queries regarding refunds or cancellations, please contact our customer support team at 
+                  <span className="font-medium"> support@nandighoshbus.com</span> or call 
+                  <span className="font-medium"> +91 98765 43210</span>
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -36,11 +36,22 @@ export const auth = {
 
   // Sign in user
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-    return { data, error }
+    console.log('Auth signIn called with:', { email, password: '***' })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      console.log('Supabase signIn response:', { 
+        user: data?.user ? 'User object present' : 'No user', 
+        session: data?.session ? 'Session present' : 'No session',
+        error: error ? error.message : 'No error'
+      })
+      return { data, error }
+    } catch (err) {
+      console.error('Exception in signIn:', err)
+      throw err
+    }
   },
 
   // Sign out user
