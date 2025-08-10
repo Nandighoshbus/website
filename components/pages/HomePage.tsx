@@ -175,8 +175,8 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
     <div className="pt-24 min-h-screen">
       {/* Offer Alert */}
       {showOfferAlert && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <Card className="w-[500px] max-w-lg mx-4 shadow-2xl border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50 animate-in zoom-in-95 duration-300 overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-end justify-center pb-16 px-4 bg-black/30 backdrop-blur-sm sm:items-end sm:pb-20 md:pb-24">
+          <Card className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto shadow-2xl border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50 animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-6 duration-300 overflow-hidden">
             <CardContent className="p-0">
               {/* Bus Image Header */}
               <div className="relative h-32 bg-gradient-to-r from-orange-400 to-red-500 overflow-hidden">
@@ -204,26 +204,26 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
               </div>
               
               {/* Content */}
-              <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Gift className="w-7 h-7 text-orange-600" />
+              <div className="p-4 sm:p-6">
+                <div className="flex items-start space-x-3 sm:space-x-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-orange-600" />
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-semibold text-gray-900 text-lg mb-2">
+                    <h5 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">
                       Limited Time Special Deal!
                     </h5>
-                    <p className="text-gray-700 text-base mb-3 leading-relaxed">
+                    <p className="text-gray-700 text-sm sm:text-base mb-3 leading-relaxed">
                       {currentLang.offerText}
                     </p>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                    <p className="text-gray-600 text-xs sm:text-sm mb-4 leading-relaxed hidden sm:block">
                       Book your comfortable journey with our premium AC buses. Experience luxury travel across Odisha with world-class amenities and unmatched service quality.
                     </p>
-                    <div className="flex space-x-3">
-                      <Link href="/booking">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link href="/booking" className="flex-1 sm:flex-initial">
                         <Button 
-                          size="lg" 
-                          className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-base px-8 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                          size="sm" 
+                          className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-sm sm:text-base px-6 py-2 sm:px-8 sm:py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                           onClick={() => setShowOfferAlert(false)}
                         >
                           <Bus className="mr-2 w-4 h-4" />
@@ -232,8 +232,8 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                       </Link>
                       <Button 
                         variant="outline"
-                        size="lg"
-                        className="border-orange-300 text-orange-700 hover:bg-orange-50 px-6 py-3"
+                        size="sm"
+                        className="border-orange-300 text-orange-700 hover:bg-orange-50 px-4 py-2 sm:px-6 sm:py-3 flex-1 sm:flex-initial"
                         onClick={() => {
                           setShowOfferAlert(false)
                           // Navigate to routes page and scroll to offers section

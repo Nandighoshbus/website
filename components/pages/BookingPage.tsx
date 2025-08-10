@@ -1,12 +1,77 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Navigation, MapPin, QrCode, Calendar, Users, ArrowRight, Clock, Shield, Smartphone, ArrowUpDown, Wind, Bed, IndianRupee, Bus } from "lucide-react"
+
+// API Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+
+// Types matching actual database structure
+interface BusScheduleResult {
+  id: string
+  bus_id: string
+  route_id: string
+  departure_date: string
+  departure_time: string
+  arrival_date: string
+  arrival_time: string
+  base_fare: number
+  available_seats: number
+  booked_seats: string[]
+  blocked_seats: string[]
+  is_active: boolean
+  bus: {
+    id: string
+    bus_number: string
+    bus_name: string
+    bus_type: 'ac' | 'non_ac' | 'sleeper' | 'semi_sleeper' | 'luxury'
+    total_seats: number
+    amenities: string[]
+    is_active: boolean
+  }
+  route: {
+    id: string
+    route_code: string
+    name: string
+    source_city: string
+    destination_city: string
+    distance_km: number
+    estimated_duration: string
+    base_fare: number
+    is_active: boolean
+  }
+}
+
+interface BusSearchResult {
+  id: string
+  bus_number: string
+  bus_type: 'ac' | 'non_ac' | 'sleeper' | 'semi_sleeper' | 'luxury'
+  total_seats: number
+  amenities: string[]
+  is_active: boolean
+}
+
+interface RouteSearchResult {
+  id: string
+  route_code: string
+  name: string
+  source_city: string
+  destination_city: string
+  distance_km: number
+  estimated_duration: string
+  base_fare: number
+  is_active: boolean
+  bus: BusSearchResult
+}
+
+interface City {
+  name: string
+}
 
 const languages = {
   en: {
@@ -95,11 +160,12 @@ const languages = {
   }
 }
 
-const cities = [
+// Static fallback cities (used if API fails)
+const fallbackCities = [
   "Balasore",
-  "Bhubaneswar", 
+  "Bhubaneswar",
   "Cuttack",
-  "Puri",
+  "Puri", 
   "Berhampur",
   "Sambalpur",
   "Kolkata",
@@ -112,6 +178,7 @@ interface BookingPageProps {
 }
 
 export default function BookingPage({ currentLanguage }: BookingPageProps) {
+  // State management
   const [formData, setFormData] = useState({
     from: '',
     to: '',
@@ -122,77 +189,88 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
     ticketNumber: ''
   })
 
+  // API data state
+  const [cities, setCities] = useState<string[]>(fallbackCities)
+  const [searchResults, setSearchResults] = useState<BusScheduleResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searching, setSearching] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const currentLang = languages[currentLanguage as keyof typeof languages]
 
-  // Route distances (in km) - approximate distances between cities
-  const routeDistances: { [key: string]: number } = {
-    'Balasore-Bhubaneswar': 210,
-    'Balasore-Cuttack': 190,
-    'Balasore-Puri': 260,
-    'Balasore-Berhampur': 350,
-    'Balasore-Sambalpur': 400,
-    'Balasore-Kolkata': 240,
-    'Balasore-Rourkela': 450,
-    'Balasore-Koraput': 500,
-    'Bhubaneswar-Cuttack': 25,
-    'Bhubaneswar-Puri': 60,
-    'Bhubaneswar-Berhampur': 170,
-    'Bhubaneswar-Sambalpur': 280,
-    'Bhubaneswar-Kolkata': 450,
-    'Bhubaneswar-Rourkela': 340,
-    'Bhubaneswar-Koraput': 450,
-    'Cuttack-Puri': 80,
-    'Cuttack-Berhampur': 190,
-    'Cuttack-Sambalpur': 260,
-    'Cuttack-Kolkata': 470,
-    'Cuttack-Rourkela': 320,
-    'Cuttack-Koraput': 430,
-    'Puri-Berhampur': 140,
-    'Puri-Sambalpur': 340,
-    'Puri-Kolkata': 510,
-    'Puri-Rourkela': 400,
-    'Puri-Koraput': 390,
-    'Berhampur-Sambalpur': 450,
-    'Berhampur-Kolkata': 620,
-    'Berhampur-Rourkela': 520,
-    'Berhampur-Koraput': 250,
-    'Sambalpur-Kolkata': 730,
-    'Sambalpur-Rourkela': 160,
-    'Sambalpur-Koraput': 600,
-    'Kolkata-Rourkela': 570,
-    'Kolkata-Koraput': 870,
-    'Rourkela-Koraput': 740
-  }
-
-  const calculateEstimatedPrice = () => {
-    if (!formData.from || !formData.to || formData.from === formData.to) {
-      return 0
+  // Fetch cities from backend on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/routes/search/cities`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && Array.isArray(data.data)) {
+            setCities(data.data)
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to fetch cities from API, using fallback:', error)
+        setCities(fallbackCities)
+      }
     }
 
-    // Get route key (alphabetically sorted to handle both directions)
-    const routeKey = [formData.from, formData.to].sort().join('-')
-    const distance = routeDistances[routeKey] || 200 // Default distance if route not found
+    fetchCities()
+  }, [])
 
-    // Base price per km
-    let baseRatePerKm = 1.5 // Base rate for normal seater
+  // API function to search bus schedules
+  const searchRoutes = async (from: string, to: string, date: string) => {
+    try {
+      setSearching(true)
+      setError(null)
 
-    // Adjust for bus type
-    if (formData.busType === 'ac') {
-      baseRatePerKm *= 1.4 // AC buses cost 40% more
+      // Search for available schedules using the new API
+      const searchParams = new URLSearchParams({
+        source_city: from,
+        destination_city: to,
+        departure_date: date,
+        min_seats: formData.passengers
+      })
+
+      // Add bus type filter if specified
+      if (formData.busType !== 'all') {
+        if (formData.busType === 'ac') {
+          searchParams.append('bus_type', 'ac')
+        } else if (formData.busType === 'normal') {
+          searchParams.append('bus_type', 'non_ac')
+        }
+      }
+
+      const schedulesResponse = await fetch(
+        `${API_BASE_URL}/schedules/search?${searchParams.toString()}`
+      )
+      
+      if (!schedulesResponse.ok) {
+        throw new Error('Failed to fetch schedules')
+      }
+
+      const schedulesData = await schedulesResponse.json()
+      
+      if (!schedulesData.success) {
+        throw new Error(schedulesData.message || 'Failed to search schedules')
+      }
+
+      const schedules = schedulesData.data || []
+
+      // Sort by departure time
+      schedules.sort((a: BusScheduleResult, b: BusScheduleResult) => {
+        return a.departure_time.localeCompare(b.departure_time)
+      })
+
+      setSearchResults(schedules)
+      
+    } catch (error) {
+      console.error('Schedule search failed:', error)
+      setError(error instanceof Error ? error.message : 'Failed to search schedules')
+      setSearchResults([])
+    } finally {
+      setSearching(false)
     }
-
-    // Adjust for seat type
-    if (formData.seatType === 'sleeper') {
-      baseRatePerKm *= 1.6 // Sleeper costs 60% more
-    }
-
-    // Calculate base price
-    const basePrice = distance * baseRatePerKm
-    
-    // Multiply by number of passengers
-    const totalPrice = basePrice * parseInt(formData.passengers)
-
-    return Math.round(totalPrice)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -202,10 +280,37 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
     })
   }
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Search submitted:', formData)
-    // Add search logic here
+    
+    // Validation
+    if (!formData.from || !formData.to) {
+      setError('Please select both departure and destination cities')
+      return
+    }
+
+    if (formData.from === formData.to) {
+      setError('Departure and destination cities cannot be the same')
+      return
+    }
+
+    if (!formData.date) {
+      setError('Please select a travel date')
+      return
+    }
+
+    // Check if selected date is not in the past
+    const selectedDate = new Date(formData.date)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (selectedDate < today) {
+      setError('Please select a date from today onwards')
+      return
+    }
+
+    // Search for routes
+    await searchRoutes(formData.from, formData.to, formData.date)
   }
 
   const handleTrack = (e: React.FormEvent) => {
@@ -413,33 +518,120 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
                       </div>
                     </div>
                     
-                    {/* Estimated Price Display */}
-                    {formData.from && formData.to && formData.from !== formData.to && (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <IndianRupee className="w-5 h-5 text-blue-600" />
-                            <span className="text-lg font-semibold text-blue-900">
-                              {currentLang.estimatedPrice}
-                            </span>
-                          </div>
-                          <div className="text-2xl font-bold text-blue-600">
-                            ₹{calculateEstimatedPrice().toLocaleString('en-IN')}
-                          </div>
-                        </div>
-                        <div className="text-sm text-blue-700 mt-2">
-                          {formData.passengers} passenger{parseInt(formData.passengers) > 1 ? 's' : ''} • {formData.busType.toUpperCase()} • {formData.seatType.charAt(0).toUpperCase() + formData.seatType.slice(1)}
-                        </div>
-                      </div>
-                    )}
-                    
                     <Button 
                       type="submit"
-                      className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold text-lg transition-all duration-200 hover:shadow-lg"
+                      disabled={searching}
+                      className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold text-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50"
                     >
                       <Navigation className="mr-2 w-5 h-5" />
-                      {currentLang.searchRoutes}
+                      {searching ? 'Searching...' : currentLang.searchRoutes}
                     </Button>
+
+                    {/* Error Display */}
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-600 text-sm">{error}</p>
+                      </div>
+                    )}
+
+                    {/* Search Results */}
+                    {searchResults.length > 0 && (
+                      <div className="mt-8 space-y-4">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">
+                          Available Routes ({searchResults.length} found)
+                        </h3>
+                        
+                        {searchResults.map((schedule) => (
+                          <Card key={schedule.id} className="border-2 hover:border-orange-300 transition-colors">
+                            <CardContent className="p-6">
+                              <div className="flex justify-between items-start mb-4">
+                                <div>
+                                  <h4 className="text-lg font-semibold text-gray-900">
+                                    {schedule.route?.name || `${schedule.route?.source_city} to ${schedule.route?.destination_city}`}
+                                  </h4>
+                                  <p className="text-sm text-gray-600">
+                                    Bus: {schedule.bus?.bus_number} • {schedule.bus?.bus_name} • {schedule.bus?.bus_type.replace('_', '-').toUpperCase()}
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="text-green-600 border-green-200">
+                                  {schedule.available_seats} seats available
+                                </Badge>
+                              </div>
+
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div className="text-center">
+                                  <Clock className="w-5 h-5 mx-auto mb-1 text-blue-600" />
+                                  <p className="text-xs text-gray-500">Departure</p>
+                                  <p className="font-semibold">{schedule.departure_time}</p>
+                                  <p className="text-xs text-gray-400">{schedule.departure_date}</p>
+                                </div>
+                                <div className="text-center">
+                                  <Clock className="w-5 h-5 mx-auto mb-1 text-green-600" />
+                                  <p className="text-xs text-gray-500">Arrival</p>
+                                  <p className="font-semibold">{schedule.arrival_time}</p>
+                                  <p className="text-xs text-gray-400">{schedule.arrival_date}</p>
+                                </div>
+                                <div className="text-center">
+                                  <ArrowRight className="w-5 h-5 mx-auto mb-1 text-gray-600" />
+                                  <p className="text-xs text-gray-500">Duration</p>
+                                  <p className="font-semibold">{schedule.route?.estimated_duration || 'N/A'}</p>
+                                </div>
+                                <div className="text-center">
+                                  <IndianRupee className="w-5 h-5 mx-auto mb-1 text-orange-600" />
+                                  <p className="text-xs text-gray-500">Base Fare</p>
+                                  <p className="font-semibold">₹{schedule.base_fare}</p>
+                                </div>
+                              </div>
+
+                              {schedule.bus?.amenities && schedule.bus.amenities.length > 0 && (
+                                <div className="mb-4">
+                                  <p className="text-sm text-gray-600 mb-2">Amenities:</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {schedule.bus.amenities.map((amenity, index) => (
+                                      <Badge key={index} variant="secondary" className="text-xs">
+                                        {amenity}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {schedule.route?.distance_km && (
+                                <div className="mb-4">
+                                  <p className="text-sm text-gray-600">
+                                    Distance: {schedule.route.distance_km} km
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="flex justify-between items-center">
+                                <div className="text-lg font-bold text-blue-600">
+                                  Total: ₹{(schedule.base_fare * parseInt(formData.passengers)).toLocaleString('en-IN')}
+                                  <span className="text-sm text-gray-500 font-normal ml-1">
+                                    for {formData.passengers} passenger{parseInt(formData.passengers) > 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                                <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                                  Select Route
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+
+                    {searchResults.length === 0 && searching === false && formData.from && formData.to && (
+                      <div className="mt-8 text-center py-8 bg-gray-50 rounded-lg">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                          <Bus className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Routes Found</h3>
+                        <p className="text-gray-600">
+                          No buses available for the selected route and date. Try different cities or dates.
+                        </p>
+                      </div>
+                    )}
                   </form>
                 </TabsContent>
 

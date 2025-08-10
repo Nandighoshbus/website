@@ -40,10 +40,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   }
 
   // Create user in Supabase Auth
+  const shouldAutoConfirm = role === 'admin' || role === 'super_admin';
+  
   const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    email_confirm: false
+    email_confirm: shouldAutoConfirm // Auto-confirm admin users
   });
 
   if (authError || !authData.user) {
@@ -59,7 +61,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       full_name,
       phone,
       role,
-      is_verified: false,
+      is_verified: shouldAutoConfirm, // Auto-verify admin users
       is_active: true
     }])
     .select()

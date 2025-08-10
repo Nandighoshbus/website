@@ -265,3 +265,20 @@ export const validatePagination = (data: any) => {
 
   return schema.validate(data);
 };
+
+// Email validation helper
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Phone validation helper
+export const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^[6-9]\d{9}$/;
+  return phoneRegex.test(phone);
+};
+
+// Input sanitization helper
+export const sanitizeInput = (input: string): string => {
+  return input.trim().replace(/[<>]/g, '');
+};

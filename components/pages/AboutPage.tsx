@@ -152,6 +152,16 @@ export default function AboutPage({ currentLanguage }: AboutPageProps) {
                   height={400}
                   className="w-full h-96 object-cover rounded-xl shadow-2xl relative z-10"
                 />
+                {/* Experience Badge */}
+                <div className="absolute bottom-6 left-2 z-20 bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-xl shadow-2xl flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-400/30 to-red-400/30 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
+                    <span className="text-2xl font-bold text-orange-100 drop-shadow-lg">✓</span>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold leading-tight text-white drop-shadow-md">25+ Years</p>
+                    <p className="text-sm leading-tight text-orange-100 drop-shadow-sm">Experience</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

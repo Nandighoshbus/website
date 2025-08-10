@@ -7,14 +7,30 @@ export const getAllRoutes = async (req: Request, res: Response): Promise<void> =
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const offset = (page - 1) * limit;
+  const { source, destination } = req.query;
 
-  const { data: routes, error, count } = await supabaseAdmin
+  let query = supabaseAdmin
     .from('routes')
     .select(`
       *,
       bus:buses(*)
-    `, { count: 'exact' })
-    .order('created_at', { ascending: false })
+    `, { count: 'exact' });
+
+  // Filter by source if provided
+  if (source) {
+    query = query.eq('source', source);
+  }
+
+  // Filter by destination if provided  
+  if (destination) {
+    query = query.eq('destination', destination);
+  }
+
+  // Only show active routes
+  query = query.eq('is_active', true);
+
+  const { data: routes, error, count } = await query
+    .order('departure_time', { ascending: true })
     .range(offset, offset + limit - 1);
 
   if (error) {

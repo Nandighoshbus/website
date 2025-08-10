@@ -240,7 +240,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                     <Input 
                       name="firstName"
                       placeholder="John" 
-                      className="border-gray-300 focus:border-orange-500"
+                      className="border border-gray-300 focus:border-orange-500 bg-white focus:bg-white"
                       value={formData.firstName}
                       onChange={handleInputChange}
                     />
@@ -250,7 +250,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                     <Input 
                       name="lastName"
                       placeholder="Doe" 
-                      className="border-gray-300 focus:border-orange-500"
+                      className="border border-gray-300 focus:border-orange-500 bg-white focus:bg-white"
                       value={formData.lastName}
                       onChange={handleInputChange}
                     />
@@ -264,7 +264,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                     name="email"
                     type="email"
                     placeholder="your.email@example.com"
-                    className={`border-gray-300 focus:border-orange-500 ${errors.email ? 'border-red-500' : ''}`}
+                    className={`border border-gray-300 focus:border-orange-500 bg-white focus:bg-white ${errors.email ? 'border-red-500' : ''}`}
                     value={formData.email}
                     onChange={handleInputChange}
                     required
@@ -279,7 +279,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                     name="phone"
                     type="tel"
                     placeholder="+91 98765 43210"
-                    className={`border-gray-300 focus:border-orange-500 ${errors.phone ? 'border-red-500' : ''}`}
+                    className={`border border-gray-300 focus:border-orange-500 bg-white focus:bg-white ${errors.phone ? 'border-red-500' : ''}`}
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
@@ -293,7 +293,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                   <Textarea
                     name="message"
                     placeholder={currentLang.travelRequirements}
-                    className={`border-gray-300 focus:border-orange-500 min-h-[100px] ${errors.message ? 'border-red-500' : ''}`}
+                    className={`border border-gray-300 focus:border-orange-500 bg-white focus:bg-white min-h-[100px] ${errors.message ? 'border-red-500' : ''}`}
                     value={formData.message}
                     onChange={handleInputChange}
                     required
@@ -302,7 +302,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 </div>
                 <Button 
                   type="submit"
-                  className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed py-2 text-base font-medium transition-all duration-200 ease-in-out"
+                  className="w-full bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed py-2 text-base font-medium transition-all duration-200 ease-in-out text-white"
                   disabled={!formData.email.trim() || !formData.phone.trim() || !formData.message.trim()}
                   style={{
                     transform: 'scale(1)',

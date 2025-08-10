@@ -167,6 +167,22 @@ export interface Seat {
   price_modifier?: number; // Additional price for premium seats
 }
 
+// Create Booking DTO Interface
+export interface CreateBookingDto {
+  route_id: string;
+  journey_date: string;
+  seat_numbers: string[];
+  passenger_details: BookingPassengerRequest[];
+  source_stop: string;
+  destination_stop: string;
+  total_amount: number;
+  contact_details: {
+    email: string;
+    phone: string;
+  };
+  special_requests?: string;
+}
+
 // Driver Details Interface
 export interface DriverDetails {
   name: string;

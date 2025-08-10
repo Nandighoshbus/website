@@ -1,99 +1,59 @@
-import { Request, Response } from 'express';
-import { supabaseAdmin } from '../config/supabase';
+import { Request, Response, NextFunction } from 'express';
+import { BookingService } from '../services/BookingService';
 import { AppError } from '../middleware/errorHandler';
-import { ApiResponse, Booking } from '../types';
-import { generateBookingReference } from '../utils/auth';
+import { ApiResponse, CreateBookingDto, Booking } from '../types';
+import { Logger } from '../utils/logger';
+import { supabaseAdmin } from '../config/supabase';
 
-export const createBooking = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const {
-    route_id,
-    journey_date,
-    seat_numbers,
-    passenger_details,
-    source_stop,
-    destination_stop,
-    total_amount,
-    contact_details
-  } = req.body;
+const bookingService = new BookingService();
+const logger = Logger.getInstance();
 
-  // Validate route exists and is active
-  const { data: route, error: routeError } = await supabaseAdmin
-    .from('routes')
-    .select(`
-      *,
-      bus:buses(*)
-    `)
-    .eq('id', route_id)
-    .eq('is_active', true)
-    .single();
+/**
+ * Create a new booking
+ */
+export const createBooking = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const startTime = Date.now();
+  const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const requestLogger = logger.setRequestId(requestId);
 
-  if (routeError || !route) {
-    throw new AppError('Route not found or inactive', 404, 'ROUTE_NOT_FOUND');
+  try {
+    const userId = req.userId!;
+    const bookingData: CreateBookingDto = req.body;
+
+    requestLogger.info('Creating booking request received', {
+      userId,
+      routeId: bookingData.route_id,
+      seatCount: bookingData.seat_numbers?.length
+    });
+
+    // Create booking using service layer
+    const booking = await bookingService.createBooking(userId, bookingData);
+
+    const duration = Date.now() - startTime;
+    requestLogger.performance('create-booking-controller', duration, {
+      bookingId: booking.id,
+      success: true
+    });
+
+    const response: ApiResponse<typeof booking> = {
+      success: true,
+      message: 'Booking created successfully',
+      data: booking
+    };
+
+    res.status(201).json(response);
+
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    requestLogger.error('Failed to create booking', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.userId,
+      duration
+    });
+    
+    next(error);
   }
-
-  // Check seat availability
-  const { data: existingBookings, error: seatError } = await supabaseAdmin
-    .from('bookings')
-    .select('seat_numbers')
-    .eq('route_id', route_id)
-    .eq('journey_date', journey_date)
-    .in('status', ['confirmed', 'pending']);
-
-  if (seatError) {
-    throw new AppError('Failed to check seat availability', 500, 'SEAT_CHECK_ERROR');
-  }
-
-  // Check for seat conflicts
-  const bookedSeats: string[] = [];
-  existingBookings?.forEach(booking => {
-    if (booking.seat_numbers) {
-      bookedSeats.push(...booking.seat_numbers);
-    }
-  });
-
-  const conflictingSeats = seat_numbers.filter((seat: string) => bookedSeats.includes(seat));
-  if (conflictingSeats.length > 0) {
-    throw new AppError(`Seats ${conflictingSeats.join(', ')} are already booked`, 409, 'SEAT_NOT_AVAILABLE');
-  }
-
-  // Generate booking reference
-  const booking_reference = generateBookingReference();
-
-  // Create booking
-  const { data: booking, error: bookingError } = await supabaseAdmin
-    .from('bookings')
-    .insert([{
-      user_id: userId,
-      route_id,
-      booking_reference,
-      journey_date,
-      seat_numbers,
-      passenger_details,
-      source_stop,
-      destination_stop,
-      total_amount,
-      contact_details,
-      status: 'pending'
-    }])
-    .select(`
-      *,
-      route:routes(*),
-      user:user_profiles(*)
-    `)
-    .single();
-
-  if (bookingError || !booking) {
-    throw new AppError('Failed to create booking', 500, 'BOOKING_CREATE_ERROR');
-  }
-
-  const response: ApiResponse<Booking> = {
-    success: true,
-    message: 'Booking created successfully',
-    data: booking
-  };
-
-  res.status(201).json(response);
 };
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {

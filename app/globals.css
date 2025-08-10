@@ -114,6 +114,16 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Fallback for Chrome, Safari, Samsung Internet, etc. */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+/* Fallback for Chrome, Safari, Samsung Internet, etc. */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }

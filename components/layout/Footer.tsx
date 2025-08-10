@@ -55,22 +55,22 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
               <ul className="space-y-2 text-gray-600">
                 <li>
                   <Link href="/" className="hover:scale-105 transition-all magnetic">
-                    🏠 {currentLang.home}
+                    {currentLang.home}
                   </Link>
                 </li>
                 <li>
                   <Link href="/routes" className="hover:text-gray-800 transition-colors magnetic">
-                    🛣️ {currentLang.routes}
+                    {currentLang.routes}
                   </Link>
                 </li>
                 <li>
                   <Link href="/features" className="hover:text-gray-800 transition-colors magnetic">
-                    ✨ {currentLang.features}
+                    {currentLang.features}
                   </Link>
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-gray-800 transition-colors magnetic">
-                    📞 {currentLang.contact}
+                    {currentLang.contact}
                   </Link>
                 </li>
               </ul>
@@ -82,13 +82,13 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
               </h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
-                  🎫 {currentLang.onlineBooking}
+                  {currentLang.onlineBooking}
                 </li>
                 <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
-                  ❄️ {currentLang.acSleeper}
+                  {currentLang.acSleeper}
                 </li>
                 <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
-                  📍 {currentLang.gpsTracking}
+                   {currentLang.gpsTracking}
                 </li>
                 <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">🕒 {currentLang.support}</li>
               </ul>
@@ -100,10 +100,10 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
                 {currentLang.contactInfoFooter}
               </h4>
               <ul className="space-y-2 text-gray-600">
-                <li className="magnetic">📞 +91 98765 43210</li>
-                <li className="magnetic">📧 info@nandighoshbus.com</li>
-                <li className="magnetic">📍 Balasore, Odisha</li>
-                <li className="magnetic">🕒 {currentLang.service24x7}</li>
+                <li className="magnetic">+91 98765 43210</li>
+                <li className="magnetic">info@nandighoshbus.com</li>
+                <li className="magnetic">Balasore, Odisha</li>
+                <li className="magnetic">{currentLang.service24x7}</li>
               </ul>
             </div>
           </div>
