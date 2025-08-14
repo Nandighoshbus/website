@@ -94,7 +94,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
           <Link href="/" className="flex items-center space-x-4 hover-zone">
             <div className="relative">
               <Image
-                src="/images/nandighosh-logo-updated.png"
+                src="/images/nandighosh-logo.png"
                 alt="Nandighosh Logo"
                 width={64}
                 height={64}
@@ -107,27 +107,6 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
               <span className="text-2xl font-bold text-white drop-shadow-lg">Nandighosh Travels</span>
             </div>
           </Link>
-
-          {/* Language Selector */}
-          <div className="hidden lg:flex items-center space-x-6">
-            <select
-              value={currentLanguage}
-              onChange={(e) => setCurrentLanguage(e.target.value)}
-              aria-label="Select language"
-              title="Language selection"
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-white/50 focus:bg-white/30 transition-all duration-300 tilt-card language-selector"
-            >
-              <option value="en" className="text-gray-800">
-                EN
-              </option>
-              <option value="hi" className="text-gray-800">
-                HIN
-              </option>
-              <option value="or" className="text-gray-800">
-                OD
-              </option>
-            </select>
-          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3">
@@ -205,6 +184,19 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                 </Button>
               </Link>
             )}
+
+            {/* Language Selector */}
+            <select
+              value={currentLanguage}
+              onChange={(e) => setCurrentLanguage(e.target.value)}
+              aria-label="Select language"
+              title="Language selection"
+              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-white/50 focus:bg-white/30 transition-all duration-300 tilt-card language-selector"
+            >
+              <option value="en" className="text-gray-800">EN</option>
+              <option value="hi" className="text-gray-800">HIN</option>
+              <option value="or" className="text-gray-800">OD</option>
+            </select>
           </div>
 
           {/* Mobile Menu Button */}

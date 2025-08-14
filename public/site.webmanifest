@@ -4,13 +4,13 @@
   "description": "Premium Travel Experience Across Odisha",
   "icons": [
     {
-      "src": "/images/nandighosh-logo-updated.png",
+      "src": "/images/nandighosh-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/images/nandighosh-logo-updated.png",
+      "src": "/images/nandighosh-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"

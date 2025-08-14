@@ -1,6 +1,6 @@
 "use client"
 
-import { Phone, Mail, MessageCircle, Navigation } from "lucide-react"
+import { Facebook, Instagram, Linkedin } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -19,91 +19,107 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="tilt-card">
+          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
+            <div className="tilt-card md:pr-8">
               <div className="flex items-center space-x-2 mb-4">
                 <Image
-                  src="/images/nandighosh-logo-updated.png"
+                  src="/images/nandighosh-logo.png"
                   alt="Nandighosh Logo"
                   width={40}
                   height={40}
                   className="w-10 h-10 object-contain"
                 />
                 <div>
-                  <span className="text-xl font-bold text-gray-800">Nandighosh</span>
+                  <span className="text-2xl font-extrabold text-gray-800">Nandighosh Travels</span>
                 </div>
               </div>
-              <p className="text-gray-600 mb-4">{currentLang.footerDescription}</p>
+              <p className="text-lg font-semibold text-gray-700 mb-4">{currentLang.footerDescription}</p>
               <div className="flex space-x-4">
-                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all magnetic">
-                  <span className="text-sm">📘</span>
-                </div>
-                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all magnetic">
-                  <span className="text-sm">🐦</span>
-                </div>
-                <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all magnetic">
-                  <span className="text-sm">📷</span>
-                </div>
+                <Link 
+                  href="https://www.facebook.com/nandighoshbus" 
+                  target="_blank" 
+                  className="cursor-pointer hover:scale-110 transition-all magnetic"
+                >
+                  <div className="w-10 h-10 rounded-full bg-orange-300 hover:bg-orange-400 transition-colors duration-300 flex items-center justify-center shadow-md">
+                    <Facebook className="w-5 h-5 text-white" />
+                  </div>
+                </Link>
+                <Link 
+                  href="https://www.instagram.com/nandighoshbus" 
+                  target="_blank" 
+                  className="cursor-pointer hover:scale-110 transition-all magnetic"
+                >
+                  <div className="w-10 h-10 rounded-full bg-orange-300 hover:bg-orange-400 transition-colors duration-300 flex items-center justify-center shadow-md">
+                    <Instagram className="w-5 h-5 text-white" />
+                  </div>
+                </Link>
+                <Link 
+                  href="https://www.linkedin.com/company/nandighoshbus" 
+                  target="_blank" 
+                  className="cursor-pointer hover:scale-110 transition-all magnetic"
+                >
+                  <div className="w-10 h-10 rounded-full bg-orange-300 hover:bg-orange-400 transition-colors duration-300 flex items-center justify-center shadow-md">
+                    <Linkedin className="w-5 h-5 text-white" />
+                  </div>
+                </Link>
               </div>
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
-                <Navigation className="mr-2 w-5 h-5 text-orange-600" />
+              <h4 className="text-xl font-bold mb-4 text-gray-800">
                 {currentLang.quickLinks}
               </h4>
-              <ul className="space-y-2 text-gray-600">
+              <ul className="space-y-3 text-gray-700">
                 <li>
-                  <Link href="/" className="hover:scale-105 transition-all magnetic">
+                  <Link href="/" className="text-base font-semibold hover:scale-105 transition-all magnetic">
                     {currentLang.home}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/routes" className="hover:text-gray-800 transition-colors magnetic">
+                  <Link href="/routes" className="text-base font-semibold hover:text-gray-800 transition-colors magnetic">
                     {currentLang.routes}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/features" className="hover:text-gray-800 transition-colors magnetic">
+                  <Link href="/features" className="text-base font-semibold hover:text-gray-800 transition-colors magnetic">
                     {currentLang.features}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-gray-800 transition-colors magnetic">
-                    {currentLang.contact}
+                  <Link href="/booking" className="text-base font-semibold hover:text-gray-800 transition-colors magnetic">
+                    Book Now
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
+              <h4 className="text-xl font-bold mb-4 flex items-center text-gray-800">
                 {currentLang.services}
               </h4>
-              <ul className="space-y-2 text-gray-600">
-                <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
+              <ul className="space-y-3 text-gray-700">
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">
                   {currentLang.onlineBooking}
                 </li>
-                <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">
                   {currentLang.acSleeper}
                 </li>
-                <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">
                    {currentLang.gpsTracking}
                 </li>
-                <li className="hover:text-gray-800 transition-colors cursor-pointer magnetic">🕒 {currentLang.support}</li>
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">{currentLang.support}</li>
               </ul>
             </div>
 
             <div className="tilt-card">
-              <h4 className="text-lg font-semibold mb-4 flex items-center text-gray-800">
-                <Phone className="mr-2 w-5 h-5" />
+              <h4 className="text-xl font-bold mb-4 text-gray-800">
                 {currentLang.contactInfoFooter}
               </h4>
-              <ul className="space-y-2 text-gray-600">
-                <li className="magnetic">+91 98765 43210</li>
-                <li className="magnetic">info@nandighoshbus.com</li>
-                <li className="magnetic">Balasore, Odisha</li>
-                <li className="magnetic">{currentLang.service24x7}</li>
+              <ul className="space-y-3 text-gray-700">
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">+91 98765 43210</li>
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">info@nandighoshbus.com</li>
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">Balasore, Odisha</li>
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">{currentLang.service24x7}</li>
               </ul>
             </div>
           </div>
@@ -122,18 +138,6 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
           </div>
         </div>
       </footer>
-
-      {/* Floating WhatsApp Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          className="bg-white hover:bg-white rounded-full w-16 h-16 shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 card-3d animate-pulse-glow flex items-center justify-center"
-          onClick={() => window.open("https://wa.me/919876543210", "_blank")}
-          title="Contact us on WhatsApp"
-          aria-label="Contact us on WhatsApp"
-        >
-          <MessageCircle className="w-8 h-8 text-orange-600" />
-        </button>
-      </div>
     </>
   )
 }

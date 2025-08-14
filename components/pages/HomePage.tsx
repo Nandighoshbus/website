@@ -175,7 +175,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
     <div className="pt-24 min-h-screen">
       {/* Offer Alert */}
       {showOfferAlert && (
-        <div className="fixed inset-0 z-[9999] flex items-end justify-center pb-16 px-4 bg-black/30 backdrop-blur-sm sm:items-end sm:pb-20 md:pb-24">
+        <div className="fixed inset-0 z-[9999] flex items-end justify-center pb-8 px-4 bg-black/30 backdrop-blur-sm sm:pb-12 md:pb-16">
           <Card className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto shadow-2xl border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-yellow-50 animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-6 duration-300 overflow-hidden">
             <CardContent className="p-0">
               {/* Bus Image Header */}
@@ -604,7 +604,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-white font-semibold">Rajesh Kumar</h4>
-                  <p className="text-white/70 text-sm">Business Executive</p>
+                  <p className="text-white/70 text-sm">Sambalpur</p>
                 </div>
               </div>
               <p className="text-white/90 italic">"{currentLang.testimonial1}"</p>
@@ -625,7 +625,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-white font-semibold">Priya Sharma</h4>
-                  <p className="text-white/70 text-sm">Teacher</p>
+                  <p className="text-white/70 text-sm">Cuttack</p>
                 </div>
               </div>
               <p className="text-white/90 italic">"{currentLang.testimonial2}"</p>
@@ -646,7 +646,7 @@ export default function HomePage({ currentLanguage }: HomePageProps) {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-white font-semibold">Amit Patel</h4>
-                  <p className="text-white/70 text-sm">Software Engineer</p>
+                  <p className="text-white/70 text-sm">Bhubaneswar</p>
                 </div>
               </div>
               <p className="text-white/90 italic">"{currentLang.testimonial3}"</p>

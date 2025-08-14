@@ -147,7 +147,7 @@ export default function SignInPage() {
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <Image
-                  src="/images/nandighosh-logo-updated.png"
+                  src="/images/nandighosh-logo.png"
                   alt="Nandighosh Logo"
                   width={80}
                   height={80}

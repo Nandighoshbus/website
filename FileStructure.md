@@ -85,7 +85,6 @@ components/
 │   ├── Footer.tsx
 │   ├── Layout.tsx
 │   ├── Navbar.tsx
-│   ├── SimpleFooter.tsx
 │   └── SimpleNavbar.tsx
 ├── pages/
 │   ├── AboutPage.tsx
