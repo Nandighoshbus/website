@@ -1,253 +1,218 @@
-# Nandighosh Bus Service - File Structure
+-- Local MySQL Database Setup for Nandighosh Bus Service
+-- Run this script after installing MySQL locally
 
-## Root Directory
-```
-Bus service/
-├── .env.local
-├── .git/
-├── .gitignore
-├── .next/
-├── .vscode/
-├── components.json
-├── FileStructure.md
-├── MULTI_USER_AUTH_GUIDE.md
-├── next-env.d.ts
-├── next.config.mjs
-├── node_modules/
-├── package-lock.json
-├── package.json
-├── PHONE_NUMBER_FIX.md
-├── pnpm-lock.yaml
-├── postcss.config.mjs
-├── README.md
-├── SETUP.md
-├── tailwind.config.ts
-├── tsconfig.json
-├── app/
-├── backend/
-├── components/
-├── hooks/
-├── lib/
-├── public/
-├── scripts/
-└── styles/
-```
+-- (Database selection is managed by your hosting control panel. Do not include CREATE DATABASE or USE statements.)
+-- The following tables will be created in the selected database.
 
-## App Directory (Next.js App Router)
-```
-app/
-├── about/
-│   └── page.tsx
-├── admin/
-│   └── signup/
-├── agent/
-│   ├── login/
-│   ├── register/
-│   └── signup/
-├── assets/
-│   ├── bus-fleet.jpg
-│   ├── nandighosh-logo-updated.png
-│   ├── nandighosh-logo.png
-│   └── premium-bus.jpg
-├── booking/
-│   └── page.tsx
-├── contact/
-│   └── page.tsx
-├── features/
-│   └── page.tsx
-├── offers/
-│   └── page.tsx
-├── routes/
-│   └── page.tsx
-├── signin/
-│   └── page.tsx
-├── theme/
-│   └── page.tsx
-├── error.tsx
-├── global-error.tsx
-├── globals.css
-├── imageImports.ts
-├── layout.tsx
-├── loading.tsx
-├── not-found.tsx
-└── page.tsx
-```
+-- Users table (hybrid Supabase + MySQL)
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(50) PRIMARY KEY,
+    supabase_id VARCHAR(255) UNIQUE,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    full_name VARCHAR(255),
+    password_hash VARCHAR(255), -- Optional for hybrid auth
+    role ENUM('customer', 'agent', 'admin') DEFAULT 'customer',
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_phone (phone),
+    INDEX idx_supabase_id (supabase_id),
+    INDEX idx_role (role)
+);
 
-## Components Directory
-```
-components/
-├── context/
-│   ├── AuthContext.tsx
-│   └── LanguageContext.tsx
-├── layout/
-│   ├── ClientLayout.tsx
-│   ├── ClientRootLayout.tsx
-│   ├── Footer.tsx
-│   ├── Layout.tsx
-│   ├── Navbar.tsx
-│   └── SimpleNavbar.tsx
-├── pages/
-│   ├── AboutPage.tsx
-│   ├── AdminSignUpPage.tsx
-│   ├── AgentLoginPage.tsx
-│   ├── AgentRegisterPage.tsx
-│   ├── AgentSignUpPage.tsx
-│   ├── BookingPage.tsx
-│   ├── ContactPage.tsx
-│   ├── FeaturesPage.tsx
-│   ├── HomePage.tsx
-│   ├── OffersPage.tsx
-│   ├── RoutesPage.tsx
-│   ├── SignInPage.tsx
-│   └── ThemePage.tsx
-├── ui/
-│   ├── accordion.tsx
-│   ├── alert-dialog.tsx
-│   ├── alert.tsx
-│   ├── aspect-ratio.tsx
-│   ├── avatar.tsx
-│   ├── BackgroundParticles.tsx
-│   ├── badge.tsx
-│   ├── breadcrumb.tsx
-│   ├── button.tsx
-│   ├── calendar.tsx
-│   ├── card.tsx
-│   ├── carousel.tsx
-│   ├── chart.tsx
-│   ├── checkbox.tsx
-│   ├── collapsible.tsx
-│   ├── command.tsx
-│   ├── context-menu.tsx
-│   ├── dialog.tsx
-│   ├── drawer.tsx
-│   ├── dropdown-menu.tsx
-│   ├── form.tsx
-│   ├── hover-card.tsx
-│   ├── input-otp.tsx
-│   ├── input.tsx
-│   ├── label.tsx
-│   ├── menubar.tsx
-│   ├── navigation-menu.tsx
-│   ├── pagination.tsx
-│   ├── popover.tsx
-│   ├── progress.tsx
-│   ├── radio-group.tsx
-│   ├── resizable.tsx
-│   ├── RouteMap.tsx
-│   ├── scroll-area.tsx
-│   ├── select.tsx
-│   ├── separator.tsx
-│   ├── sheet.tsx
-│   ├── sidebar.tsx
-│   ├── skeleton.tsx
-│   ├── slider.tsx
-│   ├── sonner.tsx
-│   ├── switch.tsx
-│   ├── table.tsx
-│   ├── tabs.tsx
-│   ├── textarea.tsx
-│   ├── toast.tsx
-│   ├── toaster.tsx
-│   ├── toggle-group.tsx
-│   ├── toggle.tsx
-│   ├── tooltip.tsx
-│   ├── use-mobile.tsx
-│   └── use-toast.ts
-└── theme-provider.tsx
-```
+-- User profiles table
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    date_of_birth DATE,
+    gender ENUM('male', 'female', 'other'),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    pincode VARCHAR(10),
+    emergency_contact VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_city (city)
+);
 
-## Backend Directory
-```
-backend/
-├── database/
-│   ├── fix-user-profiles.sql
-│   ├── multi-user-auth-schema.sql
-│   ├── sample-data.sql
-│   └── schema.sql
-├── dist/
-├── node_modules/
-├── src/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── types/
-│   ├── utils/
-│   └── server.ts
-├── .env
-├── .env.example
-├── .gitignore
-├── nodemon.json
-├── package-lock.json
-├── package.json
-├── README.md
-├── setup.bat
-├── setup.sh
-└── tsconfig.json
-```
+-- Buses table
+CREATE TABLE IF NOT EXISTS buses (
+    id VARCHAR(50) PRIMARY KEY,
+    bus_number VARCHAR(20) UNIQUE NOT NULL,
+    bus_type ENUM('AC', 'Non-AC', 'Sleeper', 'Semi-Sleeper', 'Luxury') NOT NULL,
+    capacity INT NOT NULL,
+    amenities JSON,
+    status ENUM('active', 'maintenance', 'retired') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_bus_number (bus_number),
+    INDEX idx_status (status),
+    INDEX idx_bus_type (bus_type)
+);
 
-## Public Directory
-```
-public/
-├── images/
-├── test-images/
-├── vdo/
-├── favicon.ico
-├── favicon-16x16.png
-├── favicon-32x32.png
-├── placeholder-logo.png
-├── placeholder-logo.svg
-├── placeholder-user.jpg
-├── placeholder.jpg
-├── placeholder.svg
-├── site.webmanifest
-└── test-images.html
-```
+-- Routes table
+CREATE TABLE IF NOT EXISTS routes (
+    id VARCHAR(50) PRIMARY KEY,
+    route_name VARCHAR(255) NOT NULL,
+    source VARCHAR(100) NOT NULL,
+    destination VARCHAR(100) NOT NULL,
+    distance DECIMAL(8,2),
+    duration TIME,
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_source_dest (source, destination),
+    INDEX idx_status (status),
+    INDEX idx_route_name (route_name)
+);
 
-## Other Directories
-```
-hooks/
-├── use-mobile.tsx
-└── use-toast.ts
+-- Route stops table
+CREATE TABLE IF NOT EXISTS route_stops (
+    id VARCHAR(50) PRIMARY KEY,
+    route_id VARCHAR(50) NOT NULL,
+    stop_name VARCHAR(100) NOT NULL,
+    stop_order INT NOT NULL,
+    arrival_time TIME,
+    departure_time TIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE,
+    INDEX idx_route_id (route_id),
+    INDEX idx_stop_order (route_id, stop_order)
+);
 
-lib/
-├── supabase.ts
-├── theme.ts
-└── utils.ts
+-- Bus schedules table
+CREATE TABLE IF NOT EXISTS bus_schedules (
+    id VARCHAR(50) PRIMARY KEY,
+    bus_id VARCHAR(50) NOT NULL,
+    route_id VARCHAR(50) NOT NULL,
+    departure_time TIME NOT NULL,
+    arrival_time TIME NOT NULL,
+    fare DECIMAL(10,2) NOT NULL,
+    available_seats INT NOT NULL,
+    status ENUM('scheduled', 'running', 'completed', 'cancelled') DEFAULT 'scheduled',
+    schedule_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (bus_id) REFERENCES buses(id) ON DELETE CASCADE,
+    FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE,
+    INDEX idx_schedule_date (schedule_date),
+    INDEX idx_route_date (route_id, schedule_date),
+    INDEX idx_status (status)
+);
 
-scripts/
-└── validate-protection.js
+-- Bookings table
+CREATE TABLE IF NOT EXISTS bookings (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    schedule_id VARCHAR(50) NOT NULL,
+    booking_date DATE NOT NULL,
+    total_passengers INT NOT NULL,
+    total_fare DECIMAL(10,2) NOT NULL,
+    booking_status ENUM('confirmed', 'cancelled', 'completed') DEFAULT 'confirmed',
+    payment_status ENUM('pending', 'paid', 'refunded', 'failed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (schedule_id) REFERENCES bus_schedules(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_schedule_id (schedule_id),
+    INDEX idx_booking_date (booking_date),
+    INDEX idx_booking_status (booking_status)
+);
 
-styles/
-└── globals.css
-```
+-- Booking passengers table
+CREATE TABLE IF NOT EXISTS booking_passengers (
+    id VARCHAR(50) PRIMARY KEY,
+    booking_id VARCHAR(50) NOT NULL,
+    passenger_name VARCHAR(100) NOT NULL,
+    passenger_age INT NOT NULL,
+    passenger_gender ENUM('male', 'female', 'other') NOT NULL,
+    seat_number VARCHAR(10),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    INDEX idx_booking_id (booking_id)
+);
 
-## Key Files Description
+-- Payments table
+CREATE TABLE IF NOT EXISTS payments (
+    id VARCHAR(50) PRIMARY KEY,
+    booking_id VARCHAR(50) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_method ENUM('card', 'upi', 'netbanking', 'wallet', 'cash') NOT NULL,
+    payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+    transaction_id VARCHAR(100),
+    payment_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    INDEX idx_booking_id (booking_id),
+    INDEX idx_payment_status (payment_status),
+    INDEX idx_transaction_id (transaction_id)
+);
 
-### Configuration Files
-- **package.json** - Project dependencies and scripts
-- **next.config.mjs** - Next.js configuration
-- **tailwind.config.ts** - Tailwind CSS configuration
-- **tsconfig.json** - TypeScript configuration
-- **components.json** - UI components configuration
+-- Agents table
+CREATE TABLE IF NOT EXISTS agents (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20) UNIQUE NOT NULL,
+    role ENUM('agent', 'supervisor', 'manager') DEFAULT 'agent',
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_phone (phone),
+    INDEX idx_status (status)
+);
 
-### Environment Files
-- **.env.local** - Local environment variables (frontend)
-- **backend/.env** - Backend environment variables
+-- Audit logs table
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50),
+    action ENUM('CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT') NOT NULL,
+    table_name VARCHAR(50) NOT NULL,
+    record_id VARCHAR(50),
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_action (action),
+    INDEX idx_table_name (table_name),
+    INDEX idx_created_at (created_at)
+);
 
-### Documentation Files
-- **README.md** - Project documentation
-- **SETUP.md** - Setup instructions
-- **MULTI_USER_AUTH_GUIDE.md** - Authentication guide
-- **PHONE_NUMBER_FIX.md** - Phone number fix documentation
-- **FileStructure.md** - This file structure documentation
+-- Insert sample data for testing
+INSERT INTO users (id, email, phone, password_hash, role, is_verified) VALUES
+('550e8400-e29b-41d4-a716-446655440000', 'admin@nandighosh.com', '+91-9876543210', '$2b$10$example_hash', 'admin', TRUE),
+('550e8400-e29b-41d4-a716-446655440001', 'customer@example.com', '+91-9876543211', '$2b$10$example_hash', 'customer', TRUE);
 
-### Main Application Files
-- **app/layout.tsx** - Root layout component
-- **app/page.tsx** - Home page component
-- **app/globals.css** - Global styles
-- **backend/src/server.ts** - Backend server entry point
+INSERT INTO buses (id, bus_number, bus_type, capacity, amenities, status) VALUES
+('bus-550e8400-e29b-41d4-a716-446655440000', 'OD-01-1234', 'AC', 40, '["WiFi", "Charging Port", "Entertainment"]', 'active'),
+('bus-550e8400-e29b-41d4-a716-446655440001', 'OD-01-1235', 'Non-AC', 45, '["Charging Port"]', 'active');
 
-This structure represents a full-stack Next.js application with a separate backend API, comprehensive UI components, and proper organization for a bus service booking system.
+INSERT INTO routes (id, route_name, source, destination, distance, duration, status) VALUES
+('route-550e8400-e29b-41d4-a716-446655440000', 'Bhubaneswar to Cuttack Express', 'Bhubaneswar', 'Cuttack', 30.5, '01:30:00', 'active'),
+('route-550e8400-e29b-41d4-a716-446655440001', 'Bhubaneswar to Puri Express', 'Bhubaneswar', 'Puri', 65.0, '02:00:00', 'active');
+
+INSERT INTO bus_schedules (id, bus_id, route_id, departure_time, arrival_time, fare, available_seats, schedule_date) VALUES
+('schedule-550e8400-e29b-41d4-a716-446655440000', 'bus-550e8400-e29b-41d4-a716-446655440000', 'route-550e8400-e29b-41d4-a716-446655440000', '08:00:00', '09:30:00', 150.00, 40, CURDATE()),
+('schedule-550e8400-e29b-41d4-a716-446655440001', 'bus-550e8400-e29b-41d4-a716-446655440001', 'route-550e8400-e29b-41d4-a716-446655440001', '10:00:00', '12:00:00', 200.00, 45, CURDATE());
+
+-- Create indexes for better performance
+CREATE INDEX idx_users_created_at ON users(created_at);
+CREATE INDEX idx_bookings_created_at ON bookings(created_at);
+CREATE INDEX idx_schedules_departure ON bus_schedules(departure_time);
+
+SHOW TABLES;
+SELECT 'Database setup completed successfully!' as status;

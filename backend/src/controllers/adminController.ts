@@ -1,507 +1,265 @@
+
 import { Request, Response } from 'express';
-import { supabaseAdmin } from '../config/supabase';
+import { findMany, findOne, updateOne, deleteOne, insertOne } from '../config/database';
 import { AppError } from '../middleware/errorHandler';
 import { ApiResponse } from '../types';
 
 // User Management
+// User Management
 export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
-  const { data: users, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch users', 500, 'DATABASE_ERROR');
+  try {
+    const users = await findMany('user_profiles', {}, { orderBy: 'created_at', orderDirection: 'DESC' });
+    res.status(200).json({
+      success: true,
+      message: 'Users retrieved successfully',
+      data: users
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch users', error: error.message });
   }
-
-  const response: ApiResponse<any[]> = {
-    success: true,
-    message: 'Users retrieved successfully',
-    data: users || []
-  };
-
-  res.status(200).json(response);
 };
 
-export const getUserById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { data: user, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !user) {
-    throw new AppError('User not found', 404, 'USER_NOT_FOUND');
-  }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'User retrieved successfully',
-    data: user
-  };
-
-  res.status(200).json(response);
-};
-
-export const updateUser = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  const { data: user, error } = await supabaseAdmin
-    .from('user_profiles')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to update user', 500, 'DATABASE_ERROR');
-  }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'User updated successfully',
-    data: user
-  };
-
-  res.status(200).json(response);
-};
-
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  // First delete from user_profiles
-  const { error: profileError } = await supabaseAdmin
-    .from('user_profiles')
-    .delete()
-    .eq('id', id);
-
-  if (profileError) {
-    throw new AppError('Failed to delete user profile', 500, 'DATABASE_ERROR');
-  }
-
-  // Then delete from auth.users
-  if (id) {
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
-
-    if (authError) {
-      console.warn('Failed to delete auth user:', authError);
-    }
-  }
-
-  const response: ApiResponse<null> = {
-    success: true,
-    message: 'User deleted successfully',
-    data: null
-  };
-
-  res.status(200).json(response);
-};
-
-export const updateUserStatus = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const { is_active } = req.body;
-
-  const { data: user, error } = await supabaseAdmin
-    .from('user_profiles')
-    .update({
-      is_active,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to update user status', 500, 'DATABASE_ERROR');
-  }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: `User ${is_active ? 'activated' : 'deactivated'} successfully`,
-    data: user
-  };
-
-  res.status(200).json(response);
-};
 
 // Bus Management
-export const getAllBuses = async (_req: Request, res: Response): Promise<void> => {
-  const { data: buses, error } = await supabaseAdmin
-    .from('buses')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch buses', 500, 'DATABASE_ERROR');
-  }
-
-  const response: ApiResponse<any[]> = {
-    success: true,
-    message: 'Buses retrieved successfully',
-    data: buses || []
-  };
-
-  res.status(200).json(response);
-};
-
-export const createBus = async (req: Request, res: Response): Promise<void> => {
-  const busData = req.body;
-
-  const { data: bus, error } = await supabaseAdmin
-    .from('buses')
-    .insert([{
-      ...busData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }])
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to create bus', 500, 'DATABASE_ERROR');
-  }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Bus created successfully',
-    data: bus
-  };
-
-  res.status(201).json(response);
-};
-
 export const getBusById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { data: bus, error } = await supabaseAdmin
-    .from('buses')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !bus) {
-    throw new AppError('Bus not found', 404, 'BUS_NOT_FOUND');
+  try {
+    const { id } = req.params;
+    const bus = await findOne('buses', { id });
+    if (!bus) {
+      throw new AppError('Bus not found', 404, 'BUS_NOT_FOUND');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Bus retrieved successfully',
+      data: bus
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Bus retrieved successfully',
-    data: bus
-  };
-
-  res.status(200).json(response);
 };
 
 export const updateBus = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  const { data: bus, error } = await supabaseAdmin
-    .from('buses')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to update bus', 500, 'DATABASE_ERROR');
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const result = await updateOne('buses', { ...updateData, updated_at: new Date() }, { id });
+    if (result.affectedRows === 0) {
+      throw new AppError('Failed to update bus', 500, 'DATABASE_ERROR');
+    }
+    const bus = await findOne('buses', { id });
+    res.status(200).json({
+      success: true,
+      message: 'Bus updated successfully',
+      data: bus
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Bus updated successfully',
-    data: bus
-  };
-
-  res.status(200).json(response);
-};
-
-export const deleteBus = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { error } = await supabaseAdmin
-    .from('buses')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new AppError('Failed to delete bus', 500, 'DATABASE_ERROR');
-  }
-
-  const response: ApiResponse<null> = {
-    success: true,
-    message: 'Bus deleted successfully',
-    data: null
-  };
-
-  res.status(200).json(response);
 };
 
 // Route Management
 export const getAllRoutes = async (_req: Request, res: Response): Promise<void> => {
-  const { data: routes, error } = await supabaseAdmin
-    .from('routes')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch routes', 500, 'DATABASE_ERROR');
+  try {
+    const routes = await findMany('routes', {}, { orderBy: 'created_at', orderDirection: 'DESC' });
+    // Map DB columns to frontend property names if needed
+    const mappedRoutes = routes.map((route: any) => ({
+      id: route.id,
+      route_name: route.route_name,
+      from: route.source, // frontend expects 'from'
+      to: route.destination, // frontend expects 'to'
+      duration: route.duration ? route.duration.toString() : '',
+      // If you have fare, frequency, bus_type, popularity columns, map them here. Otherwise, leave as undefined or add logic to join with schedules/buses if needed.
+      fare: route.fare, // only if present in your schema
+      frequency: route.frequency, // only if present in your schema
+      bus_type: route.bus_type, // only if present in your schema
+      popularity: route.popularity, // only if present in your schema
+      status: route.status,
+      created_at: route.created_at,
+      updated_at: route.updated_at
+    }));
+    res.status(200).json({
+      success: true,
+      message: 'Routes retrieved successfully',
+      data: mappedRoutes
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch routes', error: error.message });
   }
-
-  const response: ApiResponse<any[]> = {
-    success: true,
-    message: 'Routes retrieved successfully',
-    data: routes || []
-  };
-
-  res.status(200).json(response);
 };
 
 export const createRoute = async (req: Request, res: Response): Promise<void> => {
-  const routeData = req.body;
-
-  const { data: route, error } = await supabaseAdmin
-    .from('routes')
-    .insert([{
+  try {
+    const routeData = req.body;
+    const now = new Date();
+    const result = await insertOne('routes', {
       ...routeData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }])
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to create route', 500, 'DATABASE_ERROR');
+      created_at: now,
+      updated_at: now
+    });
+    if (!result.insertId) {
+      throw new AppError('Failed to create route', 500, 'DATABASE_ERROR');
+    }
+    const route = await findOne('routes', { id: result.insertId });
+    res.status(201).json({
+      success: true,
+      message: 'Route created successfully',
+      data: route
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Route created successfully',
-    data: route
-  };
-
-  res.status(201).json(response);
 };
 
 export const getRouteById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { data: route, error } = await supabaseAdmin
-    .from('routes')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !route) {
-    throw new AppError('Route not found', 404, 'ROUTE_NOT_FOUND');
+  try {
+    const { id } = req.params;
+    const route = await findOne('routes', { id });
+    if (!route) {
+      throw new AppError('Route not found', 404, 'ROUTE_NOT_FOUND');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Route retrieved successfully',
+      data: route
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Route retrieved successfully',
-    data: route
-  };
-
-  res.status(200).json(response);
 };
 
 export const updateRoute = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  const { data: route, error } = await supabaseAdmin
-    .from('routes')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to update route', 500, 'DATABASE_ERROR');
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const result = await updateOne('routes', { ...updateData, updated_at: new Date() }, { id });
+    if (result.affectedRows === 0) {
+      throw new AppError('Failed to update route', 500, 'DATABASE_ERROR');
+    }
+    const route = await findOne('routes', { id });
+    res.status(200).json({
+      success: true,
+      message: 'Route updated successfully',
+      data: route
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Route updated successfully',
-    data: route
-  };
-
-  res.status(200).json(response);
 };
 
 export const deleteRoute = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { error } = await supabaseAdmin
-    .from('routes')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    throw new AppError('Failed to delete route', 500, 'DATABASE_ERROR');
+  try {
+    const { id } = req.params;
+    const result = await deleteOne('routes', { id });
+    if (result.affectedRows === 0) {
+      throw new AppError('Failed to delete route', 500, 'DATABASE_ERROR');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Route deleted successfully',
+      data: null
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<null> = {
-    success: true,
-    message: 'Route deleted successfully',
-    data: null
-  };
-
-  res.status(200).json(response);
 };
 
 // Booking Management
 export const getAllBookings = async (_req: Request, res: Response): Promise<void> => {
-  const { data: bookings, error } = await supabaseAdmin
-    .from('bookings')
-    .select(`
-      *,
-      user_profiles(full_name, email, phone),
-      schedules(departure_time, arrival_time),
-      routes(route_name, origin_city, destination_city),
-      buses(bus_number, bus_type)
-    `)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch bookings', 500, 'DATABASE_ERROR');
+  try {
+    // For simplicity, fetch only bookings table. For joins, you can use a custom query with executeQuery.
+    const bookings = await findMany('bookings', {}, { orderBy: 'created_at', orderDirection: 'DESC' });
+    res.status(200).json({
+      success: true,
+      message: 'Bookings retrieved successfully',
+      data: bookings
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch bookings', error: error.message });
   }
-
-  const response: ApiResponse<any[]> = {
-    success: true,
-    message: 'Bookings retrieved successfully',
-    data: bookings || []
-  };
-
-  res.status(200).json(response);
 };
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { data: booking, error } = await supabaseAdmin
-    .from('bookings')
-    .select(`
-      *,
-      user_profiles(full_name, email, phone),
-      schedules(departure_time, arrival_time),
-      routes(route_name, origin_city, destination_city),
-      buses(bus_number, bus_type)
-    `)
-    .eq('id', id)
-    .single();
-
-  if (error || !booking) {
-    throw new AppError('Booking not found', 404, 'BOOKING_NOT_FOUND');
+  try {
+    const { id } = req.params;
+    const booking = await findOne('bookings', { id });
+    if (!booking) {
+      throw new AppError('Booking not found', 404, 'BOOKING_NOT_FOUND');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Booking retrieved successfully',
+      data: booking
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Booking retrieved successfully',
-    data: booking
-  };
-
-  res.status(200).json(response);
 };
 
 export const updateBooking = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  const { data: booking, error } = await supabaseAdmin
-    .from('bookings')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to update booking', 500, 'DATABASE_ERROR');
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const result = await updateOne('bookings', { ...updateData, updated_at: new Date() }, { id });
+    if (result.affectedRows === 0) {
+      throw new AppError('Failed to update booking', 500, 'DATABASE_ERROR');
+    }
+    const booking = await findOne('bookings', { id });
+    res.status(200).json({
+      success: true,
+      message: 'Booking updated successfully',
+      data: booking
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Booking updated successfully',
-    data: booking
-  };
-
-  res.status(200).json(response);
 };
 
 export const cancelBooking = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
-  const { data: booking, error } = await supabaseAdmin
-    .from('bookings')
-    .update({
-      status: 'cancelled',
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new AppError('Failed to cancel booking', 500, 'DATABASE_ERROR');
+  try {
+    const { id } = req.params;
+    const result = await updateOne('bookings', { status: 'cancelled', updated_at: new Date() }, { id });
+    if (result.affectedRows === 0) {
+      throw new AppError('Failed to cancel booking', 500, 'DATABASE_ERROR');
+    }
+    const booking = await findOne('bookings', { id });
+    res.status(200).json({
+      success: true,
+      message: 'Booking cancelled successfully',
+      data: booking
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
-
-  const response: ApiResponse<any> = {
-    success: true,
-    message: 'Booking cancelled successfully',
-    data: booking
-  };
-
-  res.status(200).json(response);
 };
+
 
 // Dashboard Statistics
 export const getDashboardStatistics = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const [usersResult, busesResult, routesResult, bookingsResult] = await Promise.all([
-      supabaseAdmin.from('user_profiles').select('id, role, is_active'),
-      supabaseAdmin.from('buses').select('id, status'),
-      supabaseAdmin.from('routes').select('id, is_active'),
-      supabaseAdmin.from('bookings').select('id, status, created_at, total_amount')
+    const [users, buses, routes, bookings] = await Promise.all([
+      findMany('user_profiles'),
+      findMany('buses'),
+      findMany('routes'),
+      findMany('bookings')
     ]);
-
     const stats = {
-      totalUsers: usersResult.data?.length || 0,
-      activeUsers: usersResult.data?.filter(u => u.is_active).length || 0,
-      totalBuses: busesResult.data?.length || 0,
-      activeBuses: busesResult.data?.filter(b => b.status === 'active').length || 0,
-      totalRoutes: routesResult.data?.length || 0,
-      activeRoutes: routesResult.data?.filter(r => r.is_active).length || 0,
-      totalBookings: bookingsResult.data?.length || 0,
-      todayBookings: bookingsResult.data?.filter(b => 
-        new Date(b.created_at).toDateString() === new Date().toDateString()
-      ).length || 0,
-      totalRevenue: bookingsResult.data?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0
+      totalUsers: users.length,
+      activeUsers: users.filter((u: any) => u.is_active).length,
+      totalBuses: buses.length,
+      activeBuses: buses.filter((b: any) => b.status === 'active').length,
+      totalRoutes: routes.length,
+      activeRoutes: routes.filter((r: any) => r.is_active).length,
+      totalBookings: bookings.length,
+      todayBookings: bookings.filter((b: any) => new Date(b.created_at).toDateString() === new Date().toDateString()).length,
+      totalRevenue: bookings.reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0)
     };
-
-    const response: ApiResponse<any> = {
+    res.status(200).json({
       success: true,
       message: 'Statistics retrieved successfully',
       data: stats
-    };
-
-    res.status(200).json(response);
-  } catch (error) {
-    throw new AppError('Failed to fetch statistics', 500, 'DATABASE_ERROR');
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch statistics', error: error.message });
   }
 };
 

@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
 
 // Create Supabase client for frontend
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -16,10 +12,18 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
+// Runtime check for production usage
+const checkSupabaseConfig = () => {
+  if (typeof window !== 'undefined' && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
+    console.warn('Missing Supabase environment variables. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  }
+}
+
 // Authentication helper functions
 export const auth = {
   // Sign up new user
   signUp: async (email: string, password: string, userData: { full_name: string, phone: string }) => {
+    checkSupabaseConfig()
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -36,6 +40,7 @@ export const auth = {
 
   // Sign in user
   signIn: async (email: string, password: string) => {
+    checkSupabaseConfig()
     console.log('Auth signIn called with:', { email, password: '***' })
     try {
       const { data, error } = await supabase.auth.signInWithPassword({

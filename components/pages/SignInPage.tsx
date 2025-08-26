@@ -9,7 +9,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { THEME_CLASSES } from "@/lib/theme"
 import { useAuth } from "@/components/context/AuthContext"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { db } from "@/lib/supabase"
 
 export default function SignInPage() {
@@ -27,13 +27,26 @@ export default function SignInPage() {
 
   const { signIn, signUp, user, loading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Redirect if already logged in
   useEffect(() => {
     if (user && !authLoading) {
+      const redirect = searchParams.get('redirect')
+      if (redirect === 'payment') {
+        // Check if there's pending booking data
+        const pendingBooking = sessionStorage.getItem('pendingBooking')
+        if (pendingBooking) {
+          const routeData = JSON.parse(pendingBooking)
+          const params = new URLSearchParams(routeData)
+          sessionStorage.removeItem('pendingBooking')
+          router.push(`/payment?${params.toString()}`)
+          return
+        }
+      }
       router.push('/')
     }
-  }, [user, router, authLoading])
+  }, [user, router, authLoading, searchParams])
 
   // Show loading spinner while checking auth state
   if (authLoading) {

@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { auth } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Navigation, MapPin, QrCode, Calendar, Users, ArrowRight, Clock, Shield, Smartphone, ArrowUpDown, Wind, Bed, IndianRupee, Bus } from "lucide-react"
-
-// API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+import { supabase } from "@/lib/supabase"
 
 // Types matching actual database structure
 interface BusScheduleResult {
@@ -160,24 +160,16 @@ const languages = {
   }
 }
 
-// Static fallback cities (used if API fails)
-const fallbackCities = [
-  "Balasore",
-  "Bhubaneswar",
-  "Cuttack",
-  "Puri", 
-  "Berhampur",
-  "Sambalpur",
-  "Kolkata",
-  "Rourkela",
-  "Koraput"
-]
+// Empty initial cities - will be populated from database
+const fallbackCities: string[] = []
 
 interface BookingPageProps {
   currentLanguage: string
 }
 
 export default function BookingPage({ currentLanguage }: BookingPageProps) {
+  const router = useRouter()
+  
   // State management
   const [formData, setFormData] = useState({
     from: '',
@@ -195,74 +187,245 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
   const [loading, setLoading] = useState(false)
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  // Handle route selection and navigation to payment page
+  const handleSelectRoute = async (schedule: BusScheduleResult) => {
+    // Check if user is authenticated
+    if (!user) {
+      // Store the selected route data in sessionStorage for after login
+      const routeData = {
+        scheduleId: schedule.id,
+        busName: schedule.bus.bus_name,
+        busNumber: schedule.bus.bus_number,
+        busType: schedule.bus.bus_type,
+        route: schedule.route.name,
+        from: formData.from,
+        to: formData.to,
+        date: formData.date,
+        departureTime: schedule.departure_time,
+        arrivalTime: schedule.arrival_time,
+        duration: schedule.route.estimated_duration,
+        distance: `${schedule.route.distance_km} km`,
+        passengers: formData.passengers,
+        baseFare: schedule.base_fare.toString(),
+        totalFare: (schedule.base_fare * parseInt(formData.passengers)).toString(),
+        availableSeats: schedule.available_seats.toString()
+      }
+      
+      sessionStorage.setItem('pendingBooking', JSON.stringify(routeData))
+      router.push('/signin?redirect=payment')
+      return
+    }
+
+    // User is authenticated, proceed to payment
+    const params = new URLSearchParams({
+      scheduleId: schedule.id,
+      busName: schedule.bus.bus_name,
+      busNumber: schedule.bus.bus_number,
+      busType: schedule.bus.bus_type,
+      route: schedule.route.name,
+      from: formData.from,
+      to: formData.to,
+      date: formData.date,
+      departureTime: schedule.departure_time,
+      arrivalTime: schedule.arrival_time,
+      duration: schedule.route.estimated_duration,
+      distance: `${schedule.route.distance_km} km`,
+      passengers: formData.passengers,
+      baseFare: schedule.base_fare.toString(),
+      totalFare: (schedule.base_fare * parseInt(formData.passengers)).toString(),
+      availableSeats: schedule.available_seats.toString()
+    })
+    
+    router.push(`/payment?${params.toString()}`)
+  }
 
   const currentLang = languages[currentLanguage as keyof typeof languages]
 
-  // Fetch cities from backend on component mount
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { user } = await auth.getCurrentUser()
+        setUser(user)
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        setUser(null)
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    checkAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+      setAuthLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Fetch cities from Supabase on component mount
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/routes/search/cities`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && Array.isArray(data.data)) {
-            setCities(data.data)
-          }
+        // Get unique cities from routes table
+        const { data: routes, error } = await supabase
+          .from('routes')
+          .select('source_city, destination_city')
+          .eq('is_active', true)
+        
+        if (error) throw error
+        
+        if (routes) {
+          // Extract unique cities from source and destination
+          const citySet = new Set<string>()
+          routes.forEach(route => {
+            if (route.source_city) citySet.add(route.source_city)
+            if (route.destination_city) citySet.add(route.destination_city)
+          })
+          
+          const uniqueCities = Array.from(citySet).sort()
+          setCities(uniqueCities)
         }
       } catch (error) {
-        console.warn('Failed to fetch cities from API, using fallback:', error)
-        setCities(fallbackCities)
+        console.error('Failed to fetch cities from Supabase:', error)
+        setCities([])
       }
     }
 
     fetchCities()
   }, [])
 
-  // API function to search bus schedules
+  // Supabase function to search bus schedules
   const searchRoutes = async (from: string, to: string, date: string) => {
     try {
       setSearching(true)
       setError(null)
 
-      // Search for available schedules using the new API
-      const searchParams = new URLSearchParams({
-        source_city: from,
-        destination_city: to,
-        departure_date: date,
-        min_seats: formData.passengers
-      })
+      // Get day name from the selected date
+      const selectedDate = new Date(date)
+      const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+
+      // Build the query
+      let query = supabase
+        .from('bus_schedules')
+        .select(`
+          id,
+          bus_id,
+          route_id,
+          departure_date,
+          departure_time,
+          arrival_date,
+          arrival_time,
+          base_fare,
+          available_seats,
+          booked_seats,
+          blocked_seats,
+          is_active,
+          buses!inner (
+            id,
+            bus_number,
+            bus_name,
+            bus_type,
+            total_seats,
+            amenities,
+            is_active
+          ),
+          routes!inner (
+            id,
+            route_code,
+            name,
+            source_city,
+            destination_city,
+            distance_km,
+            estimated_duration,
+            base_fare,
+            is_active,
+            operating_days
+          )
+        `)
+        .eq('is_active', true)
+        .eq('buses.is_active', true)
+        .eq('routes.is_active', true)
+        .eq('routes.source_city', from)
+        .eq('routes.destination_city', to)
+        .eq('departure_date', date)
+        .gte('available_seats', parseInt(formData.passengers))
 
       // Add bus type filter if specified
-      if (formData.busType !== 'all') {
-        if (formData.busType === 'ac') {
-          searchParams.append('bus_type', 'ac')
-        } else if (formData.busType === 'normal') {
-          searchParams.append('bus_type', 'non_ac')
+      if (formData.busType === 'ac') {
+        query = query.eq('buses.bus_type', 'ac')
+      } else if (formData.busType === 'normal') {
+        query = query.eq('buses.bus_type', 'non_ac')
+      }
+
+      const { data: schedules, error } = await query.order('departure_time')
+      
+      if (error) {
+        throw new Error(`Database error: ${error.message}`)
+      }
+
+      // Filter schedules based on route operating days
+      const filteredSchedules = (schedules || []).filter((schedule: any) => {
+        const route = Array.isArray(schedule.routes) ? schedule.routes[0] : schedule.routes;
+        const operatingDays = route?.operating_days || [];
+        
+        // If no operating days specified, assume route operates all days
+        if (!operatingDays || operatingDays.length === 0) {
+          return true;
         }
-      }
+        
+        // Check if the route operates on the selected day
+        return operatingDays.includes(dayName);
+      });
 
-      const schedulesResponse = await fetch(
-        `${API_BASE_URL}/schedules/search?${searchParams.toString()}`
-      )
-      
-      if (!schedulesResponse.ok) {
-        throw new Error('Failed to fetch schedules')
-      }
-
-      const schedulesData = await schedulesResponse.json()
-      
-      if (!schedulesData.success) {
-        throw new Error(schedulesData.message || 'Failed to search schedules')
-      }
-
-      const schedules = schedulesData.data || []
-
-      // Sort by departure time
-      schedules.sort((a: BusScheduleResult, b: BusScheduleResult) => {
-        return a.departure_time.localeCompare(b.departure_time)
+      // Transform data to match expected interface
+      const transformedSchedules: BusScheduleResult[] = filteredSchedules.map((schedule: any) => {
+        const bus = Array.isArray(schedule.buses) ? schedule.buses[0] : schedule.buses;
+        const route = Array.isArray(schedule.routes) ? schedule.routes[0] : schedule.routes;
+        
+        return {
+          id: schedule.id,
+          bus_id: schedule.bus_id,
+          route_id: schedule.route_id,
+          departure_date: schedule.departure_date,
+          departure_time: schedule.departure_time,
+          arrival_date: schedule.arrival_date,
+          arrival_time: schedule.arrival_time,
+          base_fare: schedule.base_fare,
+          available_seats: schedule.available_seats,
+          booked_seats: schedule.booked_seats || [],
+          blocked_seats: schedule.blocked_seats || [],
+          is_active: schedule.is_active,
+          bus: {
+            id: bus?.id || '',
+            bus_number: bus?.bus_number || '',
+            bus_name: bus?.bus_name || '',
+            bus_type: (bus?.bus_type as 'ac' | 'non_ac' | 'sleeper' | 'semi_sleeper' | 'luxury') || 'non_ac',
+            total_seats: bus?.total_seats || 0,
+            amenities: bus?.amenities || [],
+            is_active: bus?.is_active || false
+          },
+          route: {
+            id: route?.id || '',
+            route_code: route?.route_code || '',
+            name: route?.name || '',
+            source_city: route?.source_city || '',
+            destination_city: route?.destination_city || '',
+            distance_km: route?.distance_km || 0,
+            estimated_duration: route?.estimated_duration || '',
+            base_fare: route?.base_fare || 0,
+            is_active: route?.is_active || false
+          }
+        }
       })
 
-      setSearchResults(schedules)
+      setSearchResults(transformedSchedules)
       
     } catch (error) {
       console.error('Schedule search failed:', error)
@@ -611,7 +774,10 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
                                     for {formData.passengers} passenger{parseInt(formData.passengers) > 1 ? 's' : ''}
                                   </span>
                                 </div>
-                                <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                                <Button 
+                                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                                  onClick={() => handleSelectRoute(schedule)}
+                                >
                                   Select Route
                                 </Button>
                               </div>
