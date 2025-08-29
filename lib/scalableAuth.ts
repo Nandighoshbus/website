@@ -57,7 +57,7 @@ class ScalableFrontendAuth {
   private tokenRefreshPromise: Promise<void> | null = null;
 
   constructor() {
-  this.API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+  this.API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
     this.loadFromStorage();
     this.setupTokenRefresh();
   }
@@ -157,7 +157,7 @@ class ScalableFrontendAuth {
       await this.refreshAccessToken();
     }
 
-    const url = `${this.API_BASE_URL}${endpoint}`;
+    const url = `${this.API_BASE_URL}/api/v1${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...((options.headers as Record<string, string>) || {}),

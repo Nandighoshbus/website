@@ -117,7 +117,8 @@ export default function AgentSignUpPage() {
     
     try {
       // Call agent registration API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/auth/agent/register`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+      const response = await fetch(`${baseUrl}/api/v1/auth/agent/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
