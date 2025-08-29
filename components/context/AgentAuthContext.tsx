@@ -6,6 +6,7 @@ import { jwtAuth, User } from '@/lib/jwtAuth'
 interface AgentAuthContextType {
   user: User | null
   isLoading: boolean
+  isAuthenticated: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
 }
@@ -74,6 +75,7 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     isLoading,
+    isAuthenticated: !!user,
     login,
     logout
   }

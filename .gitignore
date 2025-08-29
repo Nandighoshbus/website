@@ -21,13 +21,13 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (IMPORTANT: Never commit these!)
-# .env*
-# backend/.env*
-# .env
-# .env.local
-# .env.development.local
-# .env.test.local
-# .env.production.local
+.env*
+backend/.env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
