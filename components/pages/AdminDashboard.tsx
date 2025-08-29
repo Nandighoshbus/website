@@ -180,13 +180,14 @@ export default function AdminDashboard() {
       }
 
       // Fetch all data in parallel
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
       const [usersRes, busesRes, routesRes, bookingsRes, agentRequestsRes, agentsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/users`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/buses`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/routes`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/bookings`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agents`, { headers })
+        fetch(`${baseUrl}/api/v1/admin/users`, { headers }),
+        fetch(`${baseUrl}/api/v1/admin/buses`, { headers }),
+        fetch(`${baseUrl}/api/v1/admin/routes`, { headers }),
+        fetch(`${baseUrl}/api/v1/admin/bookings`, { headers }),
+        fetch(`${baseUrl}/api/v1/admin/agent-requests`, { headers }),
+        fetch(`${baseUrl}/api/v1/admin/agents`, { headers })
       ])
 
       // Process responses
@@ -261,7 +262,8 @@ export default function AdminDashboard() {
         }
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${getEndpoint(type)}/${id}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+      const response = await fetch(`${baseUrl}/api/v1/admin/${getEndpoint(type)}/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -420,9 +422,10 @@ ${request.reviewed_at ? `Reviewed: ${new Date(request.reviewed_at).toLocaleStrin
       }
       
       const endpoint = getEndpoint(data.type)
+      const baseUrl3 = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
       const url = isEdit 
-        ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${endpoint}/${data.id}`
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${endpoint}`
+        ? `${baseUrl3}/api/v1/admin/${endpoint}/${data.id}`
+        : `${baseUrl3}/api/v1/admin/${endpoint}`
 
       const response = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
