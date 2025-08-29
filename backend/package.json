@@ -9,7 +9,7 @@
     "dev:basic": "nodemon src/server.ts",
     "start": "node dist/server.js",
     "start:basic": "node dist/server.js",
-    "render-build": "npm install && npm run build",
+    "render-build": "npm ci && npm run build",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
