@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../middleware/errorHandler';
-import { generateTokens } from '../utils/auth';
+import { generateTokens, generateAdminTokens, comparePassword } from '../utils/auth';
 import { validateRegistration, validateLogin } from '../utils/validation';
 import { ApiResponse, AuthResponse, LoginRequest, RegisterRequest, UserProfile, UserRole } from '../types';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
@@ -183,18 +183,27 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     throw new AppError('Account is deactivated', 401, 'ACCOUNT_DEACTIVATED');
   }
 
-  // Verify password with Supabase Auth
-  const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (authError || !authData.user) {
+  // Verify password from user_profiles table (admin users may not exist in Supabase Auth)
+  if (!user.password) {
     throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
   }
 
-  // Generate tokens
-  const { accessToken, refreshToken } = generateTokens(user.id);
+  // Check if password is bcrypt hashed or plain text
+  let isPasswordValid = false;
+  if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+    // Bcrypt hashed password
+    isPasswordValid = await comparePassword(password, user.password);
+  } else {
+    // Plain text password (for testing/development)
+    isPasswordValid = password === user.password;
+  }
+  
+  if (!isPasswordValid) {
+    throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+  }
+
+  // Generate admin tokens
+  const { accessToken, refreshToken } = generateAdminTokens(user.id, user.role);
 
   // Update last login
   await supabaseAdmin

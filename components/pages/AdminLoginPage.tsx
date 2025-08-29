@@ -1,80 +1,62 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
-import { Eye, EyeOff, Lock, Shield, Mail } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { THEME_CLASSES } from "../../lib/theme"
-import { useRouter } from "next/navigation"
-import { supabase } from '../../lib/supabase'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Eye, EyeOff, Lock, Shield, Mail } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { THEME_CLASSES } from '@/lib/theme'
+import { useAdminAuth } from '@/components/context/AdminAuthContext'
+
+interface LoginFormData {
+  email: string
+  password: string
+}
 
 export default function AdminLoginPage() {
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: ''
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("")
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  })
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState<'success' | 'error'>('error')
   const router = useRouter()
+  const { login } = useAdminAuth()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const validateForm = (): string | null => {
-    if (!formData.email || !formData.password) {
-      return "Please fill in all required fields"
-    }
-    if (!formData.email.includes("@")) {
-      return "Please enter a valid email address"
-    }
-    return null
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const validationError = validateForm()
-    if (validationError) {
-      setMessage(validationError)
-      setMessageType("error")
-      return
-    }
     setLoading(true)
     setMessage("")
+
     try {
-      // Use Supabase for login
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password
-      });
-      if (error || !data.user) {
-        setMessage('Invalid email or password.')
-        setMessageType('error')
-      } else {
-        // Check role in user_metadata
-        const userRole = data.user.user_metadata?.role || data.user.role
-        if (userRole === 'admin' || userRole === 'super_admin') {
-          setMessage('Admin login successful!')
-          setMessageType('success')
-          setTimeout(() => {
-            router.push('/admin/dashboard')
-          }, 1000)
-        } else {
-          await supabase.auth.signOut()
-          setMessage('Access denied. This account does not have admin privileges.')
-          setMessageType('error')
-        }
-      }
+      console.log('AdminLoginPage: Starting login process')
+      await login(formData.email, formData.password)
+      console.log('AdminLoginPage: Login successful, redirecting...')
+      setMessage("Admin login successful!")
+      setMessageType("success")
+      
+      // Immediate redirect without delay
+      router.push("/admin/dashboard")
     } catch (error: any) {
-      setMessage(error.message || 'An error occurred during login')
-      setMessageType('error')
+      console.error('AdminLoginPage: Login failed:', error)
+      setMessage(error.message || "Invalid email or password.")
+      setMessageType("error")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (

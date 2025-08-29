@@ -9,15 +9,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { THEME_CLASSES } from "@/lib/theme"
 import { useRouter } from "next/navigation"
-import { supabase } from '@/lib/supabase'
+import { useAgentAuth } from '@/components/context/AgentAuthContext'
 
 export default function AgentLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState<"success" | "error" | "">("")
-  // Removed loginType state - this is now agent-only login
   const router = useRouter()
+  const { login } = useAgentAuth()
 
   const [formData, setFormData] = useState({
     email: "",
@@ -54,45 +54,24 @@ export default function AgentLoginPage() {
     setMessage("")
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/v1/auth/agent/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.message || 'Login failed');
-        setMessageType('error');
-        return;
-      }
-
-      if (data.success) {
-        // Store authentication data
-        localStorage.setItem('agent_token', data.data.access_token);
-        localStorage.setItem('agent_refresh_token', data.data.refresh_token);
-        localStorage.setItem('agent_user', JSON.stringify(data.data.user));
-
-        setMessage('Agent login successful!');
-        setMessageType('success');
+      console.log('Agent login attempt:', formData.email)
+      const result = await login(formData.email, formData.password)
+      
+      if (result.success) {
+        setMessage('Agent login successful!')
+        setMessageType('success')
         
         setTimeout(() => {
-          router.push('/agent/dashboard');
-        }, 1000);
+          router.push('/agent/dashboard')
+        }, 1000)
       } else {
-        setMessage(data.message || 'Login failed');
-        setMessageType('error');
+        setMessage(result.error || 'Login failed')
+        setMessageType('error')
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      setMessage('Network error. Please try again.');
-      setMessageType('error');
+      console.error('Login error:', error)
+      setMessage('Network error. Please try again.')
+      setMessageType('error')
     }
 
     setLoading(false)

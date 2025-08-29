@@ -32,8 +32,13 @@ function AdminLoginForm() {
     setError('')
 
     try {
-      await login(email, password)
-      // Redirect will happen automatically via useEffect
+      const result = await login(email, password)
+      console.log('Login successful, redirecting to dashboard...')
+      
+      // Force redirect after successful login
+      if (result.success) {
+        router.push('/admin/dashboard')
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Login failed')
     } finally {

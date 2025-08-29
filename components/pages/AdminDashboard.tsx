@@ -1,19 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, CheckCircle, Edit, Plus, Trash2, Users, Bus, MapPin, Calendar, CreditCard, UserCheck, UserPlus } from 'lucide-react'
+import { 
+  Users, 
+  Bus, 
+  Route, 
+  Calendar, 
+  UserCheck, 
+  AlertCircle, 
+  TrendingUp, 
+  DollarSign,
+  LogOut,
+  Settings,
+  Bell,
+  MapPin,
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle,
+  UserPlus
+} from 'lucide-react'
 import { useAdminAuth } from '@/components/context/AdminAuthContext'
-import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
+import { jwtAuth } from '@/lib/jwtAuth'
 
 // TypeScript interfaces
 interface User {
@@ -165,67 +184,25 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       
-      // Get auth token from session
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
-      
-      if (!token) {
-        console.error('No auth token found')
-        return
-      }
-
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-
-      // Fetch all data in parallel
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-      const [usersRes, busesRes, routesRes, bookingsRes, agentRequestsRes, agentsRes] = await Promise.all([
-        fetch(`${baseUrl}/api/v1/admin/users`, { headers }),
-        fetch(`${baseUrl}/api/v1/admin/buses`, { headers }),
-        fetch(`${baseUrl}/api/v1/admin/routes`, { headers }),
-        fetch(`${baseUrl}/api/v1/admin/bookings`, { headers }),
-        fetch(`${baseUrl}/api/v1/admin/agent-requests`, { headers }),
-        fetch(`${baseUrl}/api/v1/admin/agents`, { headers })
+      // Use JWT auth service for authenticated requests
+      const [usersData, busesData, routesData, bookingsData, agentRequestsData, agentsData] = await Promise.all([
+        jwtAuth.authenticatedRequest('admin', '/admin/users'),
+        jwtAuth.authenticatedRequest('admin', '/admin/buses'),
+        jwtAuth.authenticatedRequest('admin', '/admin/routes'),
+        jwtAuth.authenticatedRequest('admin', '/admin/bookings'),
+        jwtAuth.authenticatedRequest('admin', '/admin/agent-requests'),
+        jwtAuth.authenticatedRequest('admin', '/admin/agents')
       ])
 
-      // Process responses
-      if (usersRes.ok) {
-        const usersData = await usersRes.json()
-        setUsers(usersData.data || [])
-      }
+      // Set data from authenticated requests with proper type casting
+      setUsers((usersData as any)?.data || [])
+      setBuses((busesData as any)?.data || [])
+      setRoutes((routesData as any)?.data || [])
+      setBookings((bookingsData as any)?.data || [])
+      setAgentRequests((agentRequestsData as any)?.data || [])
+      setAgents((agentsData as any)?.data || [])
 
-      if (busesRes.ok) {
-        const busesData = await busesRes.json()
-        setBuses(busesData.data || [])
-      }
-
-      if (routesRes.ok) {
-        const routesData = await routesRes.json()
-        setRoutes(routesData.data || [])
-      }
-
-      if (bookingsRes.ok) {
-        const bookingsData = await bookingsRes.json()
-        setBookings(bookingsData.data || [])
-      }
-
-      if (agentRequestsRes.ok) {
-        const agentRequestsData = await agentRequestsRes.json()
-        setAgentRequests(agentRequestsData.data || [])
-      }
-
-      if (agentsRes.ok) {
-        const agentsData = await agentsRes.json()
-        console.log('Agents API Response:', agentsData)
-        setAgents(agentsData.data || [])
-      } else {
-        console.error('Failed to fetch agents:', agentsRes.status, agentsRes.statusText)
-        const errorData = await agentsRes.json().catch(() => ({}))
-        console.error('Agents API Error:', errorData)
-      }
-
+      console.log('All data fetched successfully via JWT auth')
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -241,8 +218,7 @@ export default function AdminDashboard() {
     if (!confirm(confirmMessage)) return
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      const token = localStorage.getItem('admin_token')
       
       if (!token) {
         console.error('No session token available')
@@ -306,8 +282,7 @@ export default function AdminDashboard() {
     const adminNotes = prompt('Add any notes for this approval (optional):') || ''
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      const token = localStorage.getItem('admin_token')
       
       if (!token) {
         alert('Authentication error. Please login again.')
@@ -346,8 +321,7 @@ export default function AdminDashboard() {
     if (!adminNotes) return
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      const token = localStorage.getItem('admin_token')
       
       if (!token) {
         alert('Authentication error. Please login again.')
@@ -401,8 +375,7 @@ ${request.reviewed_at ? `Reviewed: ${new Date(request.reviewed_at).toLocaleStrin
 
   const handleSave = async (data: any) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      const token = localStorage.getItem('admin_token')
       
       if (!token) {
         console.error('No session token available')

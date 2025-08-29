@@ -2,6 +2,8 @@
 
 import { LanguageProvider } from '@/components/context/LanguageContext'
 import { AuthProvider } from '@/components/context/AuthContext'
+import { AdminAuthProvider } from '@/components/context/AdminAuthContext'
+import { AgentAuthProvider } from '@/components/context/AgentAuthContext'
 
 interface ClientRootLayoutProps {
   children: React.ReactNode
@@ -10,9 +12,13 @@ interface ClientRootLayoutProps {
 export default function ClientRootLayout({ children }: ClientRootLayoutProps) {
   return (
     <AuthProvider>
-      <LanguageProvider>
-        {children}
-      </LanguageProvider>
+      <AdminAuthProvider>
+        <AgentAuthProvider>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </AgentAuthProvider>
+      </AdminAuthProvider>
     </AuthProvider>
   )
 }

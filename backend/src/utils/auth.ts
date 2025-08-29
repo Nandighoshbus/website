@@ -22,6 +22,31 @@ export const generateTokens = (userId: string) => {
   return { accessToken, refreshToken };
 };
 
+export const generateAdminTokens = (userId: string, role: string = 'admin') => {
+  const payload = { 
+    sub: userId, 
+    role: role,
+    type: 'admin'
+  };
+  console.log('=== ADMIN TOKEN GENERATION DEBUG ===');
+  console.log('Generating admin tokens for userId:', userId, 'role:', role);
+  console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+  console.log('JWT_REFRESH_SECRET exists:', !!process.env.JWT_REFRESH_SECRET);
+  
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_EXPIRE || '7d'
+  } as jwt.SignOptions);
+
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET!, {
+    expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d'
+  } as jwt.SignOptions);
+
+  console.log('Admin access token generated:', accessToken ? `${accessToken.substring(0, 20)}...` : 'FAILED');
+  console.log('Admin refresh token generated:', refreshToken ? `${refreshToken.substring(0, 20)}...` : 'FAILED');
+
+  return { accessToken, refreshToken };
+};
+
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
   return bcrypt.hash(password, saltRounds);

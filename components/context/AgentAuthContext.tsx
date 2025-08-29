@@ -3,17 +3,16 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { jwtAuth, User } from '@/lib/jwtAuth'
 
-interface AdminAuthContextType {
+interface AgentAuthContextType {
   user: User | null
   isLoading: boolean
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<any>
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
 }
 
-const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined)
+const AgentAuthContext = createContext<AgentAuthContextType | undefined>(undefined)
 
-export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
+export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -21,12 +20,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        if (jwtAuth.isAuthenticated('admin')) {
-          const userData = jwtAuth.getUser('admin')
-          if (userData && ['admin', 'super_admin'].includes(userData.role)) {
+        if (jwtAuth.isAuthenticated('agent')) {
+          const userData = jwtAuth.getUser('agent')
+          if (userData && userData.role === 'agent') {
             setUser(userData)
           } else {
-            jwtAuth.logout('admin')
+            jwtAuth.logout('agent')
             setUser(null)
           }
         } else {
@@ -34,7 +33,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('Error checking auth:', error)
-        jwtAuth.logout('admin')
+        jwtAuth.logout('agent')
         setUser(null)
       } finally {
         setIsLoading(false)
@@ -48,21 +47,19 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      const result = await jwtAuth.adminLogin(email, password)
-      console.log('AdminAuthContext: Login result:', result)
+      console.log('AgentAuthContext: Starting login for:', email)
+      const result = await jwtAuth.agentLogin(email, password)
       
       if (result.success && result.data) {
-        console.log('AdminAuthContext: Setting user:', result.data.user)
         setUser(result.data.user)
-        return result
+        return { success: true }
       } else {
-        console.error('AdminAuthContext: Login failed:', result.message)
-        throw new Error(result.message || 'Login failed')
+        setUser(null)
+        return { success: false, error: result.message || 'Login failed' }
       }
-    } catch (error) {
-      console.error('AdminAuthContext: Login error:', error)
+    } catch (error: any) {
       setUser(null)
-      throw error
+      return { success: false, error: error.message || 'Login failed' }
     } finally {
       setIsLoading(false)
     }
@@ -70,29 +67,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   // Logout function
   const logout = useCallback(() => {
-    jwtAuth.logout('admin')
+    jwtAuth.logout('agent')
     setUser(null)
   }, [])
 
   const value = {
     user,
     isLoading,
-    isAuthenticated: !!user,
     login,
     logout
   }
 
   return (
-    <AdminAuthContext.Provider value={value}>
+    <AgentAuthContext.Provider value={value}>
       {children}
-    </AdminAuthContext.Provider>
+    </AgentAuthContext.Provider>
   )
 }
 
-export function useAdminAuth() {
-  const context = useContext(AdminAuthContext)
+export function useAgentAuth() {
+  const context = useContext(AgentAuthContext)
   if (context === undefined) {
-    throw new Error('useAdminAuth must be used within an AdminAuthProvider')
+    throw new Error('useAgentAuth must be used within an AgentAuthProvider')
   }
   return context
 }
