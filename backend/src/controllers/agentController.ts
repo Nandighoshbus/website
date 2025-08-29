@@ -1,635 +1,372 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../middleware/errorHandler';
-import { ApiResponse, UserProfile } from '../types';
-import { generateTokens } from '../utils/auth';
-import { sendWelcomeEmail } from '../utils/email';
+import { ApiResponse } from '../types';
 
-export const agentLogin = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+// Get agent dashboard stats
+export const getAgentStats = async (req: Request, res: Response): Promise<void> => {
+  console.log('=== AGENT CONTROLLER - getAgentStats CALLED ===');
+  console.log('Request user:', req.user);
+  console.log('Request userId:', req.userId);
+  console.log('Request userRole:', req.userRole);
+  
+  const agentUserId = req.userId;
 
-  if (!email || !password) {
-    throw new AppError('Email and password are required', 400, 'MISSING_CREDENTIALS');
-  }
-
-  // Get agent from database
-  const { data: agent, error: agentError } = await supabaseAdmin
-    .from('user_profiles')
-    .select('*')
-    .eq('email', email)
-    .eq('role', 'agent')
-    .single();
-
-  if (agentError || !agent) {
-    throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
-  }
-
-  if (!agent.is_active) {
-    throw new AppError('Agent account is deactivated', 401, 'ACCOUNT_DEACTIVATED');
-  }
-
-  if (!agent.is_verified) {
-    throw new AppError('Agent account is not verified', 401, 'ACCOUNT_NOT_VERIFIED');
-  }
-
-  // Verify password with Supabase Auth
-  const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (authError || !authData.user) {
-    throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
-  }
-
-  // Generate tokens
-  const { accessToken, refreshToken } = generateTokens(agent.id);
-
-  // Update last login
-  await supabaseAdmin
-    .from('user_profiles')
-    .update({ updated_at: new Date().toISOString() })
-    .eq('id', agent.id);
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent login successful',
-    data: {
-      user: agent,
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    }
-  };
-
-  res.status(200).json(response);
-};
-
-export const agentRegister = async (req: Request, res: Response): Promise<void> => {
-  const {
-    email,
-    password,
-    full_name,
-    phone,
-    agent_code,
-    branch_location,
-    commission_rate = 5.0
-  } = req.body;
-
-  if (!email || !password || !full_name || !agent_code) {
-    throw new AppError('Email, password, full name, and agent code are required', 400, 'MISSING_REQUIRED_FIELDS');
-  }
-
-  // Check if agent code already exists
-  const { data: existingAgent } = await supabaseAdmin
-    .from('agent_profiles')
-    .select('agent_code')
-    .eq('agent_code', agent_code)
-    .single();
-
-  if (existingAgent) {
-    throw new AppError('Agent code already exists', 409, 'AGENT_CODE_EXISTS');
-  }
-
-  // Check if user already exists
-  const { data: existingUser } = await supabaseAdmin
-    .from('user_profiles')
-    .select('email')
-    .eq('email', email)
-    .single();
-
-  if (existingUser) {
-    throw new AppError('User already exists with this email', 409, 'USER_EXISTS');
-  }
-
-  // Create user in Supabase Auth
-  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: false
-  });
-
-  if (authError || !authData.user) {
-    throw new AppError('Failed to create agent account', 500, 'AUTH_ERROR');
+  if (!agentUserId) {
+    console.log('ERROR: No agentUserId found in request');
+    throw new AppError('Agent authentication required', 401, 'UNAUTHORIZED');
   }
 
   try {
-    // Create user profile
-    const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('user_profiles')
-      .insert([{
-        id: authData.user.id,
-        email,
-        full_name,
-        phone,
-        role: 'agent',
-        is_verified: false, // Agents need admin approval
-        is_active: false    // Agents need admin approval
-      }])
-      .select()
+    // Get agent ID from user ID
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
+      .select('id')
+      .eq('user_id', agentUserId)
       .single();
 
-    if (profileError || !userProfile) {
-      throw new AppError('Failed to create user profile', 500, 'PROFILE_ERROR');
+    if (agentError || !agent) {
+      throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
     }
 
-    // Create agent profile
-    const { data: agentProfile, error: agentProfileError } = await supabaseAdmin
-      .from('agent_profiles')
-      .insert([{
-        user_id: authData.user.id,
-        agent_code,
-        branch_location,
-        commission_rate,
-        is_approved: false,
-        total_bookings: 0,
-        total_commission: 0,
-        status: 'pending'
-      }])
-      .select()
-      .single();
+    // Get total bookings
+    const { data: totalBookings } = await supabaseAdmin
+      .from('bookings')
+      .select('id', { count: 'exact' })
+      .eq('agent_id', agent.id);
 
-    if (agentProfileError || !agentProfile) {
-      throw new AppError('Failed to create agent profile', 500, 'AGENT_PROFILE_ERROR');
-    }
+    // Get monthly bookings
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+    const { data: monthlyBookings } = await supabaseAdmin
+      .from('bookings')
+      .select('id', { count: 'exact' })
+      .eq('agent_id', agent.id)
+      .gte('journey_date', `${currentMonth}-01`);
 
-    // Send welcome email (but agent is not active yet)
-    try {
-      await sendWelcomeEmail(email, full_name);
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
-    }
+    // Get total commission
+    const { data: totalCommission } = await supabaseAdmin
+      .from('agent_earnings')
+      .select('commission_amount')
+      .eq('agent_id', agent.id);
+
+    // Get monthly commission
+    const { data: monthlyCommission } = await supabaseAdmin
+      .from('agent_earnings')
+      .select('commission_amount')
+      .eq('agent_id', agent.id)
+      .gte('earning_date', `${currentMonth}-01`);
+
+    const stats = {
+      totalBookings: totalBookings?.length || 0,
+      monthlyBookings: monthlyBookings?.length || 0,
+      totalCommission: totalCommission?.reduce((sum, earning) => sum + parseFloat(earning.commission_amount), 0) || 0,
+      monthlyCommission: monthlyCommission?.reduce((sum, earning) => sum + parseFloat(earning.commission_amount), 0) || 0,
+      activeRoutes: 0 // TODO: Calculate based on agent's active routes
+    };
 
     const response: ApiResponse = {
       success: true,
-      message: 'Agent registration successful. Please wait for admin approval.',
+      message: 'Agent stats retrieved successfully',
+      data: stats
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching agent stats:', error);
+    throw error;
+  }
+};
+
+// Get available routes for booking
+export const getAvailableRoutes = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('Fetching routes from database...');
+    
+    // First, get routes from the main routes table
+    const { data: routes, error: routesError } = await supabaseAdmin
+      .from('routes')
+      .select(`
+        id,
+        route_code,
+        name,
+        source_city,
+        destination_city,
+        distance_km,
+        estimated_duration,
+        base_fare,
+        is_active
+      `)
+      .eq('is_active', true);
+
+    console.log('Routes query result:', { routes, error: routesError });
+
+    if (routesError) {
+      console.error('Routes error:', routesError);
+      throw new AppError(`Failed to fetch routes: ${routesError.message}`, 500, 'DATABASE_ERROR');
+    }
+
+    if (!routes || routes.length === 0) {
+      console.log('No routes found in database');
+      const response: ApiResponse = {
+        success: true,
+        message: 'No routes available',
+        data: []
+      };
+      res.status(200).json(response);
+      return;
+    }
+
+    // Get schedules for these routes (if schedules table exists)
+    let schedulesData: any[] = [];
+    try {
+      const { data: schedules, error: schedulesError } = await supabaseAdmin
+        .from('schedules')
+        .select(`
+          id,
+          route_id,
+          bus_id,
+          departure_time,
+          arrival_time,
+          fare,
+          operating_days,
+          is_active,
+          buses (
+            id,
+            bus_number,
+            bus_type,
+            total_seats,
+            amenities
+          )
+        `)
+        .eq('is_active', true);
+
+      if (!schedulesError && schedules) {
+        schedulesData = schedules;
+      }
+    } catch (scheduleError) {
+      console.log('Schedules table not available yet, using routes only');
+    }
+
+    // Combine routes with their schedules
+    const routesWithSchedules = routes?.map(route => ({
+      ...route,
+      schedules: schedulesData.filter(schedule => schedule.route_id === route.id)
+    })) || [];
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Routes retrieved successfully',
+      data: routesWithSchedules
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching routes:', error);
+    throw error;
+  }
+};
+
+// Create a new booking
+export const createBooking = async (req: Request, res: Response): Promise<void> => {
+  const {
+    scheduleId,
+    passengers,
+    journeyDate,
+    seatNumbers,
+    paymentMethod,
+    contactDetails
+  } = req.body;
+
+  // Get agent ID from authenticated user
+  const agentUserId = req.userId;
+  
+  try {
+    // Get agent details
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
+      .select('id, commission_rate')
+      .eq('user_id', agentUserId)
+      .single();
+
+    if (agentError || !agent) {
+      throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
+    }
+
+    // Get schedule details for pricing
+    const { data: schedule, error: scheduleError } = await supabaseAdmin
+      .from('schedules')
+      .select(`
+        *,
+        routes (base_fare, name, source_city, destination_city),
+        buses (bus_number, bus_type)
+      `)
+      .eq('id', scheduleId)
+      .single();
+
+    if (scheduleError || !schedule) {
+      throw new AppError('Schedule not found', 404, 'SCHEDULE_NOT_FOUND');
+    }
+
+    // Create or get passengers
+    const passengerIds: string[] = [];
+    
+    for (const passengerDetails of passengers) {
+      let passengerId;
+      const { data: existingPassenger } = await supabaseAdmin
+        .from('passengers')
+        .select('id')
+        .eq('phone', passengerDetails.phone)
+        .single();
+
+      if (existingPassenger) {
+        passengerId = existingPassenger.id;
+      } else {
+        const { data: newPassenger, error: passengerError } = await supabaseAdmin
+          .from('passengers')
+          .insert([{
+            full_name: passengerDetails.fullName,
+            phone: passengerDetails.phone,
+            email: passengerDetails.email,
+            age: passengerDetails.age,
+            gender: passengerDetails.gender,
+            id_proof_type: passengerDetails.idProofType,
+            id_proof_number: passengerDetails.idProofNumber
+          }])
+          .select('id')
+          .single();
+
+        if (passengerError || !newPassenger) {
+          throw new AppError('Failed to create passenger record', 500, 'PASSENGER_CREATE_ERROR');
+        }
+        passengerId = newPassenger.id;
+      }
+      passengerIds.push(passengerId);
+    }
+
+    // Calculate pricing
+    const baseFare = parseFloat(schedule.fare);
+    const totalSeats = seatNumbers.length;
+    const totalAmount = baseFare * totalSeats;
+    const agentCommission = (totalAmount * parseFloat(agent.commission_rate)) / 100;
+
+    // Generate booking reference
+    const bookingReference = `BK${Date.now().toString().slice(-8)}`;
+
+    // Create bookings for each passenger
+    const bookings = [];
+    for (let i = 0; i < passengerIds.length; i++) {
+      const { data: booking, error: bookingError } = await supabaseAdmin
+        .from('bookings')
+        .insert([{
+          booking_reference: `${bookingReference}-${i + 1}`,
+          schedule_id: scheduleId,
+          passenger_id: passengerIds[i],
+          agent_id: agent.id,
+          journey_date: journeyDate,
+          seat_numbers: [seatNumbers[i]], // Individual seat for each passenger
+          total_seats: 1,
+          base_fare: baseFare,
+          total_amount: baseFare,
+          agent_commission: (baseFare * parseFloat(agent.commission_rate)) / 100,
+          payment_method: paymentMethod,
+          payment_status: 'paid',
+          booking_status: 'confirmed',
+          contact_name: contactDetails?.name || passengers[0].fullName,
+          contact_phone: contactDetails?.phone || passengers[0].phone,
+          contact_email: contactDetails?.email || passengers[0].email
+        }])
+        .select()
+        .single();
+
+      if (bookingError || !booking) {
+        throw new AppError(`Failed to create booking for passenger ${i + 1}`, 500, 'BOOKING_CREATE_ERROR');
+      }
+      bookings.push(booking);
+    }
+
+    // Create agent earning record for total commission
+    await supabaseAdmin
+      .from('agent_earnings')
+      .insert([{
+        agent_id: agent.id,
+        booking_id: bookings[0].id, // Reference the first booking
+        commission_amount: agentCommission,
+        commission_rate: agent.commission_rate,
+        earning_date: new Date().toISOString().split('T')[0],
+        status: 'pending'
+      }]);
+
+    const response: ApiResponse = {
+      success: true,
+      message: `Booking created successfully for ${passengers.length} passenger(s)`,
       data: {
-        user: userProfile,
-        agent: agentProfile
+        bookings,
+        bookingReference,
+        totalAmount,
+        agentCommission,
+        passengerCount: passengers.length
       }
     };
 
     res.status(201).json(response);
   } catch (error) {
-    // Cleanup: delete auth user if profile creation fails
-    await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+    console.error('Error creating booking:', error);
     throw error;
   }
 };
 
-export const getAgentProfile = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-
-  const { data: agent, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select(`
-      *,
-      agent_profile:agent_profiles(*)
-    `)
-    .eq('id', userId)
-    .eq('role', 'agent')
-    .single();
-
-  if (error || !agent) {
-    throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent profile fetched successfully',
-    data: agent
-  };
-
-  res.status(200).json(response);
-};
-
-export const updateAgentProfile = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const { full_name, phone, branch_location } = req.body;
-
-  const updates: any = {};
-  if (full_name) updates.full_name = full_name;
-  if (phone) updates.phone = phone;
-
-  if (Object.keys(updates).length > 0) {
-    const { error: userUpdateError } = await supabaseAdmin
-      .from('user_profiles')
-      .update(updates)
-      .eq('id', userId);
-
-    if (userUpdateError) {
-      throw new AppError('Failed to update user profile', 500, 'USER_UPDATE_ERROR');
-    }
-  }
-
-  if (branch_location) {
-    const { error: agentUpdateError } = await supabaseAdmin
-      .from('agent_profiles')
-      .update({ branch_location })
-      .eq('user_id', userId);
-
-    if (agentUpdateError) {
-      throw new AppError('Failed to update agent profile', 500, 'AGENT_UPDATE_ERROR');
-    }
-  }
-
-  // Get updated profile
-  const { data: agent, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select(`
-      *,
-      agent_profile:agent_profiles(*)
-    `)
-    .eq('id', userId)
-    .single();
-
-  if (error || !agent) {
-    throw new AppError('Failed to fetch updated profile', 500, 'FETCH_ERROR');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent profile updated successfully',
-    data: agent
-  };
-
-  res.status(200).json(response);
-};
-
+// Get agent's bookings
 export const getAgentBookings = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const offset = (page - 1) * limit;
+  const agentUserId = req.userId;
+  const { page = 1, limit = 10, status } = req.query;
 
-  const { data: bookings, error, count } = await supabaseAdmin
-    .from('bookings')
-    .select(`
-      *,
-      route:routes(*),
-      user:user_profiles(*),
-      payment:payments(*)
-    `, { count: 'exact' })
-    .eq('agent_id', userId)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+  try {
+    // Get agent ID
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
+      .select('id')
+      .eq('user_id', agentUserId)
+      .single();
 
-  if (error) {
-    throw new AppError('Failed to fetch agent bookings', 500, 'FETCH_ERROR');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent bookings fetched successfully',
-    data: bookings || [],
-    meta: {
-      page,
-      limit,
-      total: count || 0,
-      totalPages: Math.ceil((count || 0) / limit)
+    if (agentError || !agent) {
+      throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
     }
-  };
 
-  res.status(200).json(response);
-};
+    let query = supabaseAdmin
+      .from('bookings')
+      .select(`
+        *,
+        passengers (full_name, phone, email),
+        schedules (
+          departure_time,
+          arrival_time,
+          routes (name, source_city, destination_city),
+          buses (bus_number, bus_type)
+        )
+      `)
+      .eq('agent_id', agent.id)
+      .order('created_at', { ascending: false });
 
-export const getAgentCommission = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const { start_date, end_date } = req.query;
-
-  let query = supabaseAdmin
-    .from('agent_commissions')
-    .select('*')
-    .eq('agent_id', userId);
-
-  if (start_date) {
-    query = query.gte('created_at', start_date);
-  }
-
-  if (end_date) {
-    query = query.lte('created_at', end_date);
-  }
-
-  const { data: commissions, error } = await query
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch commission data', 500, 'FETCH_ERROR');
-  }
-
-  // Calculate total commission
-  const totalCommission = commissions?.reduce((sum, commission) => sum + commission.commission_amount, 0) || 0;
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent commission data fetched successfully',
-    data: {
-      commissions: commissions || [],
-      total_commission: totalCommission,
-      period: { start_date, end_date }
+    if (status) {
+      query = query.eq('booking_status', status);
     }
-  };
 
-  res.status(200).json(response);
-};
+    const { data: bookings, error } = await query
+      .range((Number(page) - 1) * Number(limit), Number(page) * Number(limit) - 1);
 
-export const getAllAgents = async (req: Request, res: Response): Promise<void> => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const offset = (page - 1) * limit;
-
-  const { data: agents, error, count } = await supabaseAdmin
-    .from('user_profiles')
-    .select(`
-      *,
-      agent_profile:agent_profiles(*)
-    `, { count: 'exact' })
-    .eq('role', 'agent')
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (error) {
-    throw new AppError('Failed to fetch agents', 500, 'FETCH_ERROR');
-  }
-
-  const response: ApiResponse<UserProfile[]> = {
-    success: true,
-    message: 'Agents fetched successfully',
-    data: agents || [],
-    meta: {
-      page,
-      limit,
-      total: count || 0,
-      totalPages: Math.ceil((count || 0) / limit)
+    if (error) {
+      throw new AppError(`Failed to fetch bookings: ${error.message}`, 500, 'DATABASE_ERROR');
     }
-  };
 
-  res.status(200).json(response);
-};
+    const response: ApiResponse = {
+      success: true,
+      message: 'Bookings retrieved successfully',
+      data: bookings
+    };
 
-export const approveAgent = async (req: Request, res: Response): Promise<void> => {
-  const { agentId } = req.params;
-  const { is_approved = true } = req.body;
-
-  // Update agent profile
-  const { error: agentError } = await supabaseAdmin
-    .from('agent_profiles')
-    .update({
-      is_approved,
-      status: is_approved ? 'active' : 'rejected'
-    })
-    .eq('user_id', agentId);
-
-  if (agentError) {
-    throw new AppError('Failed to update agent status', 500, 'AGENT_UPDATE_ERROR');
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching agent bookings:', error);
+    throw error;
   }
-
-  // Update user profile
-  const { data: user, error: userError } = await supabaseAdmin
-    .from('user_profiles')
-    .update({
-      is_active: is_approved,
-      is_verified: is_approved
-    })
-    .eq('id', agentId)
-    .select()
-    .single();
-
-  if (userError || !user) {
-    throw new AppError('Failed to update user status', 500, 'USER_UPDATE_ERROR');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: `Agent ${is_approved ? 'approved' : 'rejected'} successfully`,
-    data: user
-  };
-
-  res.status(200).json(response);
-};
-
-// Alias for route compatibility
-export const registerAgent = agentRegister;
-
-export const getAgentEarnings = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const { start_date, end_date } = req.query;
-
-  let query = supabaseAdmin
-    .from('agent_commissions')
-    .select('*')
-    .eq('agent_id', userId);
-
-  if (start_date) {
-    query = query.gte('created_at', start_date);
-  }
-
-  if (end_date) {
-    query = query.lte('created_at', end_date);
-  }
-
-  const { data: commissions, error } = await query
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new AppError('Failed to fetch earnings', 500, 'FETCH_ERROR');
-  }
-
-  const totalEarnings = commissions?.reduce((sum, commission) => sum + commission.commission_amount, 0) || 0;
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent earnings fetched successfully',
-    data: {
-      earnings: commissions || [],
-      total_earnings: totalEarnings,
-      period: { start_date, end_date }
-    }
-  };
-
-  res.status(200).json(response);
-};
-
-export const getAgentAnalytics = async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-
-  // Get agent profile with stats
-  const { data: agentProfile, error: agentError } = await supabaseAdmin
-    .from('agent_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (agentError || !agentProfile) {
-    throw new AppError('Agent profile not found', 404, 'AGENT_NOT_FOUND');
-  }
-
-  // Get booking stats
-  const { data: bookings, error: bookingError } = await supabaseAdmin
-    .from('bookings')
-    .select('status, total_amount, created_at')
-    .eq('agent_id', userId);
-
-  if (bookingError) {
-    throw new AppError('Failed to fetch booking stats', 500, 'FETCH_ERROR');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent analytics fetched successfully',
-    data: {
-      profile: agentProfile,
-      booking_stats: {
-        total_bookings: bookings?.length || 0,
-        total_revenue: bookings?.reduce((sum, booking) => sum + booking.total_amount, 0) || 0,
-        bookings_by_status: bookings?.reduce((acc: any, booking) => {
-          acc[booking.status] = (acc[booking.status] || 0) + 1;
-          return acc;
-        }, {})
-      }
-    }
-  };
-
-  res.status(200).json(response);
-};
-
-export const getAgentById = async (req: Request, res: Response): Promise<void> => {
-  const { agentId } = req.params;
-
-  const { data: agent, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select(`
-      *,
-      agent_profile:agent_profiles(*)
-    `)
-    .eq('id', agentId)
-    .eq('role', 'agent')
-    .single();
-
-  if (error || !agent) {
-    throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent fetched successfully',
-    data: agent
-  };
-
-  res.status(200).json(response);
-};
-
-export const verifyAgent = async (req: Request, res: Response): Promise<void> => {
-  const { agentId } = req.params;
-  const { is_verified = true } = req.body;
-
-  const { data: user, error } = await supabaseAdmin
-    .from('user_profiles')
-    .update({ is_verified })
-    .eq('id', agentId)
-    .eq('role', 'agent')
-    .select()
-    .single();
-
-  if (error || !user) {
-    throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: `Agent ${is_verified ? 'verified' : 'unverified'} successfully`,
-    data: user
-  };
-
-  res.status(200).json(response);
-};
-
-export const updateAgentStatus = async (req: Request, res: Response): Promise<void> => {
-  const { agentId } = req.params;
-  const { is_active, status } = req.body;
-
-  const userUpdates: any = {};
-  const agentUpdates: any = {};
-
-  if (typeof is_active === 'boolean') {
-    userUpdates.is_active = is_active;
-  }
-
-  if (status) {
-    agentUpdates.status = status;
-  }
-
-  // Update user profile
-  if (Object.keys(userUpdates).length > 0) {
-    const { error: userError } = await supabaseAdmin
-      .from('user_profiles')
-      .update(userUpdates)
-      .eq('id', agentId);
-
-    if (userError) {
-      throw new AppError('Failed to update user status', 500, 'UPDATE_ERROR');
-    }
-  }
-
-  // Update agent profile
-  if (Object.keys(agentUpdates).length > 0) {
-    const { error: agentError } = await supabaseAdmin
-      .from('agent_profiles')
-      .update(agentUpdates)
-      .eq('user_id', agentId);
-
-    if (agentError) {
-      throw new AppError('Failed to update agent status', 500, 'UPDATE_ERROR');
-    }
-  }
-
-  // Get updated agent
-  const { data: agent, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select(`
-      *,
-      agent_profile:agent_profiles(*)
-    `)
-    .eq('id', agentId)
-    .single();
-
-  if (error || !agent) {
-    throw new AppError('Failed to fetch updated agent', 500, 'FETCH_ERROR');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Agent status updated successfully',
-    data: agent
-  };
-
-  res.status(200).json(response);
-};
-
-export const updateCommissionRate = async (req: Request, res: Response): Promise<void> => {
-  const { agentId } = req.params;
-  const { commission_rate } = req.body;
-
-  if (typeof commission_rate !== 'number' || commission_rate < 0 || commission_rate > 100) {
-    throw new AppError('Valid commission rate (0-100) is required', 400, 'INVALID_COMMISSION_RATE');
-  }
-
-  const { data: agentProfile, error } = await supabaseAdmin
-    .from('agent_profiles')
-    .update({ commission_rate })
-    .eq('user_id', agentId)
-    .select()
-    .single();
-
-  if (error || !agentProfile) {
-    throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
-  }
-
-  const response: ApiResponse = {
-    success: true,
-    message: 'Commission rate updated successfully',
-    data: agentProfile
-  };
-
-  res.status(200).json(response);
 };

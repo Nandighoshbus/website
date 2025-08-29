@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, CheckCircle, Edit, Plus, Trash2, Users, Bus, MapPin, Calendar, CreditCard, UserCheck } from 'lucide-react'
-import AdminDashboardAgentRegistrations from '@/components/admin/AdminDashboardAgentRegistrations'
+import { AlertCircle, CheckCircle, Edit, Plus, Trash2, Users, Bus, MapPin, Calendar, CreditCard, UserCheck, UserPlus } from 'lucide-react'
 import { useAdminAuth } from '@/components/context/AdminAuthContext'
+import { supabase } from '@/lib/supabase'
 
 // TypeScript interfaces
 interface User {
@@ -43,11 +43,13 @@ interface RouteData {
   destination_city: string;
   distance_km: number;
   estimated_duration: string;
+  base_fare: number;
+  operating_days: string[];
   is_active: boolean;
   created_at: string;
 }
 
-interface BookingData {
+interface Booking {
   id: string;
   booking_reference: string;
   passenger_name: string;
@@ -55,8 +57,49 @@ interface BookingData {
   journey_date: string;
   seats_booked: number;
   total_amount: number;
-  status: 'confirmed' | 'cancelled' | 'completed' | 'pending';
+  status: 'confirmed' | 'cancelled' | 'completed';
   created_at: string;
+}
+
+interface AgentRequest {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  business_name?: string;
+  business_type?: string;
+  experience_years?: string;
+  documents?: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string;
+  requested_at: string;
+  reviewed_at?: string;
+}
+
+interface Agent {
+  id: string;
+  user_id: string;
+  agent_code: string;
+  business_name: string;
+  business_type?: string;
+  contact_person?: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  commission_rate: number;
+  credit_limit: number;
+  current_balance: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface StatCard {
@@ -84,7 +127,9 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [buses, setBuses] = useState<BusData[]>([])
   const [routes, setRoutes] = useState<RouteData[]>([])
-  const [bookings, setBookings] = useState<BookingData[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [agentRequests, setAgentRequests] = useState<AgentRequest[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedEntity, setSelectedEntity] = useState<any>(null)
@@ -95,7 +140,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (currentUser && !authLoading) {
-      fetchAllData()
+      fetchData()
     }
   }, [currentUser, authLoading])
 
@@ -116,38 +161,107 @@ export default function AdminDashboard() {
     return null
   }
 
-  const fetchAllData = async () => {
-    setLoading(true)
+  const fetchData = async () => {
     try {
-      const token = localStorage.getItem('adminToken') // Updated to use adminToken
+      setLoading(true)
+      
+      // Get auth token from session
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
 
-      const [usersRes, busesRes, routesRes, bookingsRes] = await Promise.all([
+      // Fetch all data in parallel
+      const [usersRes, busesRes, routesRes, bookingsRes, agentRequestsRes, agentsRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/users`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/buses`, { headers }),
         fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/routes`, { headers }),
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/bookings`, { headers })
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/bookings`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agents`, { headers })
       ])
 
-      if (usersRes.ok) setUsers((await usersRes.json()).data || [])
-      if (busesRes.ok) setBuses((await busesRes.json()).data || [])
-      if (routesRes.ok) setRoutes((await routesRes.json()).data || [])
-      if (bookingsRes.ok) setBookings((await bookingsRes.json()).data || [])
+      // Process responses
+      if (usersRes.ok) {
+        const usersData = await usersRes.json()
+        setUsers(usersData.data || [])
+      }
+
+      if (busesRes.ok) {
+        const busesData = await busesRes.json()
+        setBuses(busesData.data || [])
+      }
+
+      if (routesRes.ok) {
+        const routesData = await routesRes.json()
+        setRoutes(routesData.data || [])
+      }
+
+      if (bookingsRes.ok) {
+        const bookingsData = await bookingsRes.json()
+        setBookings(bookingsData.data || [])
+      }
+
+      if (agentRequestsRes.ok) {
+        const agentRequestsData = await agentRequestsRes.json()
+        setAgentRequests(agentRequestsData.data || [])
+      }
+
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json()
+        console.log('Agents API Response:', agentsData)
+        setAgents(agentsData.data || [])
+      } else {
+        console.error('Failed to fetch agents:', agentsRes.status, agentsRes.statusText)
+        const errorData = await agentsRes.json().catch(() => ({}))
+        console.error('Agents API Error:', errorData)
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const handleDelete = async (type: string, id: string) => {
-    if (!confirm(`Are you sure you want to delete this ${type}?`)) return
+    const confirmMessage = type === 'agent' 
+      ? `Are you sure you want to deactivate this ${type}? This will make the agent inactive but preserve their data.`
+      : `Are you sure you want to delete this ${type}?`
+    
+    if (!confirm(confirmMessage)) return
 
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${type}s/${id}`, {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      if (!token) {
+        console.error('No session token available')
+        alert('Authentication error. Please login again.')
+        return
+      }
+
+      // Fix URL construction for delete operations
+      const getEndpoint = (type: string) => {
+        switch(type) {
+          case 'bus': return 'buses'
+          case 'route': return 'routes'
+          case 'user': return 'users'
+          case 'booking': return 'bookings'
+          case 'agent': return 'agents'
+          default: return `${type}s`
+        }
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${getEndpoint(type)}/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,14 +270,20 @@ export default function AdminDashboard() {
       })
 
       if (response.ok) {
-        fetchAllData() // Refresh data
-        alert(`${type} deleted successfully`)
+        fetchData() // Refresh data
+        const successMessage = type === 'agent' 
+          ? 'Agent deactivated successfully'
+          : `${type} deleted successfully`
+        alert(successMessage)
       } else {
-        alert(`Failed to delete ${type}`)
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.message || `Failed to ${type === 'agent' ? 'deactivate' : 'delete'} ${type}`
+        alert(errorMessage)
+        console.error(`Delete ${type} error:`, errorData)
       }
     } catch (error) {
       console.error(`Error deleting ${type}:`, error)
-      alert(`Error deleting ${type}`)
+      alert(`Error ${type === 'agent' ? 'deactivating' : 'deleting'} ${type}`)
     }
   }
 
@@ -177,13 +297,132 @@ export default function AdminDashboard() {
     setIsAddModalOpen(true)
   }
 
+  const handleApproveAgent = async (request: AgentRequest) => {
+    const password = prompt('Enter a password for the new agent account:')
+    if (!password) return
+
+    const adminNotes = prompt('Add any notes for this approval (optional):') || ''
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      if (!token) {
+        alert('Authentication error. Please login again.')
+        return
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests/${request.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'approved',
+          password,
+          admin_notes: adminNotes
+        })
+      })
+
+      if (response.ok) {
+        alert('Agent request approved successfully!')
+        fetchData() // Refresh data
+      } else {
+        const error = await response.json()
+        alert(`Failed to approve agent: ${error.message}`)
+      }
+    } catch (error) {
+      console.error('Error approving agent:', error)
+      alert('Failed to approve agent request')
+    }
+  }
+
+  const handleRejectAgent = async (request: AgentRequest) => {
+    const adminNotes = prompt('Reason for rejection:')
+    if (!adminNotes) return
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      if (!token) {
+        alert('Authentication error. Please login again.')
+        return
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests/${request.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'rejected',
+          admin_notes: adminNotes
+        })
+      })
+
+      if (response.ok) {
+        alert('Agent request rejected')
+        fetchData() // Refresh data
+      } else {
+        const error = await response.json()
+        alert(`Failed to reject agent: ${error.message}`)
+      }
+    } catch (error) {
+      console.error('Error rejecting agent:', error)
+      alert('Failed to reject agent request')
+    }
+  }
+
+  const viewAgentDetails = (request: AgentRequest) => {
+    const details = `
+Name: ${request.full_name}
+Email: ${request.email}
+Phone: ${request.phone}
+Address: ${request.address}, ${request.city}, ${request.state} - ${request.pincode}
+Business: ${request.business_name || 'N/A'}
+Business Type: ${request.business_type || 'N/A'}
+Experience: ${request.experience_years || 'N/A'}
+Documents: ${request.documents || 'N/A'}
+Reason: ${request.reason}
+Status: ${request.status}
+Requested: ${new Date(request.requested_at).toLocaleString()}
+${request.admin_notes ? `Admin Notes: ${request.admin_notes}` : ''}
+${request.reviewed_at ? `Reviewed: ${new Date(request.reviewed_at).toLocaleString()}` : ''}
+    `
+    alert(details)
+  }
+
   const handleSave = async (data: any) => {
     try {
-      const token = localStorage.getItem('adminToken')
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      
+      if (!token) {
+        console.error('No session token available')
+        return
+      }
+
       const isEdit = data.id
+      
+      // Fix URL construction for bus type (bus -> buses, not buss)
+      const getEndpoint = (type: string) => {
+        switch(type) {
+          case 'bus': return 'buses'
+          case 'route': return 'routes'
+          case 'user': return 'users'
+          case 'booking': return 'bookings'
+          case 'agent': return 'agents'
+          default: return `${type}s`
+        }
+      }
+      
+      const endpoint = getEndpoint(data.type)
       const url = isEdit 
-        ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${data.type}s/${data.id}`
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${data.type}s`
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${endpoint}/${data.id}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/${endpoint}`
 
       const response = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -195,7 +434,7 @@ export default function AdminDashboard() {
       })
 
       if (response.ok) {
-        fetchAllData()
+        fetchData()
         setIsEditModalOpen(false)
         setIsAddModalOpen(false)
         alert(`${data.type} ${isEdit ? 'updated' : 'created'} successfully`)
@@ -263,9 +502,10 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-7 lg:w-[700px]">
+          <TabsList className="grid w-full grid-cols-8 lg:w-[800px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="approved-agents">Agents</TabsTrigger>
             <TabsTrigger value="agents">Agent Requests</TabsTrigger>
             <TabsTrigger value="buses">Buses</TabsTrigger>
             <TabsTrigger value="routes">Routes</TabsTrigger>
@@ -275,12 +515,18 @@ export default function AdminDashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               <StatCard 
                 title="Total Users" 
                 value={users.length} 
                 icon={Users} 
                 color="blue" 
+              />
+              <StatCard 
+                title="Active Agents" 
+                value={agents.filter(agent => agent.is_active).length} 
+                icon={UserCheck} 
+                color="indigo" 
               />
               <StatCard 
                 title="Active Buses" 
@@ -398,9 +644,183 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Approved Agents Tab */}
+          <TabsContent value="approved-agents" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Agent Management</h2>
+              <div className="flex space-x-2">
+                <Button variant="outline">Export</Button>
+              </div>
+            </div>
+            
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agent Code</TableHead>
+                      <TableHead>Business Name</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Commission</TableHead>
+                      <TableHead>Balance</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agents.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                          No approved agents found. Agents appear here after approving agent registration requests.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      agents.map((agent) => {
+                        console.log('Rendering agent:', agent);
+                        return (
+                          <TableRow key={agent.id}>
+                          <TableCell className="font-medium">{agent.agent_code || 'N/A'}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{agent.business_name || 'N/A'}</p>
+                              <p className="text-sm text-gray-600">{agent.business_type || 'N/A'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{agent.contact_person || 'N/A'}</p>
+                              <p className="text-sm text-gray-600">{agent.email || 'N/A'}</p>
+                              <p className="text-sm text-gray-600">{agent.phone || 'N/A'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <p>{agent.city || 'N/A'}, {agent.state || 'N/A'}</p>
+                              <p className="text-gray-600">{agent.pincode || 'N/A'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium text-green-600">{agent.commission_rate || 0}%</span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <p className="font-medium">₹{agent.current_balance || 0}</p>
+                              <p className="text-gray-600">Limit: ₹{agent.credit_limit || 0}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={agent.is_active ? 'default' : 'secondary'}>
+                              {agent.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleEdit('agent', agent)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDelete('agent', agent.id)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Agent Requests Tab */}
           <TabsContent value="agents" className="space-y-6">
-            <AdminDashboardAgentRegistrations userRole={currentUser?.role || 'admin'} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  Agent Registration Requests
+                </CardTitle>
+                <CardDescription>
+                  Review and manage agent registration requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {agentRequests.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No agent requests found</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Business</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Requested</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agentRequests.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell className="font-medium">{request.full_name}</TableCell>
+                            <TableCell>{request.email}</TableCell>
+                            <TableCell>{request.business_name || 'N/A'}</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                request.status === 'approved' ? 'default' :
+                                request.status === 'rejected' ? 'destructive' : 'secondary'
+                              }>
+                                {request.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{new Date(request.requested_at).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              {request.status === 'pending' && (
+                                <div className="flex space-x-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => handleApproveAgent(request)}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive"
+                                    onClick={() => handleRejectAgent(request)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </div>
+                              )}
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => viewAgentDetails(request)}
+                                className="ml-2"
+                              >
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Buses Tab */}
@@ -481,26 +901,48 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Route Name</TableHead>
-                      <TableHead>Origin</TableHead>
-                      <TableHead>Destination</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Duration</TableHead>
+                      <TableHead>Route Details</TableHead>
+                      <TableHead>Distance & Duration</TableHead>
+                      <TableHead>Fare</TableHead>
+                      <TableHead>Operating Days</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {routes.map((route) => (
-                      <TableRow key={route.id}>
-                        <TableCell className="font-medium">{route.route_name}</TableCell>
-                        <TableCell>{route.origin_city}</TableCell>
-                        <TableCell>{route.destination_city}</TableCell>
-                        <TableCell>{route.distance_km} km</TableCell>
-                        <TableCell>{route.estimated_duration}</TableCell>
+                    {routes.map((item) => (
+                      <TableRow key={item.id}>
                         <TableCell>
-                          <Badge variant={route.is_active ? 'default' : 'secondary'}>
-                            {route.is_active ? 'Active' : 'Inactive'}
+                          <div>
+                            <p className="font-medium">{item.route_name}</p>
+                            <p className="text-sm text-gray-600">
+                              {item.origin_city} → {item.destination_city}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <p>{item.distance_km} km</p>
+                            <p className="text-gray-600">{item.estimated_duration}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <span className="font-medium text-green-600">₹{item.base_fare}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {(item.operating_days || []).map((day: string) => (
+                              <Badge key={day} variant="outline" className="text-xs px-1 py-0">
+                                {day.slice(0, 3).toUpperCase()}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                            {item.is_active ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -508,14 +950,14 @@ export default function AdminDashboard() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleEdit('route', route)}
+                              onClick={() => handleEdit('route', item)}
                             >
                               <Edit className="w-3 h-3" />
                             </Button>
                             <Button 
                               variant="destructive" 
                               size="sm"
-                              onClick={() => handleDelete('route', route.id)}
+                              onClick={() => handleDelete('route', item.id)}
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -703,6 +1145,125 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
           <DialogDescription>Make changes to the {entity.type} details</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {entity.type === 'agent' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="agent_code">Agent Code</Label>
+                  <Input
+                    id="agent_code"
+                    value={formData.agent_code || ''}
+                    disabled
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="business_name">Business Name</Label>
+                  <Input
+                    id="business_name"
+                    value={formData.business_name || ''}
+                    onChange={(e) => setFormData({...formData, business_name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="business_type">Business Type</Label>
+                  <Input
+                    id="business_type"
+                    value={formData.business_type || ''}
+                    onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contact_person">Contact Person</Label>
+                  <Input
+                    id="contact_person"
+                    value={formData.contact_person || ''}
+                    onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="commission_rate">Commission Rate (%)</Label>
+                  <Input
+                    id="commission_rate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    value={formData.commission_rate || ''}
+                    onChange={(e) => setFormData({...formData, commission_rate: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="credit_limit">Credit Limit (₹)</Label>
+                  <Input
+                    id="credit_limit"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.credit_limit || ''}
+                    onChange={(e) => setFormData({...formData, credit_limit: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="current_balance">Current Balance (₹)</Label>
+                  <Input
+                    id="current_balance"
+                    type="number"
+                    step="0.01"
+                    value={formData.current_balance || ''}
+                    onChange={(e) => setFormData({...formData, current_balance: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="is_active">Status</Label>
+                  <Select 
+                    value={formData.is_active ? 'true' : 'false'} 
+                    onValueChange={(value) => setFormData({...formData, is_active: value === 'true'})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone || ''}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email || ''}
+                      disabled
+                      className="bg-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pincode">Pincode</Label>
+                    <Input
+                      id="pincode"
+                      value={formData.pincode || ''}
+                      onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
           {entity.type === 'user' && (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -747,6 +1308,100 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
               </div>
             </>
           )}
+
+          {entity.type === 'route' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="route_name">Route Name</Label>
+                  <Input
+                    id="route_name"
+                    value={formData.route_name || ''}
+                    onChange={(e) => setFormData({...formData, route_name: e.target.value})}
+                    placeholder="e.g., Bhubaneswar to Cuttack"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="origin_city">Origin City</Label>
+                  <Input
+                    id="origin_city"
+                    value={formData.origin_city || ''}
+                    onChange={(e) => setFormData({...formData, origin_city: e.target.value})}
+                    placeholder="e.g., Bhubaneswar"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="destination_city">Destination City</Label>
+                  <Input
+                    id="destination_city"
+                    value={formData.destination_city || ''}
+                    onChange={(e) => setFormData({...formData, destination_city: e.target.value})}
+                    placeholder="e.g., Cuttack"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="distance_km">Distance (km)</Label>
+                  <Input
+                    id="distance_km"
+                    type="number"
+                    value={formData.distance_km || ''}
+                    onChange={(e) => setFormData({...formData, distance_km: e.target.value})}
+                    placeholder="e.g., 30"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="estimated_duration">Duration</Label>
+                  <Input
+                    id="estimated_duration"
+                    value={formData.estimated_duration || ''}
+                    onChange={(e) => setFormData({...formData, estimated_duration: e.target.value})}
+                    placeholder="e.g., 1 hour"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="base_fare">Base Fare (₹)</Label>
+                  <Input
+                    id="base_fare"
+                    type="number"
+                    step="0.01"
+                    value={formData.base_fare || ''}
+                    onChange={(e) => setFormData({...formData, base_fare: e.target.value})}
+                    placeholder="e.g., 50.00"
+                  />
+                </div>
+              </div>
+              
+              {/* Operating Days Selection */}
+              <div className="mt-4">
+                <Label>Operating Days</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+                    <div key={day} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`day-${day}`}
+                        checked={(formData.operating_days || []).includes(day)}
+                        onChange={(e) => {
+                          const currentDays = formData.operating_days || [];
+                          const updatedDays = e.target.checked
+                            ? [...currentDays, day]
+                            : currentDays.filter((d: string) => d !== day);
+                          setFormData({...formData, operating_days: updatedDays});
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <Label htmlFor={`day-${day}`} className="text-sm capitalize cursor-pointer">
+                        {day.slice(0, 3)}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Select the days when this route operates
+                </p>
+              </div>
+            </>
+          )}
           
           {entity.type === 'bus' && (
             <>
@@ -787,11 +1442,52 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
                       <SelectItem value="non_ac">Non-AC</SelectItem>
                       <SelectItem value="sleeper">Sleeper</SelectItem>
                       <SelectItem value="semi_sleeper">Semi Sleeper</SelectItem>
+                      <SelectItem value="luxury">Luxury</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+              
+              {/* Bus Active Status Toggle */}
+              <div className="mt-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="bus_is_active"
+                    checked={formData.is_active !== false}
+                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="bus_is_active" className="text-sm cursor-pointer">
+                    Bus is Active
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Inactive buses will not be available for booking
+                </p>
+              </div>
             </>
+          )}
+
+          {/* Route Active Status Toggle */}
+          {entity.type === 'route' && (
+            <div className="mt-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="route_is_active"
+                  checked={formData.is_active !== false}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="route_is_active" className="text-sm cursor-pointer">
+                  Route is Active
+                </Label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Inactive routes will not be available for booking
+              </p>
+            </div>
           )}
 
           <div className="flex justify-end space-x-2">
@@ -873,6 +1569,272 @@ function AddModal({ isOpen, onClose, entityType, onSave }: AddModalProps) {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {entityType === 'route' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="route_name">Route Name</Label>
+                  <Input
+                    id="route_name"
+                    value={formData.route_name || ''}
+                    onChange={(e) => setFormData({...formData, route_name: e.target.value})}
+                    placeholder="e.g., Bhubaneswar to Cuttack"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="origin_city">Origin City</Label>
+                  <Input
+                    id="origin_city"
+                    value={formData.origin_city || ''}
+                    onChange={(e) => setFormData({...formData, origin_city: e.target.value})}
+                    placeholder="e.g., Bhubaneswar"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="destination_city">Destination City</Label>
+                  <Input
+                    id="destination_city"
+                    value={formData.destination_city || ''}
+                    onChange={(e) => setFormData({...formData, destination_city: e.target.value})}
+                    placeholder="e.g., Cuttack"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="distance_km">Distance (km)</Label>
+                  <Input
+                    id="distance_km"
+                    type="number"
+                    value={formData.distance_km || ''}
+                    onChange={(e) => setFormData({...formData, distance_km: e.target.value})}
+                    placeholder="e.g., 30"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="estimated_duration">Duration</Label>
+                  <Input
+                    id="estimated_duration"
+                    value={formData.estimated_duration || ''}
+                    onChange={(e) => setFormData({...formData, estimated_duration: e.target.value})}
+                    placeholder="e.g., 1 hour"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="base_fare">Base Fare (₹)</Label>
+                  <Input
+                    id="base_fare"
+                    type="number"
+                    step="0.01"
+                    value={formData.base_fare || ''}
+                    onChange={(e) => setFormData({...formData, base_fare: e.target.value})}
+                    placeholder="e.g., 50.00"
+                    required
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {entityType === 'bus' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="bus_number">Bus Number</Label>
+                  <Input
+                    id="bus_number"
+                    value={formData.bus_number || ''}
+                    onChange={(e) => setFormData({...formData, bus_number: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="model">Model/Name</Label>
+                  <Input
+                    id="model"
+                    value={formData.model || ''}
+                    onChange={(e) => setFormData({...formData, model: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    value={formData.capacity || ''}
+                    onChange={(e) => setFormData({...formData, capacity: parseInt(e.target.value)})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bus_type">Bus Type</Label>
+                  <Select value={formData.bus_type} onValueChange={(value) => setFormData({...formData, bus_type: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ac">AC</SelectItem>
+                      <SelectItem value="non_ac">Non-AC</SelectItem>
+                      <SelectItem value="sleeper">Sleeper</SelectItem>
+                      <SelectItem value="semi_sleeper">Semi Sleeper</SelectItem>
+                      <SelectItem value="luxury">Luxury</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {entityType === 'agent' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="agent_code">Agent Code</Label>
+                  <Input
+                    id="agent_code"
+                    value={formData.agent_code || ''}
+                    onChange={(e) => setFormData({...formData, agent_code: e.target.value})}
+                    disabled
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="business_name">Business Name</Label>
+                  <Input
+                    id="business_name"
+                    value={formData.business_name || ''}
+                    onChange={(e) => setFormData({...formData, business_name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="business_type">Business Type</Label>
+                  <Input
+                    id="business_type"
+                    value={formData.business_type || ''}
+                    onChange={(e) => setFormData({...formData, business_type: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contact_person">Contact Person</Label>
+                  <Input
+                    id="contact_person"
+                    value={formData.contact_person || ''}
+                    onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email || ''}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    disabled
+                    className="bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone || ''}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="commission_rate">Commission Rate (%)</Label>
+                  <Input
+                    id="commission_rate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    value={formData.commission_rate || ''}
+                    onChange={(e) => setFormData({...formData, commission_rate: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="credit_limit">Credit Limit (₹)</Label>
+                  <Input
+                    id="credit_limit"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.credit_limit || ''}
+                    onChange={(e) => setFormData({...formData, credit_limit: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="current_balance">Current Balance (₹)</Label>
+                  <Input
+                    id="current_balance"
+                    type="number"
+                    step="0.01"
+                    value={formData.current_balance || ''}
+                    onChange={(e) => setFormData({...formData, current_balance: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="is_active">Status</Label>
+                  <Select 
+                    value={formData.is_active ? 'true' : 'false'} 
+                    onValueChange={(value) => setFormData({...formData, is_active: value === 'true'})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address || ''}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={formData.city || ''}
+                      onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={formData.state || ''}
+                      onChange={(e) => setFormData({...formData, state: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pincode">Pincode</Label>
+                    <Input
+                      id="pincode"
+                      value={formData.pincode || ''}
+                      onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                    />
+                  </div>
                 </div>
               </div>
             </>

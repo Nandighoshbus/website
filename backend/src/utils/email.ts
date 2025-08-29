@@ -18,7 +18,7 @@ const createTransporter = () => {
 };
 
 // Email templates
-const getEmailTemplate = (type: 'verification' | 'welcome' | 'booking_confirmation' | 'password_reset' | 'booking_cancellation') => {
+const getEmailTemplate = (type: 'verification' | 'welcome' | 'booking_confirmation' | 'password_reset' | 'booking_cancellation' | 'agent_approval') => {
   const baseStyle = `
     <style>
       body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
@@ -208,6 +208,59 @@ const getEmailTemplate = (type: 'verification' | 'welcome' | 'booking_confirmati
           </div>
         </div>
       `
+    },
+    agent_approval: {
+      subject: 'Agent Application Approved - Welcome to Nandighosh Bus Service',
+      html: (data: any) => `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>🎉 Congratulations!</h1>
+            <h2>Your Agent Application is Approved</h2>
+          </div>
+          <div class="content">
+            <p>Dear ${data.name},</p>
+            <p>Great news! Your application to become an agent with Nandighosh Bus Service has been <strong class="highlight">approved</strong>!</p>
+            
+            <div class="booking-details">
+              <h3>🏢 Your Agent Details</h3>
+              <p><strong>Agent Code:</strong> <span class="highlight">${data.agentCode}</span></p>
+              <p><strong>Business Name:</strong> ${data.businessName}</p>
+              <p><strong>Email:</strong> ${data.email}</p>
+              <p><strong>Commission Rate:</strong> ${data.commissionRate}%</p>
+            </div>
+
+            <div class="booking-details">
+              <h3>🔐 Login Credentials</h3>
+              <p><strong>Email:</strong> ${data.email}</p>
+              <p><strong>Password:</strong> ${data.password}</p>
+              <p><em>Please change your password after first login for security.</em></p>
+            </div>
+
+            <p style="text-align: center;">
+              <a href="${data.loginUrl}" class="button">Login to Agent Dashboard</a>
+            </p>
+
+            <p><strong>What's Next?</strong></p>
+            <ul>
+              <li>🚀 Access your agent dashboard</li>
+              <li>📊 Start managing bookings and customers</li>
+              <li>💰 Track your commissions and earnings</li>
+              <li>📱 Use our agent tools and resources</li>
+            </ul>
+
+            <p><strong>Need Help?</strong></p>
+            <p>Our support team is here to help you get started. Contact us at support@nandighosh.com or call our agent helpline.</p>
+
+            <p>Welcome to the Nandighosh family!</p>
+            <p>Best regards,<br>The Nandighosh Team</p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2025 Nandighosh Bus Service. All rights reserved.</p>
+            <p>Agent Support: agent-support@nandighosh.com | 1800-XXX-XXXX</p>
+          </div>
+        </div>
+      `
     }
   };
 
@@ -339,5 +392,32 @@ export const sendBookingCancellationEmail = async (cancellationData: any): Promi
     console.log(`Booking cancellation email sent to ${cancellationData.contactEmail}`);
   } catch (error) {
     console.error('Failed to send booking cancellation email:', error);
+  }
+};
+
+// Send agent approval email
+export const sendAgentApprovalEmail = async (agentData: any): Promise<void> => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log('Email service not configured, skipping agent approval email');
+    return; // Don't throw error for approval email
+  }
+
+  const transporter = createTransporter();
+  const template = getEmailTemplate('agent_approval');
+  
+  const loginUrl = `${process.env.FRONTEND_URL}/agent/login`;
+  
+  const mailOptions = {
+    from: `"Nandighosh Bus Service" <${process.env.EMAIL_USER}>`,
+    to: agentData.email,
+    subject: template.subject,
+    html: template.html({ ...agentData, loginUrl })
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Agent approval email sent to ${agentData.email}`);
+  } catch (error) {
+    console.error('Failed to send agent approval email:', error);
   }
 };

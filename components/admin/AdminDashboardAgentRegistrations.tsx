@@ -11,20 +11,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Clock, User, Phone, Mail, Eye, UserCheck, UserX, Search, CheckCircle, AlertCircle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 // TypeScript interfaces
 interface AgentRegistration {
   id: string
-  fullName: string
+  full_name: string
   email: string
-  phoneNumber: string
+  phone: string
   address: string
-  experience: string
-  status: 'pending' | 'approved' | 'rejected' | 'email_verification'
-  submittedAt: string
-  reviewedAt?: string
-  adminNotes?: string
-  rejectionReason?: string
+  experience_years: number | null
+  branch_location: string
+  custom_branch?: string
+  emergency_contact: string
+  expected_joining_date: string
+  status: 'pending' | 'approved' | 'rejected' | 'under_review'
+  email_verified: boolean
+  created_at: string
+  reviewed_at?: string
+  admin_notes?: string
+  rejection_reason?: string
 }
 
 interface AdminDashboardAgentRegistrationsProps {
@@ -49,23 +55,31 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
   const mockRegistrations: AgentRegistration[] = [
     {
       id: '1',
-      fullName: 'Rajesh Kumar',
+      full_name: 'Rajesh Kumar',
       email: 'rajesh.kumar@email.com',
-      phoneNumber: '+91-9876543210',
+      phone: '+91-9876543210',
       address: 'Bhubaneswar, Odisha',
-      experience: '5 years in transportation',
+      experience_years: 5,
+      branch_location: 'Bhubaneswar',
+      emergency_contact: '+91-9876543211',
+      expected_joining_date: '2025-09-01',
       status: 'pending',
-      submittedAt: '2025-08-09T10:30:00Z'
+      email_verified: true,
+      created_at: '2025-08-09T10:30:00Z'
     },
     {
       id: '2',
-      fullName: 'Priya Sahoo',
+      full_name: 'Priya Sahoo',
       email: 'priya.sahoo@email.com',
-      phoneNumber: '+91-8765432109',
+      phone: '+91-8765432109',
       address: 'Cuttack, Odisha',
-      experience: '3 years',
-      status: 'email_verification',
-      submittedAt: '2025-08-08T15:45:00Z'
+      experience_years: 3,
+      branch_location: 'Cuttack',
+      emergency_contact: '+91-8765432110',
+      expected_joining_date: '2025-09-15',
+      status: 'pending',
+      email_verified: false,
+      created_at: '2025-08-08T15:45:00Z'
     }
   ]
 
@@ -73,13 +87,21 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
   const fetchRegistrations = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('adminToken')
+      
+      // Get Supabase session token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        console.error('No admin session found')
+        setRegistrations(mockRegistrations)
+        return
+      }
+      
       const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
       
       const response = await fetch(`${baseURL}/api/v1/agents/pending`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -88,7 +110,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
         const data = await response.json()
         setRegistrations(data.registrations || [])
       } else {
-        console.error('Failed to fetch registrations')
+        console.error('Failed to fetch registrations:', response.status, response.statusText)
         setRegistrations(mockRegistrations)
       }
     } catch (error) {
@@ -110,7 +132,14 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
 
     try {
       setActionLoading(true)
-      const token = localStorage.getItem('adminToken')
+      
+      // Get Supabase session token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        alert('Admin session expired. Please login again.')
+        return
+      }
+      
       const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
       
       const endpoint = action === 'approve' 
@@ -120,12 +149,12 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           adminNotes: adminNotes.trim() || undefined,
-          rejectionReason: action === 'reject' ? rejectionReason : undefined
+          reason: action === 'reject' ? rejectionReason : undefined
         })
       })
 
@@ -153,7 +182,8 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
         alert(`Registration ${action}d successfully!`)
         fetchRegistrations()
       } else {
-        throw new Error(`Failed to ${action} registration`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `Failed to ${action} registration`)
       }
     } catch (error) {
       console.error(`Error ${action}ing registration:`, error)
@@ -182,7 +212,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
       pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       approved: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
       rejected: { color: 'bg-red-100 text-red-800', icon: AlertCircle },
-      email_verification: { color: 'bg-blue-100 text-blue-800', icon: Mail }
+      under_review: { color: 'bg-blue-100 text-blue-800', icon: Mail }
     }
     
     const variant = variants[status as keyof typeof variants] || variants.pending
@@ -208,7 +238,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
   }
 
   const filteredRegistrations = registrations.filter(reg => 
-    reg.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    reg.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     reg.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -265,8 +295,8 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
                 <Mail className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{registrations.filter(r => r.status === 'email_verification').length}</p>
-                <p className="text-sm text-gray-600">Email Verification</p>
+                <p className="text-2xl font-bold">{registrations.filter(r => r.status === 'under_review').length}</p>
+                <p className="text-sm text-gray-600">Under Review</p>
               </div>
             </div>
           </CardContent>
@@ -330,14 +360,14 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
                     <TableRow key={registration.id}>
                       <TableCell>
                         <div>
-                          <p className="font-medium">{registration.fullName}</p>
-                          <p className="text-sm text-gray-600">{registration.experience}</p>
+                          <p className="font-medium">{registration.full_name}</p>
+                          <p className="text-sm text-gray-600">{registration.experience_years ? `${registration.experience_years} years experience` : 'No experience specified'}</p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
                           <p>{registration.email}</p>
-                          <p className="text-gray-600">{registration.phoneNumber}</p>
+                          <p className="text-gray-600">{registration.phone}</p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -345,7 +375,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
                       </TableCell>
                       <TableCell>
                         <p className="text-sm">
-                          {new Date(registration.submittedAt).toLocaleDateString()}
+                          {new Date(registration.created_at).toLocaleDateString()}
                         </p>
                       </TableCell>
                       <TableCell>
@@ -396,7 +426,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
           <DialogHeader>
             <DialogTitle>Agent Registration Details</DialogTitle>
             <DialogDescription>
-              Complete information for {selectedRegistration?.fullName}
+              Complete information for {selectedRegistration?.full_name}
             </DialogDescription>
           </DialogHeader>
           
@@ -405,7 +435,7 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Full Name</Label>
-                  <p className="mt-1">{selectedRegistration.fullName}</p>
+                  <p className="mt-1">{selectedRegistration.full_name}</p>
                 </div>
                 <div>
                   <Label>Email</Label>
@@ -413,15 +443,31 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
                 </div>
                 <div>
                   <Label>Phone Number</Label>
-                  <p className="mt-1">{selectedRegistration.phoneNumber}</p>
+                  <p className="mt-1">{selectedRegistration.phone}</p>
                 </div>
                 <div>
                   <Label>Address</Label>
                   <p className="mt-1">{selectedRegistration.address}</p>
                 </div>
-                <div className="col-span-2">
-                  <Label>Experience</Label>
-                  <p className="mt-1">{selectedRegistration.experience}</p>
+                <div>
+                  <Label>Branch Location</Label>
+                  <p className="mt-1">{selectedRegistration.branch_location}</p>
+                </div>
+                <div>
+                  <Label>Emergency Contact</Label>
+                  <p className="mt-1">{selectedRegistration.emergency_contact}</p>
+                </div>
+                <div>
+                  <Label>Experience (Years)</Label>
+                  <p className="mt-1">{selectedRegistration.experience_years || 'Not specified'}</p>
+                </div>
+                <div>
+                  <Label>Expected Joining Date</Label>
+                  <p className="mt-1">{new Date(selectedRegistration.expected_joining_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label>Email Verified</Label>
+                  <p className="mt-1">{selectedRegistration.email_verified ? 'Yes' : 'No'}</p>
                 </div>
               </div>
               
@@ -430,10 +476,10 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
                 <StatusBadge status={selectedRegistration.status} />
               </div>
               
-              {selectedRegistration.adminNotes && (
+              {selectedRegistration.admin_notes && (
                 <div>
                   <Label>Admin Notes</Label>
-                  <p className="mt-1 text-sm bg-gray-50 p-3 rounded-md">{selectedRegistration.adminNotes}</p>
+                  <p className="mt-1 text-sm bg-gray-50 p-3 rounded-md">{selectedRegistration.admin_notes}</p>
                 </div>
               )}
             </div>
@@ -450,8 +496,8 @@ const AdminDashboardAgentRegistrations: React.FC<AdminDashboardAgentRegistration
             </DialogTitle>
             <DialogDescription>
               {actionType === 'approve' 
-                ? `Approve ${selectedRegistration?.fullName}'s registration?`
-                : `Reject ${selectedRegistration?.fullName}'s registration?`
+                ? `Approve ${selectedRegistration?.full_name}'s registration?`
+                : `Reject ${selectedRegistration?.full_name}'s registration?`
               }
             </DialogDescription>
           </DialogHeader>

@@ -11,10 +11,6 @@ router.use(authorize('admin', 'super_admin'));
 
 // User Management
 router.get('/users', asyncHandler(adminController.getAllUsers));
-router.get('/users/:id', asyncHandler(adminController.getUserById));
-router.put('/users/:id', asyncHandler(adminController.updateUser));
-router.delete('/users/:id', asyncHandler(adminController.deleteUser));
-router.patch('/users/:id/status', asyncHandler(adminController.updateUserStatus));
 
 // Bus Management
 router.get('/buses', asyncHandler(adminController.getAllBuses));
@@ -38,6 +34,16 @@ router.delete('/bookings/:id', asyncHandler(adminController.cancelBooking));
 
 // Dashboard Statistics
 router.get('/statistics', asyncHandler(adminController.getDashboardStatistics));
+
+// Agent Request Management
+router.get('/agent-requests', asyncHandler(adminController.getAgentRequests));
+router.put('/agent-requests/:requestId', asyncHandler(adminController.updateAgentRequestStatus));
+
+// Agent Management
+router.get('/agents', asyncHandler(adminController.getAllAgents));
+router.get('/agents/:id', asyncHandler(adminController.getAgentById));
+router.put('/agents/:id', asyncHandler(adminController.updateAgent));
+router.delete('/agents/:id', asyncHandler(adminController.deleteAgent));
 
 // Database Operations
 router.post('/database/backup', asyncHandler(adminController.createBackup));

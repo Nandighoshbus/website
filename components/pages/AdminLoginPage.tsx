@@ -1,30 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Lock, Shield, UserCheck, Building, Mail } from "lucide-react"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
+import { Eye, EyeOff, Lock, Shield, Mail } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { THEME_CLASSES } from "@/lib/theme"
+import { THEME_CLASSES } from "../../lib/theme"
 import { useRouter } from "next/navigation"
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../lib/supabase'
 
-export default function AgentLoginPage() {
+export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState<"success" | "error" | "">("")
-  // Removed loginType state - this is now agent-only login
-  const router = useRouter()
-
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   })
+  const router = useRouter()
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -32,109 +30,83 @@ export default function AgentLoginPage() {
     if (!formData.email || !formData.password) {
       return "Please fill in all required fields"
     }
-    
     if (!formData.email.includes("@")) {
       return "Please enter a valid email address"
     }
-    
     return null
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     const validationError = validateForm()
     if (validationError) {
       setMessage(validationError)
       setMessageType("error")
       return
     }
-    
     setLoading(true)
     setMessage("")
-    
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/v1/auth/agent/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      // Use Supabase for login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.message || 'Login failed');
-        setMessageType('error');
-        return;
-      }
-
-      if (data.success) {
-        // Store authentication data
-        localStorage.setItem('agent_token', data.data.access_token);
-        localStorage.setItem('agent_refresh_token', data.data.refresh_token);
-        localStorage.setItem('agent_user', JSON.stringify(data.data.user));
-
-        setMessage('Agent login successful!');
-        setMessageType('success');
-        
-        setTimeout(() => {
-          router.push('/agent/dashboard');
-        }, 1000);
+      if (error || !data.user) {
+        setMessage('Invalid email or password.')
+        setMessageType('error')
       } else {
-        setMessage(data.message || 'Login failed');
-        setMessageType('error');
+        // Check role in user_metadata
+        const userRole = data.user.user_metadata?.role || data.user.role
+        if (userRole === 'admin' || userRole === 'super_admin') {
+          setMessage('Admin login successful!')
+          setMessageType('success')
+          setTimeout(() => {
+            router.push('/admin/dashboard')
+          }, 1000)
+        } else {
+          await supabase.auth.signOut()
+          setMessage('Access denied. This account does not have admin privileges.')
+          setMessageType('error')
+        }
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      setMessage('Network error. Please try again.');
-      setMessageType('error');
+      setMessage(error.message || 'An error occurred during login')
+      setMessageType('error')
     }
-
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       {/* Background Image */}
       <div className="absolute inset-0 opacity-10">
         <Image
           src="/images/bus-fleet.jpg"
-          alt="Bus Fleet Background"
+          alt="Admin Background"
           fill
           className="object-cover"
         />
       </div>
-      
       {/* Enhanced Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-blue-900/40 to-slate-900/60"></div>
-
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-purple-900/50 to-slate-900/60"></div>
       <div className="relative z-10 w-full max-w-lg">
-        <Card className={THEME_CLASSES.CARD_GLASS + " shadow-2xl border-white/20"}>
+        <Card className={THEME_CLASSES.CARD_GLASS + " shadow-2xl border-white/30"}>
           <CardHeader className="text-center pb-6">
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl">
-                  <UserCheck className="w-10 h-10 text-white" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Building className="w-4 h-4 text-white" />
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl">
+                  <Shield className="w-10 h-10 text-white" />
                 </div>
               </div>
             </div>
-            
             <CardTitle className="text-3xl font-bold text-white mb-2">
-              Agent Login
+              Admin Login
             </CardTitle>
             <CardDescription className="text-blue-100 text-lg">
-              Sign in to access the Nandighosh Bus Service Agent Portal
+              Sign in to access the Nandighosh Bus Service Admin Portal
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-6">
             {message && (
               <div className={`p-4 rounded-lg text-center ${
@@ -145,9 +117,7 @@ export default function AgentLoginPage() {
                 {message}
               </div>
             )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="text-white text-sm font-medium block">
@@ -159,7 +129,7 @@ export default function AgentLoginPage() {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="Enter agent email"
+                    placeholder="Enter admin email"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
@@ -167,7 +137,6 @@ export default function AgentLoginPage() {
                   />
                 </div>
               </div>
-
               {/* Password Field */}
               <div className="space-y-2">
                 <label htmlFor="password" className="text-white text-sm font-medium block">
@@ -194,12 +163,11 @@ export default function AgentLoginPage() {
                   </button>
                 </div>
               </div>
-
               {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 text-lg font-semibold shadow-2xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white"
+                className="w-full h-12 text-lg font-semibold shadow-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -207,11 +175,10 @@ export default function AgentLoginPage() {
                     Signing In...
                   </div>
                 ) : (
-                  'Sign In as Agent'
+                  "Sign In as Admin"
                 )}
               </Button>
             </form>
-
             {/* Additional Links */}
             <div className="space-y-4 pt-4">
               <div className="text-center">
@@ -222,28 +189,6 @@ export default function AgentLoginPage() {
                   Forgot your password?
                 </Link>
               </div>
-
-
-              <div className="text-center space-y-2">
-                <p className="text-blue-100 text-sm">
-                  Don't have an account?
-                </p>
-                <div className="flex gap-4 justify-center">
-                  <Link
-                    href="/agent/signup"
-                    className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors"
-                  >
-                    Register as Agent
-                  </Link>
-                  <Link
-                    href="/admin/login"
-                    className="text-purple-400 hover:text-purple-300 font-medium text-sm transition-colors"
-                  >
-                    Admin Login
-                  </Link>
-                </div>
-              </div>
-
               <div className="text-center pt-4 border-t border-white/10">
                 <Link
                   href="/"

@@ -3,14 +3,21 @@ import bcrypt from 'bcryptjs';
 
 export const generateTokens = (userId: string) => {
   const payload = { sub: userId };
+  console.log('=== TOKEN GENERATION DEBUG ===');
+  console.log('Generating tokens for userId:', userId);
+  console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+  console.log('JWT_REFRESH_SECRET exists:', !!process.env.JWT_REFRESH_SECRET);
   
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
     expiresIn: process.env.JWT_EXPIRE || '7d'
   } as jwt.SignOptions);
 
-  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET!, {
     expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d'
   } as jwt.SignOptions);
+
+  console.log('Access token generated:', accessToken ? `${accessToken.substring(0, 20)}...` : 'FAILED');
+  console.log('Refresh token generated:', refreshToken ? `${refreshToken.substring(0, 20)}...` : 'FAILED');
 
   return { accessToken, refreshToken };
 };

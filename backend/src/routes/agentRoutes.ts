@@ -46,20 +46,16 @@ router.post('/register', async (req: any, res: any) => {
   }
 });
 
-// Existing authenticated agent routes
-router.get('/profile', authenticate, authorize('agent'), asyncHandler(agentController.getAgentProfile));
-router.patch('/profile', authenticate, authorize('agent'), asyncHandler(agentController.updateAgentProfile));
+// Test endpoint without authentication
+router.get('/test', (_req, res) => {
+  console.log('=== TEST ENDPOINT HIT ===');
+  res.json({ success: true, message: 'Agent routes working', timestamp: new Date().toISOString() });
+});
 
-// Agent bookings and earnings
+// Agent dashboard and booking functionality
+router.get('/stats', authenticate, authorize('agent'), asyncHandler(agentController.getAgentStats));
+router.get('/routes', authenticate, authorize('agent'), asyncHandler(agentController.getAvailableRoutes));
+router.post('/bookings', authenticate, authorize('agent'), asyncHandler(agentController.createBooking));
 router.get('/bookings', authenticate, authorize('agent'), asyncHandler(agentController.getAgentBookings));
-router.get('/earnings', authenticate, authorize('agent'), asyncHandler(agentController.getAgentEarnings));
-router.get('/analytics', authenticate, authorize('agent'), asyncHandler(agentController.getAgentAnalytics));
-
-// Admin agent management
-router.get('/', authenticate, authorize('admin', 'super_admin'), asyncHandler(agentController.getAllAgents));
-router.get('/:agentId', authenticate, authorize('admin', 'super_admin'), asyncHandler(agentController.getAgentById));
-router.patch('/:agentId/verify', authenticate, authorize('admin', 'super_admin'), asyncHandler(agentController.verifyAgent));
-router.patch('/:agentId/status', authenticate, authorize('admin', 'super_admin'), asyncHandler(agentController.updateAgentStatus));
-router.patch('/:agentId/commission', authenticate, authorize('admin', 'super_admin'), asyncHandler(agentController.updateCommissionRate));
 
 export default router;

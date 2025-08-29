@@ -22,6 +22,9 @@ interface AgentFormData {
   branch: string
   customBranch: string
   address: string
+  city: string
+  state: string
+  pincode: string
   emergencyContact: string
   experience: string
   dateOfJoining: string
@@ -45,6 +48,9 @@ export default function AgentSignUpPage() {
     branch: "",
     customBranch: "",
     address: "",
+    city: "",
+    state: "",
+    pincode: "",
     emergencyContact: "",
     experience: "",
     dateOfJoining: ""
@@ -111,22 +117,25 @@ export default function AgentSignUpPage() {
     
     try {
       // Call agent registration API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/agents/register`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/auth/agent/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fullName: formData.fullName,
+          full_name: formData.fullName,
           email: formData.email,
-          phone: formData.phone,
           password: formData.password,
-          branch: formData.branch,
-          customBranch: formData.customBranch,
+          phone: formData.phone,
           address: formData.address,
-          emergencyContact: formData.emergencyContact,
-          experience: formData.experience,
-          dateOfJoining: formData.dateOfJoining
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          business_name: '',
+          business_type: 'individual',
+          experience_years: formData.experience,
+          documents: '',
+          reason: `Interested in joining as agent. Experience: ${formData.experience}. Expected joining date: ${formData.dateOfJoining}`
         })
       })
 
@@ -139,7 +148,8 @@ export default function AgentSignUpPage() {
           router.push('/agent/login')
         }, 3000)
       } else {
-        setMessage(data.error || "Failed to submit agent registration request")
+        console.error('Registration error:', data)
+        setMessage(data.message || data.error || "Failed to submit agent registration request")
         setMessageType("error")
       }
     } catch (error: any) {
@@ -322,17 +332,63 @@ export default function AgentSignUpPage() {
               </div>
 
               {/* Address */}
-              <div className="space-y-2">
-                <Label htmlFor="address" className="text-white">Address</Label>
-                <Textarea
-                  id="address"
-                  name="address"
-                  placeholder="Enter your address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="bg-gray-800/90 border-gray-600/50 text-white font-medium placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg focus:shadow-xl"
-                />
+              <div className="space-y-4">
+                <Label className="text-white text-lg font-semibold">Address Details</Label>
+                
+                {/* Street Address */}
+                <div className="space-y-2">
+                  <Label htmlFor="address" className="text-white">Street Address</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    placeholder="Enter street address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="bg-gray-800/90 border-gray-600/50 text-white font-medium placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg focus:shadow-xl"
+                  />
+                </div>
+
+                {/* City and State */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-white">City</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      placeholder="Enter city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="bg-gray-800/90 border-gray-600/50 text-white font-medium placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg focus:shadow-xl"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="state" className="text-white">State</Label>
+                    <Input
+                      id="state"
+                      name="state"
+                      placeholder="Enter state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      className="bg-gray-800/90 border-gray-600/50 text-white font-medium placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg focus:shadow-xl"
+                    />
+                  </div>
+                </div>
+
+                {/* Pincode */}
+                <div className="space-y-2">
+                  <Label htmlFor="pincode" className="text-white">Pincode</Label>
+                  <Input
+                    id="pincode"
+                    name="pincode"
+                    placeholder="Enter pincode"
+                    value={formData.pincode}
+                    onChange={handleInputChange}
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    className="bg-gray-800/90 border-gray-600/50 text-white font-medium placeholder:text-gray-300 focus:border-purple-400/60 focus:bg-gray-700/90 backdrop-blur-sm rounded-lg transition-all duration-200 shadow-lg focus:shadow-xl"
+                  />
+                </div>
               </div>
 
               {/* Emergency Contact */}

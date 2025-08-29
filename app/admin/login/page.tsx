@@ -107,13 +107,14 @@ function AdminLoginForm() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Need help? Contact system administrator</p>
-            <p className="mt-2">
-              <strong>Demo Credentials:</strong><br />
-              Email: admin@nandighosh.com<br />
-              Password: admin123
-            </p>
+          <div className="mt-6 text-center">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => window.location.href = '/'}
+            >
+              ← Back to Homepage
+            </Button>
           </div>
         </CardContent>
       </Card>
