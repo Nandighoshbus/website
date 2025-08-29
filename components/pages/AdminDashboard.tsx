@@ -314,7 +314,8 @@ export default function AdminDashboard() {
         return
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests/${request.id}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+      const response = await fetch(`${baseUrl}/api/v1/admin/agent-requests/${request.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -353,7 +354,8 @@ export default function AdminDashboard() {
         return
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1'}/admin/agent-requests/${request.id}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+      const response = await fetch(`${baseUrl}/api/v1/admin/agent-requests/${request.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
