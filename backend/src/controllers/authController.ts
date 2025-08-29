@@ -328,12 +328,28 @@ export const agentLogin = async (req: Request, res: Response): Promise<void> => 
     const storedPassword = agent.password || agent.verification_documents?.password;
     console.log('Password verification:', { 
       storedPassword: storedPassword ? 'exists' : 'missing', 
-      inputPassword: password ? 'provided' : 'missing',
-      match: storedPassword === password 
+      inputPassword: password ? 'provided' : 'missing'
     });
     
-    if (!storedPassword || storedPassword !== password) {
-      console.log('Password mismatch or missing stored password');
+    if (!storedPassword) {
+      console.log('No stored password found');
+      throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+    }
+
+    // Check if password is bcrypt hashed or plain text
+    let isPasswordValid = false;
+    if (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$')) {
+      // Bcrypt hashed password
+      isPasswordValid = await comparePassword(password, storedPassword);
+    } else {
+      // Plain text password (for testing/development)
+      isPasswordValid = password === storedPassword;
+    }
+    
+    console.log('Password match result:', isPasswordValid);
+    
+    if (!isPasswordValid) {
+      console.log('Password verification failed');
       throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
     }
 

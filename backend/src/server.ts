@@ -178,9 +178,10 @@ class ScalableServer {
     // Enhanced CORS configuration
     const allowedOrigins = [
       process.env.FRONTEND_URL || 'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:3003'
+      'https://www.nandighoshbus.com',
+      'https://nandighoshbus.com',
+      'https://nandighosh-bus-service.vercel.app',
+      'https://nandighosh-bus-service.netlify.app'
     ];
     
     if (process.env.ADDITIONAL_ORIGINS) {
