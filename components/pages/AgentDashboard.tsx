@@ -69,7 +69,7 @@ export default function AgentDashboard() {
       
       if (token) {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-        const response = await fetch(`${baseUrl}/api/v1/agent/stats`, {
+        const response = await fetch(`${baseUrl}/api/v1/agents/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

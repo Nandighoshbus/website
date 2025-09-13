@@ -110,7 +110,7 @@ export default function BookingForm() {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-      const url = `${baseUrl}/api/v1/agent/routes`
+      const url = `${baseUrl}/api/v1/agents/routes`
       console.log('BookingForm: Fetching from URL:', url)
       
       const response = await fetch(url, {
@@ -166,7 +166,7 @@ export default function BookingForm() {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/v1/agent/schedules?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}&passengers=${passengers}`, {
+      const response = await fetch(`${baseUrl}/api/v1/agents/schedules?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}&passengers=${passengers}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -291,7 +291,7 @@ export default function BookingForm() {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/v1/agent/bookings`, {
+      const response = await fetch(`${baseUrl}/api/v1/agents/bookings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
