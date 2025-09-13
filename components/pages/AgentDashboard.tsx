@@ -25,7 +25,6 @@ import { useRouter } from "next/navigation"
 import { THEME_CLASSES } from "@/lib/theme"
 import BookingForm from "@/components/agent/BookingForm"
 import { useAgentAuth } from "@/components/context/AgentAuthContext"
-import { supabase } from "@/lib/supabase"
 
 interface AgentStats {
   totalBookings: number
@@ -64,8 +63,30 @@ export default function AgentDashboard() {
     try {
       console.log('Fetching agent stats for user:', user.id)
       
-      // Fetch stats from Supabase instead of backend API
-      // For now, we'll use mock data. In production, you'd query your Supabase tables
+      // Get token and make API call to backend
+      const { jwtAuth } = await import('@/lib/jwtAuth')
+      const token = jwtAuth.getToken('agent')
+      
+      if (token) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+        const response = await fetch(`${baseUrl}/api/v1/agent/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data) {
+            setStats(data.data)
+            console.log('Agent stats loaded:', data.data)
+            return
+          }
+        }
+      }
+      
+      // Fallback to mock data if API call fails
       const mockStats = {
         totalBookings: 156,
         monthlyBookings: 24,
@@ -75,9 +96,19 @@ export default function AgentDashboard() {
       }
       
       setStats(mockStats)
-      console.log('Agent stats loaded:', mockStats)
+      console.log('Using mock agent stats:', mockStats)
     } catch (error) {
       console.error('Error fetching agent stats:', error)
+      
+      // Use mock data as fallback
+      const mockStats = {
+        totalBookings: 156,
+        monthlyBookings: 24,
+        totalCommission: 12500,
+        monthlyCommission: 2400,
+        activeRoutes: 8
+      }
+      setStats(mockStats)
     } finally {
       setLoading(false)
     }

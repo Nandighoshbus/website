@@ -47,22 +47,24 @@ interface Passenger {
   gender: 'male' | 'female' | 'other'
   phone: string
   email: string
-  id_type: 'aadhar' | 'passport' | 'driving_license' | 'voter_id'
+  id_type: 'aadhar' | 'pan' | 'passport' | 'driving_license'
   id_number: string
 }
 
 interface BookingData {
-  scheduleId: string
-  passengers: any[]
-  journeyDate: string
-  seatNumbers: string[]
-  paymentMethod: string
-  contactDetails: any
+  route_id: string
+  schedule_id: string
+  journey_date: string
+  passengers: Passenger[]
+  contact_name: string
+  contact_phone: string
+  contact_email: string
+  payment_method: 'cash' | 'upi' | 'card'
+  special_requests?: string
 }
 
 export default function BookingForm() {
   const [routes, setRoutes] = useState<Route[]>([])
-  const [schedules, setSchedules] = useState<Schedule[]>([])
   const [cities, setCities] = useState<string[]>([])
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null)
@@ -158,20 +160,17 @@ export default function BookingForm() {
       if (response.ok) {
         const data = await response.json()
         if (data.success && data.data) {
-          setSchedules(data.data)
+          setRoutes(data.data)
         } else {
-          setSchedules([])
+          setRoutes([])
           setError('No schedules found for the selected route and date')
         }
       } else {
         const errorData = await response.json()
-        setError(errorData.message || 'Failed to search schedules')
-        setSchedules([])
-      }
     } catch (error) {
       console.error('Failed to search schedules:', error)
       setError('Failed to search schedules')
-      setSchedules([])
+      setRoutes([])
     } finally {
       setSearching(false)
     }
@@ -245,7 +244,7 @@ export default function BookingForm() {
     setError('')
 
     try {
-      // Get token from jwtAuth
+      // Get token from jwtAuth instead of localStorage
       const { jwtAuth } = await import('@/lib/jwtAuth')
       const token = jwtAuth.getToken('agent')
       
@@ -267,12 +266,13 @@ export default function BookingForm() {
           idProofNumber: passenger.id_number
         })),
         journeyDate: journeyDate,
-        seatNumbers: Array.from({length: passengers.length}, (_, i) => `A${i + 1}`),
+        seatNumbers: Array.from({length: passengers.length}, (_, i) => `A${i + 1}`), // Generate seat numbers
         paymentMethod: paymentMethod,
         contactDetails: contactDetails
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
+      // Fixed: Use correct endpoint '/api/v1/agent/bookings' (not 'agents')
       const response = await fetch(`${baseUrl}/api/v1/agent/bookings`, {
         method: 'POST',
         headers: {
@@ -353,7 +353,6 @@ export default function BookingForm() {
                     className="w-full h-12 px-3 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400/20 focus:border-blue-400 bg-white"
                     value={fromCity}
                     onChange={(e) => setFromCity(e.target.value)}
-                    aria-label="Select departure city"
                   >
                     <option value="">Select departure city</option>
                     {cities.map((city) => (
@@ -372,7 +371,6 @@ export default function BookingForm() {
                       className="w-full h-12 px-3 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400/20 focus:border-blue-400 bg-white"
                       value={toCity}
                       onChange={(e) => setToCity(e.target.value)}
-                      aria-label="Select destination city"
                     >
                       <option value="">Select destination city</option>
                       {cities.map((city) => (
@@ -430,38 +428,47 @@ export default function BookingForm() {
               </Button>
             </div>
 
-            {/* Schedule Results */}
-            {schedules.length > 0 && (
+            {/* Route Results */}
+            {routes.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-blue-900">
-                  Available Schedules ({schedules.length} found)
+                  Available Routes ({routes.length} found)
                 </h3>
                 <div className="grid gap-4">
-                  {schedules.map((schedule) => (
-                    <Card key={schedule.id} className="border-2 hover:border-orange-300 transition-colors">
+                  {routes.map((route) => (
+                    <Card key={route.id} className="border-2 hover:border-orange-300 transition-colors">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{schedule.buses.bus_number}</h4>
-                            <p className="text-sm text-gray-600">{schedule.buses.bus_type}</p>
+                            <h4 className="text-lg font-semibold text-gray-900">{route.name}</h4>
+                            <p className="text-sm text-gray-600">{route.source_city} → {route.destination_city}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm text-gray-500">Fare</p>
-                            <p className="font-semibold text-lg">₹{schedule.fare}</p>
+                            <p className="text-sm text-gray-500">Distance</p>
+                            <p className="font-semibold">{route.distance_km} km</p>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-blue-500" />
-                            <span>{schedule.departure_time} - {schedule.arrival_time}</span>
-                          </div>
-                          <Button
-                            type="button"
-                            onClick={() => setSelectedSchedule(schedule)}
-                            className={`${selectedSchedule?.id === schedule.id ? 'bg-green-600' : 'bg-blue-600'} hover:bg-blue-700 text-white`}
-                          >
-                            {selectedSchedule?.id === schedule.id ? 'Selected' : 'Select'}
-                          </Button>
+                        <div className="space-y-2">
+                          <Label className="text-blue-800">Select Schedule</Label>
+                          <Select onValueChange={(value) => {
+                            const schedule = route.schedules.find(s => s.id === value)
+                            setSelectedRoute(route)
+                            setSelectedSchedule(schedule || null)
+                          }}>
+                            <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                              <SelectValue placeholder="Choose departure time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {route.schedules.map((schedule) => (
+                                <SelectItem key={schedule.id} value={schedule.id}>
+                                  <div className="flex items-center justify-between w-full">
+                                    <span>{schedule.departure_time} - {schedule.arrival_time}</span>
+                                    <span className="ml-4 font-semibold">₹{schedule.fare}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </CardContent>
                     </Card>
@@ -482,8 +489,24 @@ export default function BookingForm() {
               </div>
             )}
 
-            {/* Passenger Details */}
+            {/* Journey Date */}
             {selectedSchedule && (
+              <div>
+                <Label htmlFor="journeyDate" className="text-blue-800">Journey Date</Label>
+                <Input
+                  id="journeyDate"
+                  type="date"
+                  value={journeyDate}
+                  onChange={(e) => setJourneyDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  className="border-blue-200 focus:border-blue-400"
+                />
+              </div>
+            )}
+
+            {/* Passenger Details */}
+            {selectedSchedule && journeyDate && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-blue-900 flex items-center gap-2">
@@ -587,9 +610,9 @@ export default function BookingForm() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="aadhar">Aadhar Card</SelectItem>
+                            <SelectItem value="pan">PAN Card</SelectItem>
                             <SelectItem value="passport">Passport</SelectItem>
                             <SelectItem value="driving_license">Driving License</SelectItem>
-                            <SelectItem value="voter_id">Voter ID</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -659,10 +682,7 @@ export default function BookingForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-blue-800">Payment Method</Label>
-                    <Select
-                      value={paymentMethod}
-                      onValueChange={(value: 'cash' | 'upi' | 'card') => setPaymentMethod(value)}
-                    >
+                    <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
                       <SelectTrigger className="border-blue-200 focus:border-blue-400">
                         <SelectValue />
                       </SelectTrigger>
@@ -675,17 +695,19 @@ export default function BookingForm() {
                   </div>
                   
                   <div className="flex items-end">
-                    <div className="w-full">
-                      <Label className="text-blue-800">Total Fare</Label>
-                      <div className="h-10 px-3 border border-blue-200 rounded-md bg-green-50 flex items-center">
-                        <span className="text-green-800 font-bold text-lg">₹{calculateTotalFare()}</span>
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200 w-full">
+                      <div className="text-green-800 font-semibold">
+                        Total Fare: ₹{calculateTotalFare()}
+                      </div>
+                      <div className="text-green-600 text-sm">
+                        {passengers.length} passenger(s) × ₹{selectedSchedule?.fare || 0}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-blue-800">Special Requests</Label>
+                  <Label className="text-blue-800">Special Requests (Optional)</Label>
                   <Textarea
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
@@ -702,7 +724,7 @@ export default function BookingForm() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold text-lg"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3"
                 >
                   {loading ? 'Creating Booking...' : `Book ${passengers.length} Ticket(s) - ₹${calculateTotalFare()}`}
                 </Button>
