@@ -16,6 +16,8 @@ export interface AuthTokens {
 export interface AuthResponse {
   success: boolean;
   message: string;
+  error?: string;
+  retryAfter?: number;
   data?: {
     user: User;
     access_token: string;

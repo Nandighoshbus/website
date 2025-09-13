@@ -1,7 +1,15 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { jwtAuth, User } from '@/lib/jwtAuth'
+import { supabase } from '@/lib/supabase'
+
+interface User {
+  id: string
+  email: string
+  role: string
+  full_name?: string
+  is_active: boolean
+}
 
 interface AgentAuthContextType {
   user: User | null
@@ -19,24 +27,45 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication on mount
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        if (jwtAuth.isAuthenticated('agent')) {
-          const userData = jwtAuth.getUser('agent')
-          if (userData && userData.role === 'agent') {
+        console.log('AgentAuthContext: Checking authentication...')
+        
+        // Get current Supabase session
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user) {
+          console.log('AgentAuthContext: Found session:', session.user)
+          
+          // Check if user has agent role
+          const userRole = session.user.user_metadata?.role
+          console.log('AgentAuthContext: User role:', userRole)
+          
+          if (userRole === 'agent') {
+            const userData: User = {
+              id: session.user.id,
+              email: session.user.email || '',
+              role: userRole,
+              full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+              is_active: true
+            }
+            console.log('AgentAuthContext: Setting user:', userData)
             setUser(userData)
           } else {
-            jwtAuth.logout('agent')
+            console.log('AgentAuthContext: Invalid user role, logging out')
+            await supabase.auth.signOut()
             setUser(null)
           }
         } else {
+          console.log('AgentAuthContext: No session found')
           setUser(null)
         }
       } catch (error) {
-        console.error('Error checking auth:', error)
-        jwtAuth.logout('agent')
+        console.error('AgentAuthContext: Error checking auth:', error)
+        await supabase.auth.signOut()
         setUser(null)
       } finally {
+        console.log('AgentAuthContext: Authentication check complete')
         setIsLoading(false)
       }
     }
@@ -49,16 +78,40 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     try {
       console.log('AgentAuthContext: Starting login for:', email)
-      const result = await jwtAuth.agentLogin(email, password)
       
-      if (result.success && result.data) {
-        setUser(result.data.user)
+      // Use Supabase for login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      
+      if (error || !data.user) {
+        console.error('AgentAuthContext: Login failed:', error?.message)
+        return { success: false, error: error?.message || 'Login failed' }
+      }
+      
+      // Check if user has agent role
+      const userRole = data.user.user_metadata?.role
+      console.log('AgentAuthContext: User role after login:', userRole)
+      
+      if (userRole === 'agent') {
+        const userData: User = {
+          id: data.user.id,
+          email: data.user.email || '',
+          role: userRole,
+          full_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name,
+          is_active: true
+        }
+        console.log('AgentAuthContext: Setting user:', userData)
+        setUser(userData)
         return { success: true }
       } else {
-        setUser(null)
-        return { success: false, error: result.message || 'Login failed' }
+        console.error('AgentAuthContext: User does not have agent role:', userRole)
+        await supabase.auth.signOut()
+        return { success: false, error: 'Access denied. This account does not have agent privileges.' }
       }
     } catch (error: any) {
+      console.error('AgentAuthContext: Login error:', error)
       setUser(null)
       return { success: false, error: error.message || 'Login failed' }
     } finally {
@@ -67,9 +120,14 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   // Logout function
-  const logout = useCallback(() => {
-    jwtAuth.logout('agent')
+  const logout = useCallback(async () => {
+    console.log('AgentAuthContext: Logging out')
     setUser(null)
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('AgentAuthContext: Logout error:', error)
+    }
   }, [])
 
   const value = {

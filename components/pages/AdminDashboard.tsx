@@ -158,10 +158,34 @@ export default function AdminDashboard() {
   const { user: currentUser, isLoading: authLoading, logout } = useAdminAuth()
 
   useEffect(() => {
+    console.log('AdminDashboard: useEffect triggered', { 
+      currentUser: !!currentUser, 
+      authLoading, 
+      userRole: currentUser?.role 
+    })
+    
     if (currentUser && !authLoading) {
+      console.log('AdminDashboard: Conditions met, calling fetchData')
       fetchData()
+    } else {
+      console.log('AdminDashboard: Conditions not met', { 
+        hasUser: !!currentUser, 
+        isLoading: authLoading 
+      })
     }
   }, [currentUser, authLoading])
+
+  // Additional effect to handle cases where auth context loads after component mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!authLoading && currentUser && users.length === 0) {
+        console.log('AdminDashboard: Fallback data fetch triggered')
+        fetchData()
+      }
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [authLoading, currentUser, users.length])
 
   // Show loading while authentication is being verified
   if (authLoading) {
@@ -1358,6 +1382,7 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
                       <input
                         type="checkbox"
                         id={`day-${day}`}
+                        aria-label={`Operating on ${day}`}
                         checked={(formData.operating_days || []).includes(day)}
                         onChange={(e) => {
                           const currentDays = formData.operating_days || [];
@@ -1432,6 +1457,7 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
                   <input
                     type="checkbox"
                     id="bus_is_active"
+                    aria-label="Bus is Active"
                     checked={formData.is_active !== false}
                     onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                     className="rounded border-gray-300"
@@ -1454,6 +1480,7 @@ function EditModal({ isOpen, onClose, entity, onSave }: EditModalProps) {
                 <input
                   type="checkbox"
                   id="route_is_active"
+                  aria-label="Route is Active"
                   checked={formData.is_active !== false}
                   onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                   className="rounded border-gray-300"

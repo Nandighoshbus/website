@@ -221,7 +221,7 @@ class ScalableServer {
     const createRateLimiter = () => {
       const config: any = {
         windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-        max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
+        max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'), // Increased for development
         message: {
           error: 'Too many requests from this IP, please try again later.',
           retryAfter: Math.ceil(parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000') / 1000)

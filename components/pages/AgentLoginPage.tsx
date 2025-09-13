@@ -1,15 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Eye, EyeOff, Lock, Shield, UserCheck, Building, Mail } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { THEME_CLASSES } from "@/lib/theme"
+import { THEME_CLASSES } from "../../lib/theme"
 import { useRouter } from "next/navigation"
-import { useAgentAuth } from '@/components/context/AgentAuthContext'
+import { useAgentAuth } from '../context/AgentAuthContext'
 
 export default function AgentLoginPage() {
   const [showPassword, setShowPassword] = useState(false)

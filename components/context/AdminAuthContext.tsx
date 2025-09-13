@@ -19,29 +19,39 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication on mount
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
+        console.log('AdminAuthContext: Checking authentication...')
+        
         if (jwtAuth.isAuthenticated('admin')) {
           const userData = jwtAuth.getUser('admin')
+          console.log('AdminAuthContext: Found user data:', userData)
+          
           if (userData && ['admin', 'super_admin'].includes(userData.role)) {
+            console.log('AdminAuthContext: User is valid admin, setting user state')
             setUser(userData)
           } else {
+            console.log('AdminAuthContext: Invalid user role, logging out')
             jwtAuth.logout('admin')
             setUser(null)
           }
         } else {
+          console.log('AdminAuthContext: No authentication found')
           setUser(null)
         }
       } catch (error) {
-        console.error('Error checking auth:', error)
+        console.error('AdminAuthContext: Error checking auth:', error)
         jwtAuth.logout('admin')
         setUser(null)
       } finally {
+        console.log('AdminAuthContext: Authentication check complete, setting loading to false')
         setIsLoading(false)
       }
     }
 
-    checkAuth()
+    // Add a small delay to ensure localStorage is ready
+    const timer = setTimeout(checkAuth, 100)
+    return () => clearTimeout(timer)
   }, [])
 
   // Login function
@@ -56,8 +66,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(result.data.user)
         return result
       } else {
-        console.error('AdminAuthContext: Login failed:', result.message)
-        throw new Error(result.message || 'Login failed')
+        console.error('AdminAuthContext: Login failed:', result.message || result.error)
+        const errorMessage = result.message || result.error || 'Login failed'
+        if (result.retryAfter) {
+          throw new Error(`${errorMessage}. Please try again in ${Math.ceil(result.retryAfter / 60)} minutes.`)
+        }
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('AdminAuthContext: Login error:', error)

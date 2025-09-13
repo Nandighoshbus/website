@@ -10,50 +10,55 @@ export const getAgentStats = async (req: Request, res: Response): Promise<void> 
   console.log('Request userId:', req.userId);
   console.log('Request userRole:', req.userRole);
   
-  const agentUserId = req.userId;
+  const agentId = req.userId; // This is already the agent ID from auth middleware
 
-  if (!agentUserId) {
-    console.log('ERROR: No agentUserId found in request');
+  if (!agentId) {
+    console.log('ERROR: No agentId found in request');
     throw new AppError('Agent authentication required', 401, 'UNAUTHORIZED');
   }
 
   try {
-    // Get agent ID from user ID
+    // Verify agent exists and get basic info
     const { data: agent, error: agentError } = await supabaseAdmin
       .from('agents')
-      .select('id')
-      .eq('user_id', agentUserId)
+      .select('id, is_active')
+      .eq('id', agentId)
       .single();
 
     if (agentError || !agent) {
+      console.log('Agent not found with ID:', agentId, 'Error:', agentError);
       throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
+    }
+
+    if (!agent.is_active) {
+      throw new AppError('Agent account is inactive', 403, 'AGENT_INACTIVE');
     }
 
     // Get total bookings
     const { data: totalBookings } = await supabaseAdmin
       .from('bookings')
       .select('id', { count: 'exact' })
-      .eq('agent_id', agent.id);
+      .eq('agent_id', agentId);
 
     // Get monthly bookings
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
     const { data: monthlyBookings } = await supabaseAdmin
       .from('bookings')
       .select('id', { count: 'exact' })
-      .eq('agent_id', agent.id)
+      .eq('agent_id', agentId)
       .gte('journey_date', `${currentMonth}-01`);
 
     // Get total commission
     const { data: totalCommission } = await supabaseAdmin
       .from('agent_earnings')
       .select('commission_amount')
-      .eq('agent_id', agent.id);
+      .eq('agent_id', agentId);
 
     // Get monthly commission
     const { data: monthlyCommission } = await supabaseAdmin
       .from('agent_earnings')
       .select('commission_amount')
-      .eq('agent_id', agent.id)
+      .eq('agent_id', agentId)
       .gte('earning_date', `${currentMonth}-01`);
 
     const stats = {
@@ -178,14 +183,14 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
   } = req.body;
 
   // Get agent ID from authenticated user
-  const agentUserId = req.userId;
+  const agentId = req.userId; // This is already the agent ID from auth middleware
   
   try {
     // Get agent details
     const { data: agent, error: agentError } = await supabaseAdmin
       .from('agents')
       .select('id, commission_rate')
-      .eq('user_id', agentUserId)
+      .eq('id', agentId)
       .single();
 
     if (agentError || !agent) {
@@ -317,15 +322,15 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
 
 // Get agent's bookings
 export const getAgentBookings = async (req: Request, res: Response): Promise<void> => {
-  const agentUserId = req.userId;
+  const agentId = req.userId; // This is already the agent ID from auth middleware
   const { page = 1, limit = 10, status } = req.query;
 
   try {
-    // Get agent ID
+    // Verify agent exists
     const { data: agent, error: agentError } = await supabaseAdmin
       .from('agents')
       .select('id')
-      .eq('user_id', agentUserId)
+      .eq('id', agentId)
       .single();
 
     if (agentError || !agent) {
@@ -344,7 +349,7 @@ export const getAgentBookings = async (req: Request, res: Response): Promise<voi
           buses (bus_number, bus_type)
         )
       `)
-      .eq('agent_id', agent.id)
+      .eq('agent_id', agentId)
       .order('created_at', { ascending: false });
 
     if (status) {

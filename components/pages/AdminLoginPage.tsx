@@ -48,8 +48,10 @@ export default function AdminLoginPage() {
       setMessage("Admin login successful!")
       setMessageType("success")
       
-      // Immediate redirect without delay
-      router.push("/admin/dashboard")
+      // Small delay to allow auth context to update
+      setTimeout(() => {
+        router.push("/admin/dashboard")
+      }, 500)
     } catch (error: any) {
       console.error('AdminLoginPage: Login failed:', error)
       setMessage(error.message || "Invalid email or password.")
