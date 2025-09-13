@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Clock, Users, CreditCard, Phone, User, AlertCircle, ArrowUpDown } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -596,38 +597,97 @@ export default function BookingForm() {
               </Button>
             </div>
 
-            {/* Schedule Results */}
-            {schedules.length > 0 && (
+            {/* Route Results */}
+            {routes.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-blue-900">
-                  Available Schedules ({schedules.length} found)
+                <h3 className="text-xl font-bold text-blue-900 mb-4">
+                  Available Routes ({routes.length} found)
                 </h3>
                 <div className="grid gap-4">
-                  {schedules.map((schedule) => (
-                    <Card key={schedule.id} className="border-2 hover:border-orange-300 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
+                  {routes.map((route) => (
+                    <Card key={route.id} className="border-2 hover:border-orange-300 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{schedule.buses.bus_number}</h4>
-                            <p className="text-sm text-gray-600">{schedule.buses.bus_type}</p>
+                            <h4 className="text-lg font-semibold text-gray-900">{route.name}</h4>
+                            <p className="text-sm text-gray-600">
+                              {route.source_city} → {route.destination_city} • {route.distance_km} km
+                            </p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm text-gray-500">Fare</p>
-                            <p className="font-semibold text-lg">₹{schedule.fare}</p>
-                          </div>
+                          <Badge variant="outline" className="text-green-600 border-green-200">
+                            {route.schedules.length} schedule{route.schedules.length !== 1 ? 's' : ''} available
+                          </Badge>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-blue-500" />
-                            <span>{schedule.departure_time} - {schedule.arrival_time}</span>
+
+                        <div className="space-y-3">
+                          <Label className="text-blue-800 font-medium">Select Schedule</Label>
+                          <div className="grid gap-3">
+                            {route.schedules.map((schedule) => (
+                              <div
+                                key={schedule.id}
+                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                  selectedSchedule?.id === schedule.id
+                                    ? 'border-orange-400 bg-orange-50'
+                                    : 'border-gray-200 hover:border-orange-200 hover:bg-orange-25'
+                                }`}
+                                onClick={() => {
+                                  setSelectedRoute(route)
+                                  setSelectedSchedule(schedule)
+                                }}
+                              >
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h5 className="font-semibold text-gray-900">
+                                      {schedule.buses.bus_number} • {schedule.buses.bus_type}
+                                    </h5>
+                                    <p className="text-sm text-gray-600">
+                                      {schedule.buses.total_seats} seats • {schedule.buses.amenities.join(', ')}
+                                    </p>
+                                  </div>
+                                  {selectedSchedule?.id === schedule.id && (
+                                    <Badge className="bg-green-500 text-white">Selected</Badge>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  <div className="text-center">
+                                    <Clock className="w-4 h-4 mx-auto mb-1 text-blue-600" />
+                                    <p className="text-xs text-gray-500">Departure</p>
+                                    <p className="font-semibold">{schedule.departure_time}</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <Clock className="w-4 h-4 mx-auto mb-1 text-green-600" />
+                                    <p className="text-xs text-gray-500">Arrival</p>
+                                    <p className="font-semibold">{schedule.arrival_time}</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <ArrowUpDown className="w-4 h-4 mx-auto mb-1 text-gray-600" />
+                                    <p className="text-xs text-gray-500">Duration</p>
+                                    <p className="font-semibold">{route.estimated_duration}</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <CreditCard className="w-4 h-4 mx-auto mb-1 text-orange-600" />
+                                    <p className="text-xs text-gray-500">Fare</p>
+                                    <p className="font-semibold">₹{schedule.fare}</p>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">
+                                      Operating: {schedule.operating_days.join(', ')}
+                                    </span>
+                                    <div className="text-lg font-bold text-blue-600">
+                                      Total: ₹{(schedule.fare * passengers.length).toLocaleString('en-IN')}
+                                      <span className="text-sm text-gray-500 font-normal ml-1">
+                                        for {passengers.length} passenger{passengers.length > 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <Button
-                            type="button"
-                            onClick={() => setSelectedSchedule(schedule)}
-                            className={`${selectedSchedule?.id === schedule.id ? 'bg-green-600' : 'bg-blue-600'} hover:bg-blue-700 text-white`}
-                          >
-                            {selectedSchedule?.id === schedule.id ? 'Selected' : 'Select'}
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -636,14 +696,41 @@ export default function BookingForm() {
               </div>
             )}
 
+            {/* No Routes Found */}
+            {routes.length === 0 && !searching && fromCity && toCity && journeyDate && (
+              <div className="mt-8 text-center py-8 bg-gray-50 rounded-lg">
+                <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <MapPin className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Routes Found</h3>
+                <p className="text-gray-600">
+                  No buses available for the selected route and date. Try different cities or dates.
+                </p>
+              </div>
+            )}
+
             {selectedSchedule && (
-              <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                <h4 className="font-medium text-indigo-900 mb-2">Selected Bus Details</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm text-indigo-700">
-                  <div>Bus: {selectedSchedule.buses.bus_number}</div>
-                  <div>Type: {selectedSchedule.buses.bus_type}</div>
-                  <div>Seats: {selectedSchedule.buses.total_seats}</div>
-                  <div>Fare: ₹{selectedSchedule.fare}</div>
+              <div className="p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200">
+                <h4 className="font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Selected Journey Details
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="bg-white p-3 rounded-lg">
+                    <p className="text-gray-500 text-xs">Bus</p>
+                    <p className="font-semibold text-gray-900">{selectedSchedule.buses.bus_number}</p>
+                    <p className="text-gray-600 text-xs">{selectedSchedule.buses.bus_type}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg">
+                    <p className="text-gray-500 text-xs">Schedule</p>
+                    <p className="font-semibold text-gray-900">{selectedSchedule.departure_time} - {selectedSchedule.arrival_time}</p>
+                    <p className="text-gray-600 text-xs">{journeyDate}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg">
+                    <p className="text-gray-500 text-xs">Total Fare</p>
+                    <p className="font-semibold text-green-600 text-lg">₹{(selectedSchedule.fare * passengers.length).toLocaleString('en-IN')}</p>
+                    <p className="text-gray-600 text-xs">{passengers.length} passenger{passengers.length > 1 ? 's' : ''}</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -666,10 +753,11 @@ export default function BookingForm() {
                 </div>
 
                 {passengers.map((passenger, index) => (
-                  <Card key={index} className="border-blue-200">
-                    <CardHeader className="pb-3">
+                  <Card key={index} className="border-2 border-blue-100 hover:border-blue-200 transition-colors">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg pb-4">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base text-blue-900">
+                        <CardTitle className="text-lg text-blue-900 flex items-center gap-2">
+                          <User className="w-5 h-5" />
                           Passenger {index + 1}
                         </CardTitle>
                         {passengers.length > 1 && (
@@ -678,94 +766,107 @@ export default function BookingForm() {
                             variant="outline"
                             size="sm"
                             onClick={() => removePassenger(index)}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                           >
                             Remove
                           </Button>
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-blue-800">Full Name</Label>
-                        <Input
-                          value={passenger.name}
-                          onChange={(e) => updatePassenger(index, 'name', e.target.value)}
-                          required
-                          className="border-blue-200 focus:border-blue-400"
-                        />
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800 flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            Full Name *
+                          </Label>
+                          <Input
+                            value={passenger.name}
+                            onChange={(e) => updatePassenger(index, 'name', e.target.value)}
+                            placeholder="Enter full name"
+                            required
+                            className="h-11 border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800">Age *</Label>
+                          <Input
+                            type="number"
+                            value={passenger.age || ''}
+                            onChange={(e) => updatePassenger(index, 'age', parseInt(e.target.value) || 0)}
+                            placeholder="Enter age"
+                            min="1"
+                            max="120"
+                            required
+                            className="h-11 border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800">Gender *</Label>
+                          <Select
+                            value={passenger.gender}
+                            onValueChange={(value) => updatePassenger(index, 'gender', value)}
+                          >
+                            <SelectTrigger className="h-11 border-blue-200 focus:border-blue-400">
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="male">Male</SelectItem>
+                              <SelectItem value="female">Female</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800 flex items-center gap-1">
+                            <Phone className="w-3 h-3" />
+                            Phone Number *
+                          </Label>
+                          <Input
+                            value={passenger.phone}
+                            onChange={(e) => updatePassenger(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            required
+                            className="h-11 border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800">Email Address *</Label>
+                          <Input
+                            type="email"
+                            value={passenger.email}
+                            onChange={(e) => updatePassenger(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            required
+                            className="h-11 border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-blue-800">ID Type *</Label>
+                          <Select
+                            value={passenger.id_type}
+                            onValueChange={(value) => updatePassenger(index, 'id_type', value)}
+                          >
+                            <SelectTrigger className="h-11 border-blue-200 focus:border-blue-400">
+                              <SelectValue placeholder="Select ID type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="aadhar">Aadhar Card</SelectItem>
+                              <SelectItem value="passport">Passport</SelectItem>
+                              <SelectItem value="driving_license">Driving License</SelectItem>
+                              <SelectItem value="voter_id">Voter ID</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div>
-                        <Label className="text-blue-800">Age</Label>
-                        <Input
-                          type="number"
-                          value={passenger.age || ''}
-                          onChange={(e) => updatePassenger(index, 'age', parseInt(e.target.value) || 0)}
-                          min="1"
-                          max="120"
-                          required
-                          className="border-blue-200 focus:border-blue-400"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-blue-800">Gender</Label>
-                        <Select
-                          value={passenger.gender}
-                          onValueChange={(value) => updatePassenger(index, 'gender', value)}
-                        >
-                          <SelectTrigger className="border-blue-200 focus:border-blue-400">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-blue-800">Phone</Label>
-                        <Input
-                          value={passenger.phone}
-                          onChange={(e) => updatePassenger(index, 'phone', e.target.value)}
-                          required
-                          className="border-blue-200 focus:border-blue-400"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-blue-800">Email</Label>
-                        <Input
-                          type="email"
-                          value={passenger.email}
-                          onChange={(e) => updatePassenger(index, 'email', e.target.value)}
-                          required
-                          className="border-blue-200 focus:border-blue-400"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-blue-800">ID Type</Label>
-                        <Select
-                          value={passenger.id_type}
-                          onValueChange={(value) => updatePassenger(index, 'id_type', value)}
-                        >
-                          <SelectTrigger className="border-blue-200 focus:border-blue-400">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="aadhar">Aadhar Card</SelectItem>
-                            <SelectItem value="passport">Passport</SelectItem>
-                            <SelectItem value="driving_license">Driving License</SelectItem>
-                            <SelectItem value="voter_id">Voter ID</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-blue-800">ID Number</Label>
+                      <div className="mt-6">
+                        <Label className="text-sm font-medium text-blue-800">ID Number *</Label>
                         <Input
                           value={passenger.id_number}
                           onChange={(e) => updatePassenger(index, 'id_number', e.target.value)}
+                          placeholder="Enter ID number"
                           required
-                          className="border-blue-200 focus:border-blue-400"
+                          className="h-11 mt-2 border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
                         />
                       </div>
                     </CardContent>
@@ -776,42 +877,52 @@ export default function BookingForm() {
 
             {/* Contact Details */}
             {passengers.length > 0 && passengers[0].name && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-blue-900 flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  Contact Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label className="text-blue-800">Contact Name</Label>
-                    <Input
-                      value={contactDetails.name}
-                      onChange={(e) => setContactDetails({...contactDetails, name: e.target.value})}
-                      required
-                      className="border-blue-200 focus:border-blue-400"
-                    />
+              <Card className="border-2 border-green-100 bg-gradient-to-r from-green-50 to-emerald-50">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg text-green-900 flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Contact Details
+                  </CardTitle>
+                  <CardDescription className="text-green-700">
+                    Primary contact for booking confirmation and updates
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-green-800">Contact Name *</Label>
+                      <Input
+                        value={contactDetails.name}
+                        onChange={(e) => setContactDetails({...contactDetails, name: e.target.value})}
+                        placeholder="Enter contact name"
+                        required
+                        className="h-11 border-green-200 focus:border-green-400 focus:ring-green-400/20 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-green-800">Contact Phone *</Label>
+                      <Input
+                        value={contactDetails.phone}
+                        onChange={(e) => setContactDetails({...contactDetails, phone: e.target.value})}
+                        placeholder="Enter phone number"
+                        required
+                        className="h-11 border-green-200 focus:border-green-400 focus:ring-green-400/20 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-green-800">Contact Email *</Label>
+                      <Input
+                        type="email"
+                        value={contactDetails.email}
+                        onChange={(e) => setContactDetails({...contactDetails, email: e.target.value})}
+                        placeholder="Enter email address"
+                        required
+                        className="h-11 border-green-200 focus:border-green-400 focus:ring-green-400/20 bg-white"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-blue-800">Contact Phone</Label>
-                    <Input
-                      value={contactDetails.phone}
-                      onChange={(e) => setContactDetails({...contactDetails, phone: e.target.value})}
-                      required
-                      className="border-blue-200 focus:border-blue-400"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-blue-800">Contact Email</Label>
-                    <Input
-                      type="email"
-                      value={contactDetails.email}
-                      onChange={(e) => setContactDetails({...contactDetails, email: e.target.value})}
-                      required
-                      className="border-blue-200 focus:border-blue-400"
-                    />
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Payment & Additional Details */}
