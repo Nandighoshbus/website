@@ -95,25 +95,37 @@ export default function BookingForm() {
 
   const fetchCities = async () => {
     try {
+      console.log('BookingForm: Starting fetchCities...')
+      
       // Get token for authenticated request
       const { jwtAuth } = await import('@/lib/jwtAuth')
       const token = jwtAuth.getToken('agent')
       
+      console.log('BookingForm: Agent token exists:', !!token)
+      
       if (!token) {
+        console.error('BookingForm: No agent token found')
         setError('Agent authentication required. Please login again.')
         return
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/v1/agent/routes`, {
+      const url = `${baseUrl}/api/v1/agent/routes`
+      console.log('BookingForm: Fetching from URL:', url)
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
       
+      console.log('BookingForm: Response status:', response.status, response.statusText)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('BookingForm: API response data:', data)
+        
         if (data.success && data.data) {
           const citySet = new Set<string>()
           data.data.forEach((route: any) => {
@@ -122,14 +134,20 @@ export default function BookingForm() {
           })
           
           const uniqueCities = Array.from(citySet).sort()
+          console.log('BookingForm: Extracted cities:', uniqueCities)
           setCities(uniqueCities)
+        } else {
+          console.error('BookingForm: Invalid data structure:', data)
+          setError('No route data available')
         }
       } else {
-        setError('Failed to load cities')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('BookingForm: API error:', response.status, errorData)
+        setError(`Failed to load cities: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
-      console.error('Failed to fetch cities:', error)
-      setError('Failed to load cities')
+      console.error('BookingForm: fetchCities error:', error)
+      setError(`Failed to load cities: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
