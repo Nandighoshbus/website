@@ -84,8 +84,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: profile, error } = await db.getUserProfile(userId)
       if (error) {
         console.error('AuthContext: Error fetching user profile:', error)
-      } else {
+      } else if (profile) {
         setUserProfile(profile)
+      } else {
+        console.log('AuthContext: No user profile found for user:', userId)
+        setUserProfile(null)
       }
     } catch (error) {
       console.error('AuthContext: Error fetching user profile:', error)

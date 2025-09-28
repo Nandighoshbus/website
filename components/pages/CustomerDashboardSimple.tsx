@@ -19,7 +19,8 @@ import {
   Receipt,
   Settings,
   Bell,
-  Shield
+  Shield,
+  Home
 } from "lucide-react"
 import { useAuth } from "@/components/context/AuthContext"
 import { useRouter } from "next/navigation"
@@ -165,18 +166,29 @@ export default function CustomerDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Link href="/booking">
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                    <Bus className="w-4 h-4 mr-2" />
-                    Book a New Trip
-                  </Button>
-                </Link>
-                <Link href="/routes">
-                  <Button variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    View Routes
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => router.push('/booking')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  <Bus className="w-4 h-4 mr-2" />
+                  Book a New Trip
+                </Button>
+                <Button 
+                  onClick={() => router.push('/routes')}
+                  variant="outline" 
+                  className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  View Routes
+                </Button>
+                <Button 
+                  onClick={() => router.push('/')}
+                  variant="outline" 
+                  className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Go to Home
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -195,11 +207,12 @@ export default function CustomerDashboard() {
                   <Bus className="w-16 h-16 mx-auto text-white/50 mb-4" />
                   <h3 className="text-xl font-semibold mb-2">No bookings yet</h3>
                   <p className="text-white/70 mb-6">Start your journey by booking your first trip</p>
-                  <Link href="/booking">
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                      Book Your First Trip
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={() => router.push('/booking')}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  >
+                    Book Your First Trip
+                  </Button>
                 </div>
               </CardContent>
             </Card>
