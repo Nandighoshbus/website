@@ -64,13 +64,19 @@ export const authenticate = async (
         tokenLength: token.length,
         fullDecoded: decoded
       });
+      // Additional debug: detect common token shapes
+      if (!userId) {
+        console.warn('Decoded JWT has no sub/userId. Full payload:', decoded);
+      }
     } catch (jwtError: any) {
       console.log('JWT verification failed:', jwtError.message);
+      console.log('JWT verification stack:', jwtError.stack || 'no stack');
       console.log('Trying Supabase auth fallback...');
       // Fallback to Supabase token verification
       const { data: { user: supabaseUser }, error } = await supabaseAdmin.auth.getUser(token);
       if (error || !supabaseUser) {
         console.log('Supabase auth also failed:', error?.message || 'No user returned');
+        console.log('Supabase getUser response: ', { error, supabaseUser });
         throw new AppError('Invalid token', 401, 'INVALID_TOKEN');
       }
       userId = supabaseUser.id;
@@ -89,8 +95,10 @@ export const authenticate = async (
         .single();
 
       if (userData && !userError) {
+        console.log('Found user in user_profiles for id:', userId);
         user = userData;
       } else {
+        console.log('No user_profiles record for id:', userId, 'userError:', userError);
         // Fallback to agents table for agent authentication
         console.log('Looking for agent with ID:', userId);
         let { data: agentData, error: agentError } = await supabaseAdmin

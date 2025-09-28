@@ -5,6 +5,9 @@ import * as userController from '../controllers/userController';
 
 const router = Router();
 
+// Token validation route
+router.get('/validate', authenticate, asyncHandler(userController.validateUserToken));
+
 // Protected user routes
 router.get('/profile', authenticate, asyncHandler(userController.getProfile));
 router.patch('/profile', authenticate, asyncHandler(userController.updateProfile));

@@ -52,7 +52,9 @@ router.get('/test', (_req, res) => {
   res.json({ success: true, message: 'Agent routes working', timestamp: new Date().toISOString() });
 });
 
-// Agent dashboard and booking functionality
+// Agent profile and dashboard functionality
+router.get('/validate', authenticate, authorize('agent'), asyncHandler(agentController.validateAgentToken));
+router.get('/profile', authenticate, authorize('agent'), asyncHandler(agentController.getAgentProfile));
 router.get('/stats', authenticate, authorize('agent'), asyncHandler(agentController.getAgentStats));
 router.get('/routes', authenticate, authorize('agent'), asyncHandler(agentController.getAvailableRoutes));
 router.post('/bookings', authenticate, authorize('agent'), asyncHandler(agentController.createBooking));

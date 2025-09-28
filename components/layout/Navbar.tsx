@@ -23,11 +23,18 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
   const pathname = usePathname()
   const router = useRouter()
 
-  // Use actual authentication context
-  const { user, signOut, loading } = useAuth()
+  // Use AuthContext for customer authentication
+  const { user, userProfile, loading, signOut } = useAuth()
 
   // Helper function to get first name only
-  const getFirstName = (user: any) => {
+  const getFirstName = (user: any, userProfile: any) => {
+    // Try to get first name from userProfile first, then user
+    if (userProfile?.first_name) {
+      return userProfile.first_name
+    }
+    if (userProfile?.full_name) {
+      return userProfile.full_name.split(' ')[0]
+    }
     if (user?.user_metadata?.full_name) {
       return user.user_metadata.full_name.split(' ')[0]
     }
@@ -38,18 +45,9 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
     setIsSigningOut(true)
     try {
       console.log('Navbar: Starting signOut...')
-      const { error } = await signOut()
-      
-      // Since we now handle "Auth session missing" as success in the auth layer,
-      // we only treat it as an error if it's a different type of error
-      if (error && !error.message?.includes('Auth session missing')) {
-        console.error('SignOut error:', error.message)
-        // Could add toast notification here for actual errors
-      } else {
-        console.log('Navbar: SignOut completed, redirecting...')
-        setIsUserMenuOpen(false)
-        router.push('/')
-      }
+      await signOut()
+      setIsUserMenuOpen(false)
+      router.push('/')
     } catch (error) {
       console.error('SignOut failed:', error)
     } finally {
@@ -144,22 +142,22 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                   <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center relative z-10">
                     <User className="w-5 h-5 text-white stroke-2" />
                   </div>
-                  <span className="font-medium text-sm">{getFirstName(user)}</span>
+                  <span className="font-medium text-sm">{getFirstName(user, userProfile)}</span>
                 </button>
                 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-200/50">
-                      <p className="text-sm font-medium text-gray-800">{getFirstName(user)}</p>
+                      <p className="text-sm font-medium text-gray-800">{getFirstName(user, userProfile)}</p>
                       <p className="text-xs text-gray-600">{user.email}</p>
                     </div>
                     <Link
-                      href="/profile"
+                      href="/dashboard"
                       className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100/50 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <Settings className="w-4 h-4 stroke-2" />
-                      <span className="text-sm">Profile Settings</span>
+                      <span className="text-sm">Dashboard</span>
                     </Link>
                     <button
                       onClick={handleSignOut}
@@ -260,14 +258,14 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
                       <User className="w-5 h-5 text-white stroke-2" />
                     </div>
                     <div>
-                      <p className="text-white font-medium text-sm">{getFirstName(user)}</p>
+                      <p className="text-white font-medium text-sm">{getFirstName(user, userProfile)}</p>
                       <p className="text-white/70 text-xs">{user.email}</p>
                     </div>
                   </div>
-                  <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
+                  <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                     <Button className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20">
                       <Settings className="w-4 h-4 mr-2 stroke-2" />
-                      Profile Settings
+                      Dashboard
                     </Button>
                   </Link>
                   <Button 

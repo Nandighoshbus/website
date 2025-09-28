@@ -254,7 +254,7 @@ export default function AgentSignUpPage() {
                       id="phone"
                       name="phone"
                       type="tel"
-                      placeholder="9876543210"
+                      placeholder="1234567890"
                       value={formData.phone}
                       onChange={handleInputChange}
                       required

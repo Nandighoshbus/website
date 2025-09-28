@@ -59,34 +59,37 @@ export default function AgentDashboard() {
 
   const fetchAgentStats = async () => {
     if (!user) return
-    
+
     try {
       console.log('Fetching agent stats for user:', user.id)
-      
-      // Get token and make API call to backend
+
       const { jwtAuth } = await import('@/lib/jwtAuth')
       const token = jwtAuth.getToken('agent')
-      
-      if (token) {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'
-        const response = await fetch(`${baseUrl}/api/v1/agents/stats`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && data.data) {
-            setStats(data.data)
-            console.log('Agent stats loaded:', data.data)
-            return
-          }
+
+      if (!token) {
+        console.error('No agent token found in localStorage')
+        setLoading(false)
+        return
+      }
+
+      console.log('Agent token present. length:', token.length)
+
+      try {
+  const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
+        if (data && (data as any).success) {
+          setStats((data as any).data)
+          console.log('Agent stats loaded:', (data as any).data)
+          return
+        }
+        console.error('Unexpected stats response:', data)
+      } catch (err: any) {
+        console.error('Error fetching agent stats via jwtAuth:', err.message || err)
+        if (err.message && err.message.includes('Authentication expired')) {
+          await logout()
         }
       }
-      
-      // Fallback to mock data if API call fails
+
+      // Fallback mock data
       const mockStats = {
         totalBookings: 156,
         monthlyBookings: 24,
@@ -94,21 +97,11 @@ export default function AgentDashboard() {
         monthlyCommission: 2400,
         activeRoutes: 8
       }
-      
       setStats(mockStats)
       console.log('Using mock agent stats:', mockStats)
     } catch (error) {
-      console.error('Error fetching agent stats:', error)
-      
-      // Use mock data as fallback
-      const mockStats = {
-        totalBookings: 156,
-        monthlyBookings: 24,
-        totalCommission: 12500,
-        monthlyCommission: 2400,
-        activeRoutes: 8
-      }
-      setStats(mockStats)
+      console.error('Error in fetchAgentStats:', error)
+      setStats({ totalBookings: 156, monthlyBookings: 24, totalCommission: 12500, monthlyCommission: 2400, activeRoutes: 8 })
     } finally {
       setLoading(false)
     }

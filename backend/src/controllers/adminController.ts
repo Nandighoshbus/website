@@ -6,6 +6,46 @@ import { supabaseAdmin } from '../config/supabase';
 
 const supabase = supabaseAdmin;
 
+// Validate admin token
+export const validateAdminToken = async (req: Request, res: Response): Promise<void> => {
+  const adminId = req.userId;
+
+  if (!adminId) {
+    throw new AppError('Admin authentication required', 401, 'UNAUTHORIZED');
+  }
+
+  try {
+    const { data: admin, error: adminError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, is_active, role')
+      .eq('id', adminId)
+      .single();
+
+    if (adminError || !admin) {
+      throw new AppError('Admin not found', 404, 'ADMIN_NOT_FOUND');
+    }
+
+    if (!admin.is_active) {
+      throw new AppError('Admin account is inactive', 403, 'ADMIN_INACTIVE');
+    }
+
+    if (!['admin', 'super_admin'].includes(admin.role)) {
+      throw new AppError('Insufficient permissions', 403, 'INSUFFICIENT_PERMISSIONS');
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Token is valid',
+      data: { valid: true }
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error validating admin token:', error);
+    throw error;
+  }
+};
+
 // User Management
 // User Management
 export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {

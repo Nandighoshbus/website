@@ -194,8 +194,8 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 -- Insert sample data for testing
 INSERT INTO users (id, email, phone, password_hash, role, is_verified) VALUES
-('550e8400-e29b-41d4-a716-446655440000', 'admin@nandighosh.com', '+91-9876543210', '$2b$10$example_hash', 'admin', TRUE),
-('550e8400-e29b-41d4-a716-446655440001', 'customer@example.com', '+91-9876543211', '$2b$10$example_hash', 'customer', TRUE);
+('550e8400-e29b-41d4-a716-446655440000', 'admin@nandighosh.com', '+91-1234567890', '$2b$10$example_hash', 'admin', TRUE),
+('550e8400-e29b-41d4-a716-446655440001', 'customer@example.com', '+91-1234567891', '$2b$10$example_hash', 'customer', TRUE);
 
 INSERT INTO buses (id, bus_number, bus_type, capacity, amenities, status) VALUES
 ('bus-550e8400-e29b-41d4-a716-446655440000', 'OD-01-1234', 'AC', 40, '["WiFi", "Charging Port", "Entertainment"]', 'active'),

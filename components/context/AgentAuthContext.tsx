@@ -31,6 +31,7 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         console.log('AgentAuthContext: Checking authentication...')
         
+        // First check if there's a token and it's not expired (this already handles expiration)
         if (jwtAuth.isAuthenticated('agent')) {
           const userData = jwtAuth.getUser('agent')
           console.log('AgentAuthContext: Found user data:', userData)
@@ -38,13 +39,24 @@ export function AgentAuthProvider({ children }: { children: React.ReactNode }) {
           if (userData && userData.role === 'agent') {
             console.log('AgentAuthContext: User is valid agent, setting user state')
             setUser(userData)
+            
+            // Optional: Validate token with server in background (don't block UI)
+            jwtAuth.validateToken('agent').then(isValid => {
+              if (!isValid) {
+                console.log('AgentAuthContext: Background token validation failed, logging out')
+                setUser(null)
+              }
+            }).catch(error => {
+              console.log('AgentAuthContext: Background token validation error:', error)
+              // Don't logout on network errors
+            })
           } else {
             console.log('AgentAuthContext: Invalid user role, logging out')
             jwtAuth.logout('agent')
             setUser(null)
           }
         } else {
-          console.log('AgentAuthContext: No authentication found')
+          console.log('AgentAuthContext: No valid authentication found (token expired or missing)')
           setUser(null)
         }
       } catch (error) {

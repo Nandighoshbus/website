@@ -23,6 +23,8 @@ import paymentRoutes from './routes/paymentRoutes';
 import agentRoutes from './routes/agentRoutes';
 import agentRegistrationRoutes from './routes/agentRegistration';
 import adminRoutes from './routes/adminRoutes';
+import contactRoutes from './routes/contactRoutes';
+import customerRoutes from './routes/customerRoutes';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -381,6 +383,8 @@ class ScalableServer {
     this.app.use(`/api/${apiVersion}/agents`, agentRoutes);
     this.app.use(`/api/${apiVersion}/agents`, agentRegistrationRoutes); // Additional agent registration routes
     this.app.use(`/api/${apiVersion}/admin`, adminRoutes);
+    this.app.use(`/api/${apiVersion}/contact`, contactRoutes);
+    this.app.use(`/api/${apiVersion}/customer`, customerRoutes);
 
     // API documentation endpoint
     this.app.get(`/api/${apiVersion}/docs`, (_req: Request, res: Response) => {

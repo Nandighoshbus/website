@@ -3,6 +3,42 @@ import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../middleware/errorHandler';
 import { ApiResponse, UserProfile } from '../types';
 
+// Validate user token
+export const validateUserToken = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.userId;
+
+  if (!userId) {
+    throw new AppError('User authentication required', 401, 'UNAUTHORIZED');
+  }
+
+  try {
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('id, is_active, role')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    if (!user.is_active) {
+      throw new AppError('User account is inactive', 403, 'USER_INACTIVE');
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Token is valid',
+      data: { valid: true }
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error validating user token:', error);
+    throw error;
+  }
+};
+
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
 

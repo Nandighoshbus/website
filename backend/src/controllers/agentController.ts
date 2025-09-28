@@ -3,6 +3,78 @@ import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../middleware/errorHandler';
 import { ApiResponse } from '../types';
 
+// Validate agent token
+export const validateAgentToken = async (req: Request, res: Response): Promise<void> => {
+  const agentId = req.userId;
+
+  if (!agentId) {
+    throw new AppError('Agent authentication required', 401, 'UNAUTHORIZED');
+  }
+
+  try {
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
+      .select('id, is_active')
+      .eq('id', agentId)
+      .single();
+
+    if (agentError || !agent) {
+      throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
+    }
+
+    if (!agent.is_active) {
+      throw new AppError('Agent account is inactive', 403, 'AGENT_INACTIVE');
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Token is valid',
+      data: { valid: true }
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error validating agent token:', error);
+    throw error;
+  }
+};
+
+// Get agent profile
+export const getAgentProfile = async (req: Request, res: Response): Promise<void> => {
+  const agentId = req.userId;
+
+  if (!agentId) {
+    throw new AppError('Agent authentication required', 401, 'UNAUTHORIZED');
+  }
+
+  try {
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
+      .select('*')
+      .eq('id', agentId)
+      .single();
+
+    if (agentError || !agent) {
+      throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
+    }
+
+    if (!agent.is_active) {
+      throw new AppError('Agent account is inactive', 403, 'AGENT_INACTIVE');
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Agent profile retrieved successfully',
+      data: agent
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error fetching agent profile:', error);
+    throw error;
+  }
+};
+
 // Get agent dashboard stats
 export const getAgentStats = async (req: Request, res: Response): Promise<void> => {
   console.log('=== AGENT CONTROLLER - getAgentStats CALLED ===');

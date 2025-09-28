@@ -5,6 +5,9 @@ import * as adminController from '../controllers/adminController';
 
 const router = Router();
 
+// Token validation route (needs to be before middleware)
+router.get('/validate', authenticate, authorize('admin', 'super_admin'), asyncHandler(adminController.validateAdminToken));
+
 // All routes require admin authentication
 router.use(authenticate);
 router.use(authorize('admin', 'super_admin'));

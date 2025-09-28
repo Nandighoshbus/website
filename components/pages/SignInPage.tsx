@@ -29,26 +29,7 @@ export default function SignInPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user && !authLoading) {
-      const redirect = searchParams.get('redirect')
-      if (redirect === 'payment') {
-        // Check if there's pending booking data
-        const pendingBooking = sessionStorage.getItem('pendingBooking')
-        if (pendingBooking) {
-          const routeData = JSON.parse(pendingBooking)
-          const params = new URLSearchParams(routeData)
-          sessionStorage.removeItem('pendingBooking')
-          router.push(`/payment?${params.toString()}`)
-          return
-        }
-      }
-      router.push('/')
-    }
-  }, [user, router, authLoading, searchParams])
 
-  // Show loading spinner while checking auth state
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
@@ -58,9 +39,10 @@ export default function SignInPage() {
   }
 
   // Don't render if user is already logged in
-  if (user) {
-    return null
-  }
+  // Temporarily commented out for debugging
+  // if (user) {
+  //   return null
+  // }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -74,6 +56,9 @@ export default function SignInPage() {
     console.log('Form submitted with data:', { 
       email: formData.email, 
       password: formData.password ? '***' : 'empty',
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
       isLogin 
     })
 
@@ -101,35 +86,49 @@ export default function SignInPage() {
         }
       } else {
         // Sign up
+        console.log('Attempting sign-up with form data:', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email
+        })
+
         if (!formData.firstName || !formData.lastName || !formData.phone) {
+          console.log('Missing required fields:', {
+            firstName: !formData.firstName,
+            lastName: !formData.lastName,
+            phone: !formData.phone
+          })
           setMessage("Please fill in all required fields")
           setLoading(false)
           return
         }
 
         const fullName = `${formData.firstName} ${formData.lastName}`
+        console.log('Calling signUp with:', { fullName, phone: formData.phone })
+        
         const { data, error } = await signUp(
           formData.email, 
           formData.password, 
-          { full_name: fullName, phone: formData.phone }
+          { 
+            full_name: fullName, 
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone 
+          }
         )
 
+        console.log('SignUp result:', { data: data ? 'Present' : 'Null', error: error ? error.message : 'None' })
+
         if (error) {
+          console.error('SignUp error:', error)
           setMessage(error.message)
         } else if (data?.user) {
-          // Create user profile in database
-          const { error: profileError } = await db.createUserProfile(data.user.id, {
-            full_name: fullName,
-            email: formData.email,
-            phone: formData.phone,
-            role: 'passenger'
-          })
-
-          if (profileError) {
-            console.error('Profile creation error:', profileError)
-          }
-
+          console.log('SignUp successful:', data.user.id)
           setMessage("Account created successfully! Please check your email to verify your account.")
+        } else {
+          console.log('SignUp failed - no user data returned')
+          setMessage("Registration failed - no user data returned")
         }
       }
     } catch (error: any) {

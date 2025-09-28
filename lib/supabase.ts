@@ -24,16 +24,12 @@ export const auth = {
   // Sign up new user
   signUp: async (email: string, password: string, userData: { full_name: string, phone: string }) => {
     checkSupabaseConfig()
+    
+    // Try signup without metadata first to avoid trigger issues
     const { data, error } = await supabase.auth.signUp({
       email,
-      password,
-      options: {
-        data: {
-          full_name: userData.full_name,
-          phone: userData.phone,
-          role: 'passenger'
-        }
-      }
+      password
+      // Removed options.data to avoid database trigger failures
     })
     return { data, error }
   },
@@ -133,21 +129,39 @@ export const auth = {
 
 // Database helper functions
 export const db = {
-  // Create user profile after signup
+  // Create user profile after signup - matches signup form exactly
   createUserProfile: async (userId: string, profileData: {
-    full_name: string
+    full_name?: string
+    first_name?: string
+    last_name?: string
     email: string
     phone: string
     role?: string
   }) => {
+    // Use provided first/last names or split full_name
+    const firstName = profileData.first_name || (profileData.full_name ? profileData.full_name.trim().split(' ')[0] : '') || null
+    const lastName = profileData.last_name || (profileData.full_name ? profileData.full_name.trim().split(' ').slice(1).join(' ') : '') || null
+    const fullName = profileData.full_name || (firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName) || null
+    
     const { data, error } = await supabase
       .from('user_profiles')
       .insert([{
         id: userId,
-        full_name: profileData.full_name,
-        email: profileData.email,
-        phone: profileData.phone,
-        role: profileData.role || 'passenger'
+        email: profileData.email || null,
+        phone: profileData.phone || null,
+        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
+        role: profileData.role || 'customer',
+        is_verified: false,
+        is_active: true,
+        preferences: {},
+        // Explicitly set unused fields to NULL
+        date_of_birth: null,
+        gender: null,
+        avatar_url: null,
+        address: null,
+        emergency_contact: null
       }])
       .select()
     return { data, error }

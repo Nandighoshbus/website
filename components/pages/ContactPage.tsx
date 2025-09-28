@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Phone, Mail, MessageCircle, ArrowRight, Shield, Clock } from "lucide-react"
+import { sendContactEmail, sendEmailFallback } from "@/lib/emailService"
 
 const languages = {
   en: {
@@ -172,26 +173,51 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
     return !newErrors.email && !newErrors.phone && !newErrors.message
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (validateForm()) {
-      // Handle form submission here
-      console.log('Form submitted:', formData)
-      alert('Message sent successfully!')
-      // Reset form after successful submission
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        message: ''
-      })
-      setErrors({
-        email: '',
-        phone: '',
-        message: ''
-      })
+      try {
+        // Use EmailJS to send email
+        const result = await sendContactEmail(formData)
+
+        if (result.success) {
+          alert(result.message)
+          // Reset form after successful submission
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            message: ''
+          })
+          setErrors({
+            email: '',
+            phone: '',
+            message: ''
+          })
+        } else {
+          // Show error and offer fallback option
+          const useEmailClient = confirm(
+            `${result.message}\n\nWould you like to open your email client instead?`
+          )
+          
+          if (useEmailClient) {
+            sendEmailFallback(formData)
+          }
+        }
+      } catch (error) {
+        console.error('Error submitting contact form:', error)
+        
+        // Offer email client fallback
+        const useEmailClient = confirm(
+          'Failed to send message through our contact form.\n\nWould you like to open your email client instead?'
+        )
+        
+        if (useEmailClient) {
+          sendEmailFallback(formData)
+        }
+      }
     }
   }
 
@@ -278,7 +304,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                   <Input
                     name="phone"
                     type="tel"
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 12345 67890"
                     className={`border border-gray-300 focus:border-orange-500 bg-white focus:bg-white ${errors.phone ? 'border-red-500' : ''}`}
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -335,7 +361,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{currentLang.helpline}</div>
-                  <div className="text-gray-600">+91 98765 43210</div>
+                  <div className="text-gray-600">+91 12345 67890</div>
                   <div className="text-sm text-green-600">{currentLang.support24x7}</div>
                 </div>
               </div>
@@ -345,7 +371,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{currentLang.whatsappService}</div>
-                  <div className="text-gray-600">+91 98765 43210</div>
+                  <div className="text-gray-600">+91 12345 67890</div>
                   <div className="text-sm text-green-600">{currentLang.instantResponse}</div>
                 </div>
               </div>
@@ -401,7 +427,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
         </div>
 
         {/* Refund Policy Section */}
-        <div className="max-w-5xl mx-auto mt-12">
+        <div id="refund-policy" className="max-w-5xl mx-auto mt-12">
           <Card className="shadow-sm border">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
@@ -442,7 +468,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 <p className="text-sm text-orange-700">
                   For any queries regarding refunds or cancellations, please contact our customer support team at 
                   <span className="font-medium"> support@nandighoshbus.com</span> or call 
-                  <span className="font-medium"> +91 98765 43210</span>
+                  <span className="font-medium"> +91 12345 67890</span>
                 </p>
               </div>
             </CardContent>
