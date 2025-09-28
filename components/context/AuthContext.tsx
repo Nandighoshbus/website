@@ -97,9 +97,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     setLoading(true)
-    const result = await auth.signIn(email, password)
-    setLoading(false)
-    return result
+    try {
+      console.log('AuthContext: Starting sign-in process')
+      const result = await auth.signIn(email, password)
+      
+      if (result.error) {
+        console.error('AuthContext: Sign-in failed:', result.error)
+        // Provide more specific error messages
+        if (result.error.message?.includes('Invalid login credentials')) {
+          result.error.message = 'Invalid email or password. Please check your credentials and try again.'
+        } else if (result.error.message?.includes('Email not confirmed')) {
+          result.error.message = 'Please verify your email address before signing in.'
+        } else if (result.error.message?.includes('Too many requests')) {
+          result.error.message = 'Too many login attempts. Please wait a few minutes and try again.'
+        } else if (result.error.message?.includes('NetworkError') || result.error.message?.includes('CORS') || result.error.message?.includes('fetch')) {
+          result.error.message = 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.'
+        } else if ((result.error as any).isCorsError) {
+          result.error.message = 'Network connection failed. Your deployment domain may not be configured in Supabase. Please check the authentication settings.'
+        }
+      } else if (result.data?.user) {
+        console.log('AuthContext: Sign-in successful for user:', result.data.user.id)
+      }
+      
+      setLoading(false)
+      return result
+    } catch (error) {
+      console.error('AuthContext: Sign-in exception:', error)
+      setLoading(false)
+      return { 
+        data: null, 
+        error: { 
+          message: 'Authentication service unavailable. Please check your internet connection and try again.' 
+        } 
+      }
+    }
   }
 
   const signUp = async (email: string, password: string, userData: { 

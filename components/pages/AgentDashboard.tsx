@@ -59,39 +59,23 @@ export default function AgentDashboard() {
 
   const fetchAgentStats = async () => {
     if (!user) return
-    
-    setLoading(true)
+
     try {
       console.log('Fetching agent stats for user:', user.id)
 
       const { jwtAuth } = await import('@/lib/jwtAuth')
-      
-      // Check if user is still authenticated
-      if (!jwtAuth.isAuthenticated('agent')) {
-        console.warn('Agent token expired or missing, using mock data')
-        // Don't throw error, just use mock data
-        const mockStats = {
-          totalBookings: 156,
-          monthlyBookings: 24,
-          totalCommission: 12500,
-          monthlyCommission: 2400,
-          activeRoutes: 8
-        }
-        setStats(mockStats)
-        console.log('Using mock agent stats (not authenticated):', mockStats)
+      const token = jwtAuth.getToken('agent')
+
+      if (!token) {
+        console.error('No agent token found in localStorage')
+        setLoading(false)
         return
       }
 
-      const token = jwtAuth.getToken('agent')
-      console.log('Agent token details:', {
-        tokenLength: token?.length || 0,
-        tokenStart: token?.substring(0, 20) + '...',
-        currentTime: new Date().toISOString(),
-        isAuthenticated: jwtAuth.isAuthenticated('agent')
-      })
+      console.log('Agent token present. length:', token.length)
 
       try {
-        const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
+  const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
         if (data && (data as any).success) {
           setStats((data as any).data)
           console.log('Agent stats loaded:', (data as any).data)
@@ -100,24 +84,12 @@ export default function AgentDashboard() {
         console.error('Unexpected stats response:', data)
       } catch (err: any) {
         console.error('Error fetching agent stats via jwtAuth:', err.message || err)
-        if (err.message && (err.message.includes('Authentication expired') || err.message.includes('401'))) {
-          console.log('Authentication expired, but continuing with mock data instead of logout')
-          // Don't logout immediately, just use mock data
-          const mockStats = {
-            totalBookings: 156,
-            monthlyBookings: 24,
-            totalCommission: 12500,
-            monthlyCommission: 2400,
-            activeRoutes: 8
-          }
-          setStats(mockStats)
-          console.log('Using mock agent stats (401 error):', mockStats)
-          return
+        if (err.message && err.message.includes('Authentication expired')) {
+          await logout()
         }
-        throw err
       }
 
-      // Fallback to mock data if API fails but user is authenticated
+      // Fallback mock data
       const mockStats = {
         totalBookings: 156,
         monthlyBookings: 24,
@@ -126,23 +98,15 @@ export default function AgentDashboard() {
         activeRoutes: 8
       }
       setStats(mockStats)
-      console.log('Using mock agent stats (API failed):', mockStats)
+      console.log('Using mock agent stats:', mockStats)
     } catch (error) {
       console.error('Error in fetchAgentStats:', error)
-      // Use mock data as final fallback
-      const mockStats = {
-        totalBookings: 156,
-        monthlyBookings: 24,
-        totalCommission: 12500,
-        monthlyCommission: 2400,
-        activeRoutes: 8
-      }
-      setStats(mockStats)
-      console.log('Using mock agent stats (error fallback):', mockStats)
+      setStats({ totalBookings: 156, monthlyBookings: 24, totalCommission: 12500, monthlyCommission: 2400, activeRoutes: 8 })
     } finally {
       setLoading(false)
     }
   }
+
   const handleLogout = async () => {
     await logout()
     router.push('/agent/login')

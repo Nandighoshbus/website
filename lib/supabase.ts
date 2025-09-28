@@ -1,21 +1,53 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+// Validate environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Create Supabase client for frontend
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing required Supabase environment variables:')
+  console.error('Current environment:', process.env.NODE_ENV)
+  console.error('Current domain:', typeof window !== 'undefined' ? window.location.origin : 'Server-side')
+  
+  if (typeof window !== 'undefined') {
+    // Show user-friendly error in browser with deployment info
+    const currentDomain = window.location.origin
+    alert(`Application configuration error on ${currentDomain}. Please ensure environment variables are set in Render dashboard.`)
+  }
+  
+  throw new Error('Missing required Supabase environment variables. Please configure in Render dashboard.')
+}
+
+// Create Supabase client for frontend with flexible CORS handling
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: false, // Disable URL detection to avoid redirect issues
+    flowType: 'implicit', // Use implicit flow instead of PKCE for better compatibility
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'nandighosh-auth-token'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'nandighosh-bus@1.0.0',
+      'Access-Control-Allow-Origin': '*'
+    }
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 2
+    }
   }
 })
 
 // Runtime check for production usage
 const checkSupabaseConfig = () => {
-  if (typeof window !== 'undefined' && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
-    console.warn('Missing Supabase environment variables. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase configuration is invalid')
   }
 }
 
@@ -34,23 +66,81 @@ export const auth = {
     return { data, error }
   },
 
-  // Sign in user
+  // Sign in user with fallback for CORS issues
   signIn: async (email: string, password: string) => {
     checkSupabaseConfig()
     console.log('Auth signIn called with:', { email, password: '***' })
+    
     try {
+      // Primary authentication method
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       })
+      
       console.log('Supabase signIn response:', { 
         user: data?.user ? 'User object present' : 'No user', 
         session: data?.session ? 'Session present' : 'No session',
         error: error ? error.message : 'No error'
       })
+      
+      // Handle CORS-specific errors with fallback
+      if (error && (error.message?.includes('CORS') || error.message?.includes('NetworkError') || error.message?.includes('fetch'))) {
+        console.error('CORS/Network error detected, trying fallback method:', error)
+        
+        // Fallback: Try with different configuration
+        try {
+          const fallbackClient = createClient(supabaseUrl, supabaseAnonKey, {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false,
+              detectSessionInUrl: false
+            }
+          })
+          
+          const fallbackResult = await fallbackClient.auth.signInWithPassword({
+            email,
+            password
+          })
+          
+          if (fallbackResult.data?.user) {
+            console.log('Fallback authentication successful')
+            // Manually set session in main client
+            await supabase.auth.setSession({
+              access_token: fallbackResult.data.session?.access_token || '',
+              refresh_token: fallbackResult.data.session?.refresh_token || ''
+            })
+            return fallbackResult
+          }
+        } catch (fallbackError) {
+          console.error('Fallback authentication also failed:', fallbackError)
+        }
+        
+        return { 
+          data: null, 
+          error: { 
+            ...error,
+            message: 'Connection failed due to CORS restrictions. Please contact support to configure your deployment domain in Supabase.',
+            isCorsError: true
+          } 
+        }
+      }
+      
       return { data, error }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Exception in signIn:', err)
+      
+      // Handle network/CORS errors
+      if (err.message?.includes('NetworkError') || err.message?.includes('CORS') || err.message?.includes('fetch')) {
+        return { 
+          data: null, 
+          error: { 
+            message: 'Network connection failed. Your deployment domain needs to be configured in Supabase settings. Please contact the project administrator.',
+            isCorsError: true
+          } 
+        }
+      }
+      
       throw err
     }
   },
