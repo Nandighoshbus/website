@@ -11,6 +11,7 @@ import { THEME_CLASSES } from "@/lib/theme"
 import { useAuth } from "@/components/context/AuthContext"
 import { useRouter, useSearchParams } from "next/navigation"
 import { db } from "@/lib/supabase"
+import CorsDebugger from "@/components/debug/CorsDebugger"
 
 export default function SignInPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -348,6 +349,9 @@ export default function SignInPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* CORS Debugger - only shows when needed */}
+      <CorsDebugger />
     </div>
   )
 }
