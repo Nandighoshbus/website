@@ -75,17 +75,27 @@ export default function AgentDashboard() {
       console.log('Agent token present. length:', token.length)
 
       try {
-  const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
+        console.log('Attempting to fetch agent stats...')
+        console.log('Has refresh token:', jwtAuth.hasRefreshToken('agent'))
+        
+        const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
+        
         if (data && (data as any).success) {
           setStats((data as any).data)
-          console.log('Agent stats loaded:', (data as any).data)
+          console.log('Agent stats loaded successfully:', (data as any).data)
           return
         }
         console.error('Unexpected stats response:', data)
       } catch (err: any) {
         console.error('Error fetching agent stats via jwtAuth:', err.message || err)
+        
+        // Don't logout immediately on auth errors - let user retry
         if (err.message && err.message.includes('Authentication expired')) {
-          await logout()
+          console.log('Authentication expired, but not logging out automatically')
+          console.log('User should refresh the page or login again')
+          // Could show a toast notification here in the future
+        } else {
+          console.error('Non-auth error:', err)
         }
       }
 

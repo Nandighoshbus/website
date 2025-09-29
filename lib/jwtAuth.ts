@@ -186,8 +186,8 @@ class JWTAuthService {
     return null;
   }
 
-  // Check if user is authenticated
-  isAuthenticated(userType: 'admin' | 'agent' | 'customer'): boolean {
+  // Check if user is authenticated (with automatic refresh attempt)
+  async isAuthenticatedAsync(userType: 'admin' | 'agent' | 'customer'): Promise<boolean> {
     const token = this.getToken(userType);
     const user = this.getUser(userType);
     const expiresAt = this.getExpiresAt(userType);
@@ -196,14 +196,42 @@ class JWTAuthService {
       return false;
     }
     
-    // Check if token is expired
+    // Check if token is expired and try to refresh
     if (expiresAt && new Date(expiresAt) <= new Date()) {
-      console.log(`${userType} token expired, logging out`);
-      this.logout(userType);
-      return false;
+      console.log(`${userType} token expired, attempting refresh...`);
+      const refreshed = await this.refreshToken(userType);
+      
+      if (!refreshed) {
+        console.log(`Failed to refresh ${userType} token, logging out`);
+        this.logout(userType);
+        return false;
+      }
+      
+      console.log(`${userType} token refreshed successfully`);
     }
     
     return true;
+  }
+
+  // Check if user is authenticated (synchronous - for backward compatibility)
+  isAuthenticated(userType: 'admin' | 'agent' | 'customer'): boolean {
+    const token = this.getToken(userType);
+    const user = this.getUser(userType);
+    
+    if (!token || !user) {
+      return false;
+    }
+    
+    // For synchronous check, be more lenient with expiration
+    // Let the async methods handle token refresh
+    return true;
+  }
+
+  // Check if refresh token is available
+  hasRefreshToken(userType: 'admin' | 'agent' | 'customer'): boolean {
+    const prefix = userType === 'admin' ? 'admin' : userType === 'agent' ? 'agent' : 'customer';
+    const refreshToken = localStorage.getItem(`${prefix}_refresh_token`);
+    return !!refreshToken;
   }
 
   // Get token expiration time
@@ -258,39 +286,141 @@ class JWTAuthService {
     localStorage.removeItem(`${prefix}_expires_at`);
   }
 
-  // Make authenticated API request
+  // Refresh token with multiple endpoint attempts
+  async refreshToken(userType: 'admin' | 'agent' | 'customer'): Promise<boolean> {
+    const prefix = userType === 'admin' ? 'admin' : userType === 'agent' ? 'agent' : 'customer';
+    const refreshToken = localStorage.getItem(`${prefix}_refresh_token`);
+    
+    if (!refreshToken) {
+      console.log(`No refresh token found for ${userType}`);
+      return false;
+    }
+
+    // Try multiple possible refresh endpoints
+    const possibleEndpoints = [
+      `/auth/${userType}/refresh`,
+      `/auth/refresh`,
+      `/${userType}/refresh`,
+      `/refresh`
+    ];
+
+    for (const endpoint of possibleEndpoints) {
+      try {
+        console.log(`Attempting to refresh ${userType} token via ${endpoint}...`);
+        
+        const response = await fetch(`${this.API_BASE_URL}/api/v1${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${refreshToken}`
+          },
+          body: JSON.stringify({ 
+            refresh_token: refreshToken,
+            user_type: userType 
+          })
+        });
+
+        console.log(`Refresh attempt ${endpoint}: ${response.status}`);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`Refresh response for ${endpoint}:`, result);
+          
+          if (result.success && result.data) {
+            console.log(`${userType} token refreshed successfully via ${endpoint}`);
+            this.storeTokens(userType, result.data);
+            return true;
+          }
+        } else if (response.status === 404) {
+          console.log(`Endpoint ${endpoint} not found, trying next...`);
+          continue;
+        } else {
+          console.log(`Refresh failed at ${endpoint}: ${response.status}`);
+          const errorText = await response.text();
+          console.log(`Error response:`, errorText);
+        }
+      } catch (error) {
+        console.error(`Error refreshing ${userType} token via ${endpoint}:`, error);
+        continue;
+      }
+    }
+    
+    console.log(`All refresh attempts failed for ${userType}`);
+    return false;
+  }
+
+  // Make authenticated API request with automatic token refresh and fallback
   async authenticatedRequest<T>(
     userType: 'admin' | 'agent' | 'customer',
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const token = this.getToken(userType);
+    let token = this.getToken(userType);
     
     if (!token) {
       throw new Error('No authentication token found');
     }
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...((options.headers as Record<string, string>) || {})
+    console.log(`Making authenticated request to ${endpoint} for ${userType}`);
+
+    const makeRequest = async (authToken: string) => {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+        ...((options.headers as Record<string, string>) || {})
+      };
+
+      return fetch(`${this.API_BASE_URL}/api/v1${endpoint}`, {
+        ...options,
+        headers
+      });
     };
 
-    const response = await fetch(`${this.API_BASE_URL}/api/v1${endpoint}`, {
-      ...options,
-      headers
-    });
+    // First attempt with current token
+    let response = await makeRequest(token);
+    
+    if (response.ok) {
+      return response.json();
+    }
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        // Token expired or invalid, logout user
+    // If we get 401, try to refresh and retry
+    if (response.status === 401) {
+      console.log(`${userType} received 401, attempting token refresh...`);
+      
+      const refreshed = await this.refreshToken(userType);
+      
+      if (refreshed) {
+        const newToken = this.getToken(userType);
+        if (newToken) {
+          console.log(`Retrying request with refreshed token...`);
+          const retryResponse = await makeRequest(newToken);
+          
+          if (retryResponse.ok) {
+            console.log(`Request successful after token refresh`);
+            return retryResponse.json();
+          } else {
+            console.log(`Request still failed after refresh: ${retryResponse.status}`);
+          }
+        }
+      }
+      
+      // If refresh failed or retry failed, check if we should force logout
+      const currentToken = this.getToken(userType);
+      if (!currentToken) {
+        console.log(`No token after refresh attempt, logging out ${userType}`);
         this.logout(userType);
         throw new Error('Authentication expired. Please login again.');
       }
-      throw new Error(`API request failed: ${response.status}`);
+      
+      // Don't logout immediately - let the user try to login manually
+      console.log(`Authentication issues for ${userType}, but keeping session for manual retry`);
+      throw new Error('Authentication expired. Please login again.');
     }
 
-    return response.json();
+    // For other errors, don't logout
+    const errorText = await response.text();
+    console.error(`API request failed: ${response.status} - ${errorText}`);
+    throw new Error(`API request failed: ${response.status}`);
   }
 }
 
