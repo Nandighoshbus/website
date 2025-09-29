@@ -89,11 +89,15 @@ export default function AgentDashboard() {
       } catch (err: any) {
         console.error('Error fetching agent stats via jwtAuth:', err.message || err)
         
-        // Don't logout immediately on auth errors - let user retry
+        // Handle different types of authentication errors
         if (err.message && err.message.includes('Authentication expired')) {
-          console.log('Authentication expired, but not logging out automatically')
-          console.log('User should refresh the page or login again')
-          // Could show a toast notification here in the future
+          if (err.message.includes('does not support token refresh')) {
+            console.log('Backend does not support token refresh - this is expected behavior')
+            console.log('Agent will need to login again when token fully expires')
+          } else {
+            console.log('Authentication expired, but not logging out automatically')
+            console.log('User should refresh the page or login again')
+          }
         } else {
           console.error('Non-auth error:', err)
         }

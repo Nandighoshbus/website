@@ -286,13 +286,23 @@ class JWTAuthService {
     localStorage.removeItem(`${prefix}_expires_at`);
   }
 
-  // Refresh token with multiple endpoint attempts
+  // Check if backend supports refresh tokens
+  private refreshEndpointsChecked = new Set<string>();
+  private backendSupportsRefresh = new Map<string, boolean>();
+
+  // Refresh token with backend capability detection
   async refreshToken(userType: 'admin' | 'agent' | 'customer'): Promise<boolean> {
     const prefix = userType === 'admin' ? 'admin' : userType === 'agent' ? 'agent' : 'customer';
     const refreshToken = localStorage.getItem(`${prefix}_refresh_token`);
     
     if (!refreshToken) {
       console.log(`No refresh token found for ${userType}`);
+      return false;
+    }
+
+    // Check if we already know this backend doesn't support refresh
+    if (this.backendSupportsRefresh.get(userType) === false) {
+      console.log(`Backend doesn't support refresh for ${userType}, skipping attempts`);
       return false;
     }
 
@@ -303,6 +313,8 @@ class JWTAuthService {
       `/${userType}/refresh`,
       `/refresh`
     ];
+
+    let foundAnyEndpoint = false;
 
     for (const endpoint of possibleEndpoints) {
       try {
@@ -322,12 +334,17 @@ class JWTAuthService {
 
         console.log(`Refresh attempt ${endpoint}: ${response.status}`);
 
+        if (response.status !== 404) {
+          foundAnyEndpoint = true;
+        }
+
         if (response.ok) {
           const result = await response.json();
           console.log(`Refresh response for ${endpoint}:`, result);
           
           if (result.success && result.data) {
             console.log(`${userType} token refreshed successfully via ${endpoint}`);
+            this.backendSupportsRefresh.set(userType, true);
             this.storeTokens(userType, result.data);
             return true;
           }
@@ -338,11 +355,18 @@ class JWTAuthService {
           console.log(`Refresh failed at ${endpoint}: ${response.status}`);
           const errorText = await response.text();
           console.log(`Error response:`, errorText);
+          foundAnyEndpoint = true; // Endpoint exists but failed for other reasons
         }
       } catch (error) {
         console.error(`Error refreshing ${userType} token via ${endpoint}:`, error);
         continue;
       }
+    }
+    
+    // If no endpoints were found, mark backend as not supporting refresh
+    if (!foundAnyEndpoint) {
+      console.log(`Backend doesn't support refresh tokens for ${userType} - all endpoints returned 404`);
+      this.backendSupportsRefresh.set(userType, false);
     }
     
     console.log(`All refresh attempts failed for ${userType}`);
@@ -404,7 +428,7 @@ class JWTAuthService {
         }
       }
       
-      // If refresh failed or retry failed, check if we should force logout
+      // If refresh failed, provide different messages based on backend capability
       const currentToken = this.getToken(userType);
       if (!currentToken) {
         console.log(`No token after refresh attempt, logging out ${userType}`);
@@ -412,9 +436,16 @@ class JWTAuthService {
         throw new Error('Authentication expired. Please login again.');
       }
       
-      // Don't logout immediately - let the user try to login manually
-      console.log(`Authentication issues for ${userType}, but keeping session for manual retry`);
-      throw new Error('Authentication expired. Please login again.');
+      // Check if backend supports refresh at all
+      if (this.backendSupportsRefresh.get(userType) === false) {
+        console.log(`Backend doesn't support token refresh for ${userType}. Session will expire naturally.`);
+        // Don't logout immediately, but inform that refresh isn't supported
+        throw new Error('Session expired. Backend does not support token refresh. Please login again when needed.');
+      } else {
+        // Refresh is supported but failed for other reasons
+        console.log(`Token refresh failed for ${userType}, but keeping session for manual retry`);
+        throw new Error('Authentication expired. Please login again.');
+      }
     }
 
     // For other errors, don't logout
