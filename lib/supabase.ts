@@ -18,20 +18,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables. Please configure in Render dashboard.')
 }
 
-// Create Supabase client for frontend with flexible CORS handling
+// Create Supabase client for frontend with production-ready configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // Disable URL detection to avoid redirect issues
-    flowType: 'implicit', // Use implicit flow instead of PKCE for better compatibility
+    detectSessionInUrl: false,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'nandighosh-auth-token'
   },
   global: {
     headers: {
-      'X-Client-Info': 'nandighosh-bus@1.0.0',
-      'Access-Control-Allow-Origin': '*'
+      'X-Client-Info': 'nandighosh-bus@1.0.0'
     }
   },
   db: {
