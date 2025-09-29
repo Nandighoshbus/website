@@ -7,9 +7,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start",
-    "verify-deployment": "node scripts/verify-deployment.js",
-    "prebuild": "node scripts/verify-deployment.js"
+    "start": "next start"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
