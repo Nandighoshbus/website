@@ -43,15 +43,16 @@ export default function AdminLoginPage() {
 
     try {
       console.log('AdminLoginPage: Starting login process')
-      await login(formData.email, formData.password)
-      console.log('AdminLoginPage: Login successful, redirecting...')
+      const result = await login(formData.email, formData.password)
+      console.log('AdminLoginPage: Login successful, result:', result)
       setMessage("Admin login successful!")
       setMessageType("success")
       
-      // Small delay to allow auth context to update
+      // Wait a bit longer to ensure auth context is fully updated
       setTimeout(() => {
+        console.log('AdminLoginPage: Redirecting to dashboard')
         router.push("/admin/dashboard")
-      }, 500)
+      }, 1000)
     } catch (error: any) {
       console.error('AdminLoginPage: Login failed:', error)
       setMessage(error.message || "Invalid email or password.")

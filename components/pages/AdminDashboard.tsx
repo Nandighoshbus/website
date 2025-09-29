@@ -155,13 +155,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   // Use the scalable authentication context
-  const { user: currentUser, isLoading: authLoading, logout } = useAdminAuth()
+  const { user: currentUser, isLoading: authLoading, logout, refreshAuth } = useAdminAuth()
 
   useEffect(() => {
     console.log('AdminDashboard: useEffect triggered', { 
       currentUser: !!currentUser, 
       authLoading, 
-      userRole: currentUser?.role 
+      userRole: currentUser?.role,
+      userEmail: currentUser?.email
     })
     
     if (currentUser && !authLoading) {
@@ -175,6 +176,15 @@ export default function AdminDashboard() {
     }
   }, [currentUser, authLoading])
 
+  // Additional effect to handle auth state changes after login
+  useEffect(() => {
+    console.log('AdminDashboard: Auth state changed', {
+      isLoading: authLoading,
+      hasUser: !!currentUser,
+      userEmail: currentUser?.email
+    })
+  }, [authLoading, currentUser])
+
   // Additional effect to handle cases where auth context loads after component mount
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -187,8 +197,29 @@ export default function AdminDashboard() {
     return () => clearTimeout(timer)
   }, [authLoading, currentUser, users.length])
 
+  // Emergency fallback: If stuck in loading for too long, try to refresh auth
+  useEffect(() => {
+    if (authLoading) {
+      const emergencyTimer = setTimeout(() => {
+        console.log('AdminDashboard: Emergency auth refresh - stuck in loading too long')
+        refreshAuth()
+      }, 3000) // 3 seconds timeout
+      
+      return () => clearTimeout(emergencyTimer)
+    }
+  }, [authLoading, refreshAuth])
+
+  // Handle case where we have token but no user (trigger refresh)
+  useEffect(() => {
+    if (!authLoading && !currentUser && jwtAuth.isAuthenticated('admin')) {
+      console.log('AdminDashboard: Have token but no user, triggering refresh')
+      refreshAuth()
+    }
+  }, [authLoading, currentUser, refreshAuth])
+
   // Show loading while authentication is being verified
   if (authLoading) {
+    console.log('AdminDashboard: Showing loading screen, authLoading:', authLoading)
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -199,10 +230,40 @@ export default function AdminDashboard() {
     )
   }
 
-  // Redirect if not authenticated (handled by auth context)
-  if (!currentUser) {
-    return null
+  // Redirect if not authenticated (but only after auth loading is complete)
+  if (!currentUser && !authLoading) {
+    console.log('AdminDashboard: No current user after auth check')
+    
+    // Double-check if we have a token in localStorage before redirecting
+    const hasToken = jwtAuth.isAuthenticated('admin')
+    if (!hasToken) {
+      // Prevent redirect loops by checking current path
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/admin/login')) {
+        console.log('AdminDashboard: No token, redirecting to login')
+        window.location.href = '/admin/login'
+      }
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-gray-600">Redirecting to login...</p>
+          </div>
+        </div>
+      )
+    } else {
+      // We have a token but no user - useEffect will handle refresh
+      console.log('AdminDashboard: Have token but no user, waiting for refresh')
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Refreshing authentication...</p>
+          </div>
+        </div>
+      )
+    }
   }
+
+  console.log('AdminDashboard: Rendering dashboard for user:', currentUser?.email)
 
   const fetchData = async () => {
     try {

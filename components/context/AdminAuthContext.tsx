@@ -9,6 +9,7 @@ interface AdminAuthContextType {
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<any>
   logout: () => void
+  refreshAuth: () => void
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined)
@@ -17,13 +18,16 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         console.log('AdminAuthContext: Checking authentication...')
         
-        if (jwtAuth.isAuthenticated('admin')) {
+        // First check if we have basic auth data
+        const hasToken = jwtAuth.isAuthenticated('admin')
+        console.log('AdminAuthContext: Has token:', hasToken)
+        
+        if (hasToken) {
           const userData = jwtAuth.getUser('admin')
           console.log('AdminAuthContext: Found user data:', userData)
           
@@ -31,7 +35,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             console.log('AdminAuthContext: User is valid admin, setting user state')
             setUser(userData)
           } else {
-            console.log('AdminAuthContext: Invalid user role, logging out')
+            console.log('AdminAuthContext: Invalid user role or no user data, logging out')
             jwtAuth.logout('admin')
             setUser(null)
           }
@@ -88,12 +92,50 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [])
 
+  // Refresh auth function
+  const refreshAuth = useCallback(() => {
+    console.log('AdminAuthContext: Manual auth refresh triggered')
+    setIsLoading(true)
+    
+    const checkAuth = async () => {
+      try {
+        const hasToken = jwtAuth.isAuthenticated('admin')
+        console.log('AdminAuthContext: Refresh - Has token:', hasToken)
+        
+        if (hasToken) {
+          const userData = jwtAuth.getUser('admin')
+          console.log('AdminAuthContext: Refresh - Found user data:', userData)
+          
+          if (userData && ['admin', 'super_admin'].includes(userData.role)) {
+            console.log('AdminAuthContext: Refresh - Setting user state')
+            setUser(userData)
+          } else {
+            console.log('AdminAuthContext: Refresh - Invalid user, logging out')
+            jwtAuth.logout('admin')
+            setUser(null)
+          }
+        } else {
+          console.log('AdminAuthContext: Refresh - No authentication found')
+          setUser(null)
+        }
+      } catch (error) {
+        console.error('AdminAuthContext: Refresh error:', error)
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    setTimeout(checkAuth, 100)
+  }, [])
+
   const value = {
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
-    logout
+    logout,
+    refreshAuth
   }
 
   return (

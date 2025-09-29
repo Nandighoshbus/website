@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "nandighosh-bus",
   "version": "1.0.0",
   "description": "Premium bus service application for Odisha travel",
