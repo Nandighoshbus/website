@@ -81,38 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch user profile from user_profiles table
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('AuthContext: Fetching user profile for user:', userId)
-      
-      // Add a small delay to ensure session is fully established
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
       const { data: profile, error } = await db.getUserProfile(userId)
       if (error) {
-        console.error('AuthContext: Error fetching user profile:', error)
-        if (error.message?.includes('No API key found')) {
-          console.error('AuthContext: API key issue - session may not be properly established')
-          // Try to refresh the session
-          const { session } = await auth.getSession()
-          if (session) {
-            console.log('AuthContext: Session exists, retrying profile fetch')
-            // Retry once more
-            const { data: retryProfile, error: retryError } = await db.getUserProfile(userId)
-            if (!retryError && retryProfile) {
-              setUserProfile(retryProfile)
-              return
-            }
-          }
-        }
+        console.error('Error fetching user profile:', error)
         setUserProfile(null)
       } else if (profile) {
-        console.log('AuthContext: User profile loaded successfully')
         setUserProfile(profile)
       } else {
-        console.log('AuthContext: No user profile found for user:', userId)
         setUserProfile(null)
       }
     } catch (error) {
-      console.error('AuthContext: Exception fetching user profile:', error)
+      console.error('Exception fetching user profile:', error)
       setUserProfile(null)
     }
   }
@@ -120,39 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true)
     try {
-      console.log('AuthContext: Starting scalable direct sign-in process')
       const result = await auth.signIn(email, password)
-      
-      if (result.error) {
-        console.error('AuthContext: Sign-in failed:', result.error)
-        
-        // Enhanced error handling with better user messages
-        if (result.error.message?.includes('Invalid login credentials')) {
-          result.error.message = 'Invalid email or password. Please check your credentials and try again.'
-        } else if (result.error.message?.includes('Email not confirmed')) {
-          result.error.message = 'Please verify your email address before signing in.'
-        } else if (result.error.message?.includes('Too many requests')) {
-          result.error.message = 'Too many login attempts. Please wait a few minutes and try again.'
-        } else if (result.error.message?.includes('CORS') || (result.error as any).isCorsError) {
-          result.error.message = 'Connection issue detected. Please ensure your Supabase Site URL is configured correctly for this domain.'
-        } else if (result.error.message?.includes('deployment domain')) {
-          result.error.message = 'Authentication service configuration issue. Please contact support.'
-        }
-      } else if (result.data?.user) {
-        console.log('AuthContext: Sign-in successful for user:', result.data.user.id)
-      }
-      
       setLoading(false)
       return result
     } catch (error) {
       console.error('AuthContext: Sign-in exception:', error)
       setLoading(false)
-      return { 
-        data: null, 
-        error: { 
-          message: 'Authentication service unavailable. Please check your internet connection and try again.' 
-        } 
-      }
+      return { data: null, error: { message: 'Sign-in failed' } }
     }
   }
 
@@ -164,23 +117,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     setLoading(true)
     try {
-      console.log('AuthContext: Starting scalable direct sign-up process')
-      
-      // Use the scalable auth.signUp with direct Supabase client
       const { data, error } = await auth.signUp(email, password, userData)
       
       if (error) {
-        console.error('AuthContext: Sign-up failed:', error)
         setLoading(false)
         return { data: null, error }
       }
 
       if (data?.user) {
-        console.log('AuthContext: Sign-up successful for user:', data.user.id)
-        
-        // Create user profile after successful signup
+        // Create user profile
         try {
-          const { error: profileError } = await db.createUserProfile(data.user.id, {
+          await db.createUserProfile(data.user.id, {
             full_name: userData.full_name,
             first_name: userData.first_name,
             last_name: userData.last_name,
@@ -188,71 +135,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             phone: userData.phone,
             role: 'customer'
           })
-
-          if (profileError) {
-            console.log('AuthContext: Profile creation failed:', profileError.message)
-            // Don't fail the signup if profile creation fails
-          } else {
-            console.log('AuthContext: User profile created successfully')
-          }
         } catch (profileError) {
-          console.log('AuthContext: Profile creation exception:', profileError)
-          // Don't fail signup for profile issues
+          console.log('Profile creation failed:', profileError)
         }
       }
 
       setLoading(false)
       return { data, error: null }
     } catch (error: any) {
-      console.error('AuthContext: Sign-up exception:', error)
       setLoading(false)
       return { data: null, error: { message: error.message || 'Registration failed' } }
     }
   }
 
   const signOut = async () => {
-    console.log('AuthContext: Starting PURE CLIENT-SIDE signOut (no server calls)')
+    setLoading(true)
     
-    // Clear React state IMMEDIATELY
+    // Clear state immediately
     setUser(null)
     setUserProfile(null)
     setSession(null)
-    setLoading(true)
     
     try {
-      // Use pure client-side signout (NO server calls = NO 403 errors)
       await auth.signOut()
-      
-      console.log('AuthContext: Pure client-side signOut completed')
-      
-      // Small delay to ensure cleanup is complete
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
       setLoading(false)
-      
-      // Force page reload to ensure complete cleanup and fresh state
-      console.log('AuthContext: Forcing page reload for complete cleanup')
-      if (typeof window !== 'undefined') {
-        window.location.reload()
-      }
-      
       return { error: null }
-      
     } catch (error) {
-      console.log('AuthContext: SignOut exception (forcing cleanup anyway):', error)
-      
-      // Force cleanup even on exception
-      setUser(null)
-      setUserProfile(null)
-      setSession(null)
       setLoading(false)
-      
-      // Force page reload even on error to ensure cleanup
-      if (typeof window !== 'undefined') {
-        console.log('AuthContext: Forcing page reload after error')
-        window.location.reload()
-      }
-      
       return { error: null }
     }
   }
