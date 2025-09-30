@@ -7,12 +7,27 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function POST(request: NextRequest) {
   try {
+    // Debug logging
+    console.log('=== Sign-In API Route Called ===')
+    console.log('Supabase URL:', supabaseUrl ? 'Set ✓' : 'Missing ✗')
+    console.log('Service Key:', supabaseServiceKey ? 'Set ✓' : 'Missing ✗')
+    
     const { email, password } = await request.json()
+    console.log('Sign-in attempt for email:', email)
 
     if (!email || !password) {
       return NextResponse.json(
         { error: { message: 'Email and password are required' } },
         { status: 400 }
+      )
+    }
+
+    // Check if environment variables are present
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Missing environment variables!')
+      return NextResponse.json(
+        { error: { message: 'Server configuration error - missing credentials' } },
+        { status: 500 }
       )
     }
 
@@ -23,6 +38,7 @@ export async function POST(request: NextRequest) {
         persistSession: false
       }
     })
+    console.log('Supabase admin client created')
 
     // Sign in using admin client
     const { data, error } = await supabaseAdmin.auth.signInWithPassword({
@@ -31,13 +47,17 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Server-side sign-in error:', error)
+      console.error('❌ Server-side sign-in error:')
+      console.error('Error message:', error.message)
+      console.error('Error status:', error.status)
+      console.error('Full error:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: { message: error.message } },
+        { error: { message: error.message, details: error.status } },
         { status: 401 }
       )
     }
 
+    console.log('✅ Sign-in successful for:', email)
     // Return the session data
     return NextResponse.json({ data }, { status: 200 })
   } catch (error: any) {

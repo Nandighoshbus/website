@@ -54,7 +54,8 @@ export const auth = {
 
   // Server-side sign-in (no client auth)
   signIn: async (email: string, password: string) => {
-    console.log('Auth: Server-side sign-in only')
+    console.log('Auth: Starting server-side sign-in')
+    console.log('Auth: Calling /api/auth/signin')
     
     try {
       const response = await fetch('/api/auth/signin', {
@@ -65,18 +66,26 @@ export const auth = {
         body: JSON.stringify({ email, password }),
       })
 
-      const result = await response.json()
-      
-      if (response.ok) {
-        console.log('Auth: Server-side sign-in successful')
-        return result
-      } else {
-        console.error('Auth: Server-side sign-in failed:', result)
+      console.log('Auth: Response status:', response.status)
+
+      if (!response.ok) {
+        const result = await response.json()
+        console.error('Auth: Sign-in failed with status', response.status, ':', result)
         return { data: null, error: result.error || { message: 'Invalid credentials' } }
       }
+
+      const result = await response.json()
+      console.log('Auth: Sign-in successful')
+      return result
     } catch (error: any) {
-      console.error('Auth: Server-side sign-in error:', error)
-      return { data: null, error: { message: error.message || 'Sign-in failed' } }
+      console.error('Auth: Network error during sign-in:', error)
+      return { 
+        data: null, 
+        error: { 
+          message: 'Network error - check if dev server is running and API routes are accessible',
+          details: error.message 
+        } 
+      }
     }
   },
 
