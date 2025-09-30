@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables. Please configure in Render dashboard.')
 }
 
-// Create Supabase client for frontend with enhanced CORS handling
+// Create Supabase client for frontend with proper CORS handling
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -26,29 +26,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'nandighosh-auth-token',
-    // Use implicit flow for better compatibility
+    // Use implicit flow for password-based authentication (PKCE is for OAuth)
     flowType: 'implicit'
   },
   global: {
     headers: {
-      'X-Client-Info': 'nandighosh-bus@1.0.0'
-    },
-    fetch: (url, options = {}) => {
-      // Enhanced fetch with better error handling
-      return fetch(url, {
-        ...options,
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          ...options.headers
-        }
-      }).catch(error => {
-        console.error('Fetch error:', error)
-        throw new Error(`Network request failed: ${error.message}`)
-      })
+      'X-Client-Info': 'nandighosh-bus@1.0.0',
+      'apikey': supabaseAnonKey,
+      'Authorization': `Bearer ${supabaseAnonKey}`
     }
   },
   db: {
@@ -60,12 +45,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 const checkSupabaseConfig = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase configuration is invalid')
-  }
-  
-  // Log current domain for debugging CORS issues
-  if (typeof window !== 'undefined') {
-    console.log('Current deployment domain:', window.location.origin)
-    console.log('Make sure this domain is added to Supabase Site URL settings')
   }
 }
 
@@ -84,171 +63,100 @@ export const auth = {
     return { data, error }
   },
 
-  // Sign in user with multiple fallback methods for CORS issues
+  // Sign in user with enhanced CORS error handling
   signIn: async (email: string, password: string) => {
     checkSupabaseConfig()
-    console.log('Auth signIn called with:', { email, password: '***' })
     
-    // Method 1: Try standard authentication
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       })
       
-      console.log('Supabase signIn response:', { 
-        user: data?.user ? 'User object present' : 'No user', 
-        session: data?.session ? 'Session present' : 'No session',
-        error: error ? error.message : 'No error'
-      })
-      
-      if (!error && data?.user) {
+      if (error) {
+        // Enhanced CORS error detection
+        const isCorsError = error.message?.includes('NetworkError') || 
+                           error.message?.includes('CORS') || 
+                           error.message?.includes('fetch') ||
+                           error.message?.includes('Failed to fetch') ||
+                           (error as any).status === 0
+        
+        if (isCorsError) {
+          return {
+            data: null,
+            error: {
+              message: 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.',
+              isCorsError: true,
+              __isAuthError: true,
+              name: 'AuthRetryableFetchError',
+              status: 0
+            }
+          }
+        }
+        
+        // Handle other Supabase errors
+        if (error.message?.includes('Invalid login credentials')) {
+          return {
+            data: null,
+            error: {
+              message: 'Invalid email or password. Please check your credentials and try again.',
+              __isAuthError: true
+            }
+          }
+        }
+        
+        if (error.message?.includes('Email not confirmed')) {
+          return {
+            data: null,
+            error: {
+              message: 'Please verify your email address before signing in.',
+              __isAuthError: true
+            }
+          }
+        }
+        
         return { data, error }
       }
       
-      // If we get here, there was an error - try fallback methods
-      console.log('Primary auth failed, trying fallback methods...')
-      
-    } catch (primaryError: any) {
-      console.error('Primary authentication failed:', primaryError)
-    }
-    
-    // Method 2: Try with minimal client configuration
-    try {
-      console.log('Trying minimal client configuration...')
-      const minimalClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-          detectSessionInUrl: false,
-          flowType: 'implicit'
-        },
-        global: {
-          fetch: (url, options = {}) => {
-            return fetch(url, {
-              ...options,
-              mode: 'cors',
-              credentials: 'omit'
-            })
-          }
-        }
-      })
-      
-      const { data, error } = await minimalClient.auth.signInWithPassword({
-        email,
-        password
-      })
-      
-      if (!error && data?.user) {
-        console.log('Minimal client authentication successful')
-        // Set session in main client
-        if (data.session) {
-          await supabase.auth.setSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token
-          })
-        }
-        return { data, error }
+      if (data?.user) {
+        return { data, error: null }
       }
       
-    } catch (minimalError: any) {
-      console.error('Minimal client authentication failed:', minimalError)
-    }
-    
-    // Method 3: Try through Next.js API proxy (server-side, no CORS)
-    try {
-      console.log('Trying proxy authentication...')
-      const response = await fetch('/api/auth/proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      })
+    } catch (authError: any) {
+      // Enhanced network error detection
+      const isNetworkError = authError.name === 'TypeError' ||
+                            authError.message?.includes('NetworkError') ||
+                            authError.message?.includes('CORS') ||
+                            authError.message?.includes('Failed to fetch')
       
-      if (response.ok) {
-        const authData = await response.json()
-        console.log('Proxy authentication successful')
-        
-        // Set session in main client
-        if (authData.access_token) {
-          await supabase.auth.setSession({
-            access_token: authData.access_token,
-            refresh_token: authData.refresh_token
-          })
-          
-          return {
-            data: {
-              user: authData.user,
-              session: {
-                access_token: authData.access_token,
-                refresh_token: authData.refresh_token,
-                expires_in: authData.expires_in,
-                token_type: authData.token_type,
-                user: authData.user
-              }
-            },
-            error: null
+      if (isNetworkError) {
+        return {
+          data: null,
+          error: {
+            message: 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.',
+            isCorsError: true,
+            __isAuthError: true,
+            name: 'AuthRetryableFetchError',
+            status: 0
           }
         }
       }
       
-    } catch (proxyError: any) {
-      console.error('Proxy authentication failed:', proxyError)
-    }
-    
-    // Method 4: Try direct API call as last resort
-    try {
-      console.log('Trying direct API authentication...')
-      const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      })
-      
-      if (response.ok) {
-        const authData = await response.json()
-        console.log('Direct API authentication successful')
-        
-        // Set session in main client
-        if (authData.access_token) {
-          await supabase.auth.setSession({
-            access_token: authData.access_token,
-            refresh_token: authData.refresh_token
-          })
-          
-          return {
-            data: {
-              user: authData.user,
-              session: authData
-            },
-            error: null
-          }
+      return {
+        data: null,
+        error: {
+          message: authError.message || 'Authentication service unavailable',
+          __isAuthError: true
         }
       }
-      
-    } catch (directError: any) {
-      console.error('Direct API authentication failed:', directError)
     }
     
-    // All methods failed - return comprehensive error
+    // Fallback error
     return {
       data: null,
       error: {
-        message: `Authentication failed due to network/CORS issues. Current domain: ${typeof window !== 'undefined' ? window.location.origin : 'unknown'}. Please ensure this domain is configured in Supabase Dashboard → Authentication → URL Configuration.`,
-        isCorsError: true,
-        __isAuthError: true,
-        name: 'AuthRetryableFetchError',
-        status: 0
+        message: 'Authentication failed for unknown reason',
+        __isAuthError: true
       }
     }
   },

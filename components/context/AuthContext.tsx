@@ -111,9 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (result.error.message?.includes('Too many requests')) {
           result.error.message = 'Too many login attempts. Please wait a few minutes and try again.'
         } else if (result.error.message?.includes('NetworkError') || result.error.message?.includes('CORS') || result.error.message?.includes('fetch')) {
-          result.error.message = 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.'
+          result.error.message = 'Connection failed. This appears to be a CORS configuration issue. Please contact support.'
         } else if ((result.error as any).isCorsError) {
-          result.error.message = 'Network connection failed. Your deployment domain may not be configured in Supabase. Please check the authentication settings.'
+          result.error.message = 'Authentication service temporarily unavailable. Please try again in a few moments or contact support if this persists.'
+        } else if (result.error.message?.includes('deployment domain')) {
+          result.error.message = 'Authentication service configuration issue. Please contact support.'
         }
       } else if (result.data?.user) {
         console.log('AuthContext: Sign-in successful for user:', result.data.user.id)
