@@ -43,47 +43,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session from server only
     const getInitialSession = async () => {
-      const { session } = await auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      // If user exists, fetch their profile from user_profiles table
-      if (session?.user) {
-        await fetchUserProfile(session.user.id)
+      try {
+        const { session } = await auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        // Profile fetch in background (optional, non-blocking)
+        if (session?.user) {
+          fetchUserProfile(session.user.id).catch(err => {
+            console.log('Profile fetch failed (non-critical):', err)
+          })
+        }
+      } catch (error) {
+        console.error('Session check failed:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      setLoading(false)
     }
 
     getInitialSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event)
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      // If user exists, fetch their profile
-      if (session?.user) {
-        await fetchUserProfile(session.user.id)
-      } else {
-        setUserProfile(null)
-      }
-      
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    
+    // No client-side auth state listening
   }, [])
 
-  // Fetch user profile from user_profiles table
+  // Fetch user profile from user_profiles table (optional, non-blocking)
   const fetchUserProfile = async (userId: string) => {
     try {
       const { data: profile, error } = await db.getUserProfile(userId)
       if (error) {
-        console.error('Error fetching user profile:', error)
+        console.log('Profile fetch error (non-critical):', error)
         setUserProfile(null)
       } else if (profile) {
         setUserProfile(profile)
@@ -91,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserProfile(null)
       }
     } catch (error) {
-      console.error('Exception fetching user profile:', error)
+      console.log('Profile fetch exception (non-critical):', error)
       setUserProfile(null)
     }
   }
@@ -100,6 +90,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     try {
       const result = await auth.signIn(email, password)
+      
+      // Manually update state after server-side sign-in
+      if (result.data?.user) {
+        setUser(result.data.user)
+        setSession(result.data.session)
+        
+        // Profile fetch in background
+        fetchUserProfile(result.data.user.id).catch(err => {
+          console.log('Profile fetch failed (non-critical):', err)
+        })
+      }
+      
       setLoading(false)
       return result
     } catch (error) {
@@ -117,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     setLoading(true)
     try {
+      // Sign-up only verifies email/password through Supabase auth
       const { data, error } = await auth.signUp(email, password, userData)
       
       if (error) {
@@ -124,20 +127,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { data: null, error }
       }
 
+      // Profile creation is optional and non-blocking
       if (data?.user) {
-        // Create user profile
-        try {
-          await db.createUserProfile(data.user.id, {
-            full_name: userData.full_name,
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            email: email,
-            phone: userData.phone,
-            role: 'customer'
-          })
-        } catch (profileError) {
-          console.log('Profile creation failed:', profileError)
-        }
+        db.createUserProfile(data.user.id, {
+          full_name: userData.full_name,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          email: email,
+          phone: userData.phone,
+          role: 'customer'
+        }).catch(profileError => {
+          console.log('Profile creation failed (non-critical):', profileError)
+        })
       }
 
       setLoading(false)
@@ -149,19 +150,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    console.log('AuthContext: Starting sign-out')
     setLoading(true)
     
-    // Clear state immediately
+    // Clear state immediately (optimistic update)
     setUser(null)
     setUserProfile(null)
     setSession(null)
     
     try {
+      // Call server-side sign-out
       await auth.signOut()
+      console.log('AuthContext: Sign-out complete')
       setLoading(false)
       return { error: null }
     } catch (error) {
+      console.error('AuthContext: Sign-out error (non-critical):', error)
       setLoading(false)
+      // Always return success - state already cleared
       return { error: null }
     }
   }

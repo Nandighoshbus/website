@@ -4,70 +4,182 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Simple Supabase client - no complex configuration
+// Supabase client for database queries only (NO client-side auth)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storageKey: 'nandighosh-auth-token'
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    persistSession: false
   }
 })
 
-// Simple authentication functions
+// Server-side only authentication functions
 export const auth = {
-  // Simple sign-up
+  // Server-side sign-up (no client fallback)
   signUp: async (email: string, password: string, userData: { full_name: string, first_name?: string, last_name?: string, phone: string }) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: userData.full_name,
-          phone: userData.phone
-        }
+    console.log('Auth: Starting server-side sign-up')
+    
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          userData: {
+            full_name: userData.full_name,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone
+          }
+        }),
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        console.log('Auth: Server-side sign-up successful')
+        return result
+      } else {
+        console.error('Auth: Server-side sign-up failed:', result)
+        return { data: null, error: result.error || { message: 'Sign-up failed' } }
       }
-    })
-    
-    return { data, error }
+    } catch (error: any) {
+      console.error('Auth: Server-side sign-up error:', error)
+      return { data: null, error: { message: error.message || 'Sign-up failed' } }
+    }
   },
 
-  // Simple sign-in
+  // Server-side sign-in (no client auth)
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
+    console.log('Auth: Server-side sign-in only')
     
-    return { data, error }
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        console.log('Auth: Server-side sign-in successful')
+        return result
+      } else {
+        console.error('Auth: Server-side sign-in failed:', result)
+        return { data: null, error: result.error || { message: 'Invalid credentials' } }
+      }
+    } catch (error: any) {
+      console.error('Auth: Server-side sign-in error:', error)
+      return { data: null, error: { message: error.message || 'Sign-in failed' } }
+    }
   },
 
-  // Simple sign-out
+  // Server-side sign-out only
   signOut: async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    console.log('Auth: Server-side sign-out - clearing all auth data')
+    
+    try {
+      // Clear all possible localStorage keys
+      if (typeof window !== 'undefined') {
+        // Get token before clearing (if exists)
+        const token = localStorage.getItem('nandighosh-auth-token')
+        
+        // Call server-side sign-out if token exists
+        if (token) {
+          try {
+            await fetch('/api/auth/signout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ accessToken: token }),
+            })
+          } catch (e) {
+            console.log('Server-side signout call failed (non-critical):', e)
+          }
+        }
+        
+        // Clear all auth-related localStorage keys
+        localStorage.removeItem('nandighosh-auth-token')
+        localStorage.removeItem('nandighosh-user')
+        localStorage.removeItem('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+        
+        // Clear all keys that might be related to auth
+        const keysToRemove: string[] = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.includes('auth') || key.includes('token') || key.includes('session'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+        
+        console.log('Auth: All localStorage cleared')
+      }
+      
+      return { error: null }
+    } catch (error: any) {
+      console.error('Auth: Sign-out error:', error)
+      // Always return success for sign-out
+      return { error: null }
+    }
   },
 
-  // Get current user
-  getCurrentUser: async () => {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    return { user, error }
-  },
-
-  // Get current session
+  // Server-side session check
   getSession: async () => {
-    const { data: { session }, error } = await supabase.auth.getSession()
-    return { session, error }
+    try {
+      const response = await fetch('/api/auth/session', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        return result
+      }
+      
+      return { session: null, error: { message: 'No session' } }
+    } catch (error: any) {
+      return { session: null, error: { message: error.message || 'Session check failed' } }
+    }
   },
 
-  // Listen to auth changes
+  // Placeholder for compatibility (not used)
+  getCurrentUser: async () => {
+    console.warn('getCurrentUser called - use server-side session instead')
+    return { user: null, error: { message: 'Use server-side auth' } }
+  },
+
+  // Placeholder for compatibility (not used)
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
-    return supabase.auth.onAuthStateChange(callback)
+    console.warn('onAuthStateChange called - not supported in server-side only mode')
+    return { data: { subscription: { unsubscribe: () => {} } } }
   },
 
-  // Reset password
+  // Server-side password reset
   resetPassword: async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email)
-    return { data, error }
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+      
+      const result = await response.json()
+      return result
+    } catch (error: any) {
+      return { data: null, error: { message: error.message || 'Password reset failed' } }
+    }
   }
 }
 
@@ -111,17 +223,9 @@ export const db = {
     return { data, error }
   },
 
-  // Get user profile with proper authentication
+  // Get user profile (server-side auth only)
   getUserProfile: async (userId: string) => {
     try {
-      // Ensure we have a valid session before making the request
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        console.log('No active session for getUserProfile')
-        return { data: null, error: { message: 'No active session' } }
-      }
-
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -129,12 +233,12 @@ export const db = {
         .maybeSingle()
       
       if (error) {
-        console.error('getUserProfile error:', error)
+        console.log('getUserProfile error:', error)
       }
       
       return { data, error }
     } catch (error: any) {
-      console.error('getUserProfile exception:', error)
+      console.log('getUserProfile exception:', error)
       return { data: null, error: { message: error.message || 'Failed to fetch user profile' } }
     }
   },
