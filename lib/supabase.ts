@@ -18,22 +18,36 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables. Please configure in Render dashboard.')
 }
 
-// Create Supabase client for frontend with proper CORS handling
+// Create Supabase client for frontend with scalable deployment configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'nandighosh-auth-token',
-    // Use implicit flow for password-based authentication (PKCE is for OAuth)
-    flowType: 'implicit'
+    // Use pkce flow for better security and deployment compatibility
+    flowType: 'pkce',
+    // Scalable configuration for production
+    debug: process.env.NODE_ENV === 'development'
   },
   global: {
     headers: {
       'X-Client-Info': 'nandighosh-bus@1.0.0',
       'apikey': supabaseAnonKey,
       'Authorization': `Bearer ${supabaseAnonKey}`
+    },
+    // Custom fetch for better error handling without proxy
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Cache-Control': 'no-cache',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`
+        }
+      })
     }
   },
   db: {
@@ -50,22 +64,85 @@ const checkSupabaseConfig = () => {
 
 // Authentication helper functions
 export const auth = {
-  // Sign up new user
-  signUp: async (email: string, password: string, userData: { full_name: string, phone: string }) => {
+  // Scalable sign-up: Direct Supabase client with enhanced error handling
+  signUp: async (email: string, password: string, userData: { full_name: string, first_name?: string, last_name?: string, phone: string }) => {
     checkSupabaseConfig()
     
-    // Try signup without metadata first to avoid trigger issues
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-      // Removed options.data to avoid database trigger failures
-    })
-    return { data, error }
+    console.log('Auth: Starting scalable direct sign-up')
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone
+          }
+        }
+      })
+      
+      if (error) {
+        console.error('Auth: Sign-up error:', error)
+        
+        // Enhanced error handling
+        if (error.message?.includes('User already registered')) {
+          return {
+            data: null,
+            error: {
+              message: 'An account with this email already exists. Please sign in instead.',
+              __isAuthError: true
+            }
+          }
+        }
+        
+        if (error.message?.includes('Password should be')) {
+          return {
+            data: null,
+            error: {
+              message: 'Password must be at least 6 characters long.',
+              __isAuthError: true
+            }
+          }
+        }
+        
+        if (error.message?.includes('Invalid email')) {
+          return {
+            data: null,
+            error: {
+              message: 'Please enter a valid email address.',
+              __isAuthError: true
+            }
+          }
+        }
+        
+        return { data, error }
+      }
+      
+      if (data?.user) {
+        console.log('Auth: Direct sign-up successful for user:', data.user.id)
+      }
+      
+      return { data, error }
+    } catch (signupError: any) {
+      console.error('Auth: Sign-up exception:', signupError)
+      return {
+        data: null,
+        error: {
+          message: signupError.message || 'Registration failed',
+          __isAuthError: true
+        }
+      }
+    }
   },
 
-  // Sign in user with enhanced CORS error handling
+  // Scalable sign-in: Direct Supabase client with enhanced error handling
   signIn: async (email: string, password: string) => {
     checkSupabaseConfig()
+    
+    console.log('Auth: Starting scalable direct authentication')
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -74,27 +151,9 @@ export const auth = {
       })
       
       if (error) {
-        // Enhanced CORS error detection
-        const isCorsError = error.message?.includes('NetworkError') || 
-                           error.message?.includes('CORS') || 
-                           error.message?.includes('fetch') ||
-                           error.message?.includes('Failed to fetch') ||
-                           (error as any).status === 0
+        console.error('Auth: Sign-in error:', error)
         
-        if (isCorsError) {
-          return {
-            data: null,
-            error: {
-              message: 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.',
-              isCorsError: true,
-              __isAuthError: true,
-              name: 'AuthRetryableFetchError',
-              status: 0
-            }
-          }
-        }
-        
-        // Handle other Supabase errors
+        // Enhanced error handling with specific messages
         if (error.message?.includes('Invalid login credentials')) {
           return {
             data: null,
@@ -115,14 +174,47 @@ export const auth = {
           }
         }
         
+        if (error.message?.includes('Too many requests')) {
+          return {
+            data: null,
+            error: {
+              message: 'Too many login attempts. Please wait a few minutes and try again.',
+              __isAuthError: true
+            }
+          }
+        }
+        
+        // CORS errors - provide configuration guidance
+        const isCorsError = error.message?.includes('NetworkError') || 
+                           error.message?.includes('CORS') || 
+                           error.message?.includes('fetch') ||
+                           error.message?.includes('Failed to fetch') ||
+                           (error as any).status === 0
+        
+        if (isCorsError) {
+          return {
+            data: null,
+            error: {
+              message: 'Connection issue detected. Please ensure your Supabase Site URL is configured correctly for this domain.',
+              isCorsError: true,
+              __isAuthError: true,
+              name: 'AuthRetryableFetchError',
+              status: 0
+            }
+          }
+        }
+        
         return { data, error }
       }
       
       if (data?.user) {
+        console.log('Auth: Direct authentication successful for user:', data.user.id)
         return { data, error: null }
       }
       
     } catch (authError: any) {
+      console.error('Auth: Authentication exception:', authError)
+      
       // Enhanced network error detection
       const isNetworkError = authError.name === 'TypeError' ||
                             authError.message?.includes('NetworkError') ||
@@ -133,7 +225,7 @@ export const auth = {
         return {
           data: null,
           error: {
-            message: 'Connection failed. Please ensure your deployment domain is configured in Supabase settings. Contact support if this persists.',
+            message: 'Network connection failed. Please check your internet connection and ensure the site is properly configured.',
             isCorsError: true,
             __isAuthError: true,
             name: 'AuthRetryableFetchError',
@@ -161,41 +253,79 @@ export const auth = {
     }
   },
 
-  // Sign out user
+  // Pure client-side signout - NO server calls to avoid 403 errors
   signOut: async () => {
+    console.log('Auth: Starting pure client-side signout (no server calls)')
+    
     try {
-      // First check if there's an active session
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        console.log('No active session to sign out from')
-        // Still return success since user is already signed out
-        return { error: null }
+      // STEP 1: Force complete local storage cleanup
+      if (typeof window !== 'undefined') {
+        console.log('Auth: Clearing all authentication storage')
+        
+        // Clear specific auth keys first
+        const authKeys = [
+          'nandighosh-auth-token',
+          'supabase.auth.token',
+          'sb-lcxmwghgehhrabhaqgxl-auth-token',
+          'sb-auth-token'
+        ]
+        
+        authKeys.forEach(key => {
+          if (localStorage.getItem(key)) {
+            localStorage.removeItem(key)
+            console.log(`Auth: Cleared localStorage key: ${key}`)
+          }
+        })
+        
+        // Clear any remaining auth-related keys
+        const allKeys = Object.keys(localStorage)
+        allKeys.forEach(key => {
+          if (key.includes('supabase') || key.includes('auth') || key.includes('sb-')) {
+            localStorage.removeItem(key)
+            console.log(`Auth: Cleared additional key: ${key}`)
+          }
+        })
+        
+        // Clear sessionStorage completely
+        sessionStorage.clear()
+        console.log('Auth: Cleared sessionStorage')
+        
+        // Clear any cookies (if any)
+        document.cookie.split(';').forEach(cookie => {
+          const eqPos = cookie.indexOf('=')
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+          if (name.includes('supabase') || name.includes('auth') || name.includes('sb-')) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+            console.log(`Auth: Cleared cookie: ${name}`)
+          }
+        })
       }
-
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        // Check if it's the "Auth session missing" error
-        if (error.message?.includes('Auth session missing')) {
-          console.log('Session already cleared, treating as successful signout')
-          return { error: null }
+      
+      // STEP 2: Reset Supabase client internal state (without server call)
+      try {
+        // Force the client to forget the current session internally
+        // This is a hack but it works without server calls
+        if (supabase?.auth) {
+          // Clear the internal session state
+          try {
+            (supabase.auth as any)._currentSession = null;
+            (supabase.auth as any)._currentUser = null;
+          } catch (stateError) {
+            console.log('Auth: Internal state reset failed (continuing)')
+          }
         }
-        console.error('Supabase signOut error:', error)
-        return { error }
+        console.log('Auth: Reset Supabase client internal state')
+      } catch (clientError) {
+        console.log('Auth: Client state reset not needed or failed (continuing)')
       }
       
-      console.log('Successfully signed out')
+      console.log('Auth: Pure client-side signout completed successfully')
       return { error: null }
-    } catch (error) {
-      console.error('SignOut catch error:', error)
-      // If it's a session missing error, treat it as success
-      if (error && typeof error === 'object' && 'message' in error) {
-        if ((error as any).message?.includes('Auth session missing')) {
-          console.log('Session missing error caught, treating as successful signout')
-          return { error: null }
-        }
-      }
-      return { error }
+      
+    } catch (error: any) {
+      console.log('Auth: Client-side signout error (but continuing):', error.message)
+      // Always return success - we did our best to clean up
+      return { error: null }
     }
   },
 
@@ -273,14 +403,32 @@ export const db = {
     return { data, error }
   },
 
-  // Get user profile
+  // Get user profile with proper authentication
   getUserProfile: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-    return { data, error }
+    try {
+      // Ensure we have a valid session before making the request
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        console.log('No active session for getUserProfile')
+        return { data: null, error: { message: 'No active session' } }
+      }
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+      
+      if (error) {
+        console.error('getUserProfile error:', error)
+      }
+      
+      return { data, error }
+    } catch (error: any) {
+      console.error('getUserProfile exception:', error)
+      return { data: null, error: { message: error.message || 'Failed to fetch user profile' } }
+    }
   },
 
   // Update user profile
