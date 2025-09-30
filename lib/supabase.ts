@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables. Please configure in Render dashboard.')
 }
 
-// Create Supabase client for frontend with scalable deployment configuration
+// Create Supabase client with CORS-friendly configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -26,28 +26,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'nandighosh-auth-token',
-    // Use pkce flow for better security and deployment compatibility
+    // Use pkce flow for better CORS compatibility
     flowType: 'pkce',
-    // Scalable configuration for production
     debug: process.env.NODE_ENV === 'development'
   },
   global: {
     headers: {
       'X-Client-Info': 'nandighosh-bus@1.0.0',
       'apikey': supabaseAnonKey,
-      'Authorization': `Bearer ${supabaseAnonKey}`
-    },
-    // Custom fetch for better error handling without proxy
-    fetch: (url, options = {}) => {
-      return fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Cache-Control': 'no-cache',
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`
-        }
-      })
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+      'Content-Type': 'application/json'
     }
   },
   db: {
@@ -138,20 +126,45 @@ export const auth = {
     }
   },
 
-  // Scalable sign-in: Direct Supabase client with enhanced error handling
+  // CORS-friendly sign-in with fallback to server-side proxy
   signIn: async (email: string, password: string) => {
     checkSupabaseConfig()
     
-    console.log('Auth: Starting scalable direct authentication')
+    console.log('Auth: Starting CORS-friendly authentication with fallback')
     
+    // STRATEGY 1: Try server-side proxy first (bypasses CORS completely)
     try {
+      console.log('Auth: Trying server-side proxy authentication')
+      const proxyResponse = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      })
+      
+      if (proxyResponse.ok) {
+        const result = await proxyResponse.json()
+        console.log('Auth: Server-side proxy authentication successful')
+        return result
+      } else {
+        const errorResult = await proxyResponse.json()
+        console.log('Auth: Server-side proxy failed, trying direct client:', errorResult.error)
+      }
+    } catch (proxyError: any) {
+      console.log('Auth: Server-side proxy error, trying direct client:', proxyError.message)
+    }
+    
+    // STRATEGY 2: Try direct Supabase client (may have CORS issues)
+    try {
+      console.log('Auth: Trying direct Supabase client authentication')
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       })
       
       if (error) {
-        console.error('Auth: Sign-in error:', error)
+        console.error('Auth: Direct client sign-in error:', error)
         
         // Enhanced error handling with specific messages
         if (error.message?.includes('Invalid login credentials')) {
@@ -174,17 +187,7 @@ export const auth = {
           }
         }
         
-        if (error.message?.includes('Too many requests')) {
-          return {
-            data: null,
-            error: {
-              message: 'Too many login attempts. Please wait a few minutes and try again.',
-              __isAuthError: true
-            }
-          }
-        }
-        
-        // CORS errors - provide configuration guidance
+        // CORS errors - provide specific guidance
         const isCorsError = error.message?.includes('NetworkError') || 
                            error.message?.includes('CORS') || 
                            error.message?.includes('fetch') ||
@@ -192,10 +195,11 @@ export const auth = {
                            (error as any).status === 0
         
         if (isCorsError) {
+          const currentDomain = typeof window !== 'undefined' ? window.location.origin : 'unknown'
           return {
             data: null,
             error: {
-              message: 'Connection issue detected. Please ensure your Supabase Site URL is configured correctly for this domain.',
+              message: `CORS Error: Please configure Supabase Site URL to: ${currentDomain}\n\nSteps:\n1. Go to Supabase Dashboard\n2. Settings → Authentication → URL Configuration\n3. Set Site URL to: ${currentDomain}\n4. Add to Redirect URLs: ${currentDomain}/**`,
               isCorsError: true,
               __isAuthError: true,
               name: 'AuthRetryableFetchError',
@@ -213,7 +217,7 @@ export const auth = {
       }
       
     } catch (authError: any) {
-      console.error('Auth: Authentication exception:', authError)
+      console.error('Auth: Direct authentication exception:', authError)
       
       // Enhanced network error detection
       const isNetworkError = authError.name === 'TypeError' ||
@@ -222,10 +226,11 @@ export const auth = {
                             authError.message?.includes('Failed to fetch')
       
       if (isNetworkError) {
+        const currentDomain = typeof window !== 'undefined' ? window.location.origin : 'unknown'
         return {
           data: null,
           error: {
-            message: 'Network connection failed. Please check your internet connection and ensure the site is properly configured.',
+            message: `Network/CORS Error: Configure Supabase Site URL to: ${currentDomain}\n\nBoth server-side proxy and direct client failed. This is likely a CORS configuration issue.`,
             isCorsError: true,
             __isAuthError: true,
             name: 'AuthRetryableFetchError',
@@ -247,7 +252,7 @@ export const auth = {
     return {
       data: null,
       error: {
-        message: 'Authentication failed for unknown reason',
+        message: 'All authentication methods failed. Please contact support.',
         __isAuthError: true
       }
     }
