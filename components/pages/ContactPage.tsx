@@ -353,6 +353,9 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
           <Card className="shadow-sm border">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900">{currentLang.contactInfo}</CardTitle>
+              <CardDescription className="text-sm text-gray-600">
+                This website is operated by <span className="font-semibold">Saurav Nanda</span>
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -361,7 +364,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{currentLang.helpline}</div>
-                  <div className="text-gray-600">+91 12345 67890</div>
+                  <div className="text-gray-600">+91 9778835361</div>
                   <div className="text-sm text-green-600">{currentLang.support24x7}</div>
                 </div>
               </div>
@@ -371,7 +374,7 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{currentLang.whatsappService}</div>
-                  <div className="text-gray-600">+91 12345 67890</div>
+                  <div className="text-gray-600">+91 9778835361</div>
                   <div className="text-sm text-green-600">{currentLang.instantResponse}</div>
                 </div>
               </div>
@@ -383,6 +386,25 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                   <div className="font-medium text-gray-900">{currentLang.emailService}</div>
                   <div className="text-gray-600">info@nandighoshbus.com</div>
                   <div className="text-sm text-orange-600">{currentLang.correspondence}</div>
+                </div>
+              </div>
+              
+              {/* Registered Address Section */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-2">Registered Address</h4>
+                <p className="text-sm text-gray-700">
+                  As per Aadhar: 938449720041<br />
+                  Balasore, Odisha, India
+                </p>
+              </div>
+              
+              {/* Business Information */}
+              <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-2">Business Contact</h4>
+                <div className="text-sm text-gray-700 space-y-1">
+                  <p><span className="font-medium">Mobile:</span> +91 9778835361</p>
+                  <p><span className="font-medium">Email:</span> info@nandighoshbus.com</p>
+                  <p><span className="font-medium">Proprietor:</span> Saurav Nanda</p>
                 </div>
               </div>
             </CardContent>
@@ -421,55 +443,6 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Have any query, reach out to us</span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Refund Policy Section */}
-        <div id="refund-policy" className="max-w-5xl mx-auto mt-12">
-          <Card className="shadow-sm border">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center">
-                <Shield className="mr-2 w-5 h-5 text-blue-600" />
-                {currentLang.refundPolicy}
-              </CardTitle>
-              <CardDescription className="text-gray-600">{currentLang.refundPolicyDescription}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  {currentLang.refundRules.slice(0, 4).map((rule, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Clock className="w-3 h-3 text-blue-600" />
-                      </div>
-                      <div className="text-sm text-gray-700 leading-relaxed">{rule}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-3">
-                  {currentLang.refundRules.slice(4).map((rule, index) => (
-                    <div key={index + 4} className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
-                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Shield className="w-3 h-3 text-green-600" />
-                      </div>
-                      <div className="text-sm text-gray-700 leading-relaxed">{rule}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Mail className="w-5 h-5 text-orange-600" />
-                  <span className="font-medium text-orange-800">Need Help with Refunds?</span>
-                </div>
-                <p className="text-sm text-orange-700">
-                  For any queries regarding refunds or cancellations, please contact our customer support team at 
-                  <span className="font-medium"> support@nandighoshbus.com</span> or call 
-                  <span className="font-medium"> +91 12345 67890</span>
-                </p>
               </div>
             </CardContent>
           </Card>

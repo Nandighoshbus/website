@@ -72,6 +72,7 @@ export default function Navbar({ currentLanguage, setCurrentLanguage, currentLan
   const navLinks = [
     { href: "/", label: currentLang.home, id: "home" },
     { href: "/about", label: currentLang.about, id: "about" },
+    { href: "/services", label: "Services", id: "services" },
     { href: "/routes", label: currentLang.routes, id: "routes" },
     { href: "/features", label: currentLang.features, id: "features" },
     { href: "/contact", label: currentLang.contact, id: "contact" },

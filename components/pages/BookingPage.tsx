@@ -306,10 +306,13 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
     try {
       setSearching(true)
       setError(null)
+      
+      console.log('🔍 Search Parameters:', { from, to, date, busType: formData.busType, passengers: formData.passengers })
 
       // Get day name from the selected date
       const selectedDate = new Date(date)
       const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+      console.log('📅 Day name:', dayName)
 
       // Build the query
       let query = supabase
@@ -366,7 +369,10 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
 
       const { data: schedules, error } = await query.order('departure_time')
       
+      console.log('📊 Query result:', { schedules: schedules?.length || 0, error })
+      
       if (error) {
+        console.error('❌ Database error:', error)
         throw new Error(`Database error: ${error.message}`)
       }
 
@@ -425,13 +431,13 @@ export default function BookingPage({ currentLanguage }: BookingPageProps) {
         }
       })
 
+      console.log('✅ Final results:', transformedSchedules.length, 'schedules')
       setSearchResults(transformedSchedules)
-      
+      setSearching(false)
     } catch (error) {
-      console.error('Schedule search failed:', error)
+      console.error('❌ Schedule search failed:', error)
       setError(error instanceof Error ? error.message : 'Failed to search schedules')
       setSearchResults([])
-    } finally {
       setSearching(false)
     }
   }

@@ -32,9 +32,19 @@ export default function PrivacyPolicy() {
 
             <section className="mb-8">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">1. Introduction</h3>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed mb-4">
                 Nandighosh Bus Service ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile application, and booking services.
               </p>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-2">Business Information</h4>
+                <div className="text-sm text-gray-700 space-y-1">
+                  <p><span className="font-medium">Operated by:</span> Saurav Nanda</p>
+                  <p><span className="font-medium">Registered Address:</span> Balasore, Odisha, India</p>
+                  <p><span className="font-medium">Aadhar Reference:</span> 938449720041</p>
+                  <p><span className="font-medium">Contact:</span> +91 9778835361</p>
+                  <p><span className="font-medium">Email:</span> privacy@nandighoshbus.com</p>
+                </div>
+              </div>
             </section>
 
             <section className="mb-8">
@@ -158,9 +168,10 @@ export default function PrivacyPolicy() {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">13. Contact Us</h3>
               <div className="text-gray-700 leading-relaxed space-y-2">
                 <p>If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-                <p><strong>Email:</strong> privacy@nandighoshbus.com</p>
-                <p><strong>Phone:</strong> +91 12345 67890</p>
+                <p><strong>Email:</strong> saurav@nandighoshbus.com</p>
+                <p><strong>Phone:</strong> +91 9778835361</p>
                 <p><strong>Address:</strong> Balasore, Odisha, India</p>
+                <p><strong>Operated by:</strong> Saurav Nanda (Aadhar: 938449720041)</p>
               </div>
             </section>
 

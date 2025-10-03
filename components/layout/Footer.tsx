@@ -116,10 +116,11 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
                 {currentLang.contactInfoFooter}
               </h4>
               <ul className="space-y-3 text-gray-700">
-                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">+91 12345 67890</li>
+                <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">+91 9778835361</li>
                 <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">info@nandighoshbus.com</li>
                 <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">Balasore, Odisha</li>
                 <li className="text-base font-semibold hover:text-gray-800 transition-colors cursor-pointer magnetic">{currentLang.service24x7}</li>
+                <li className="text-sm text-gray-600 mt-2">Operated by Saurav Nanda</li>
               </ul>
             </div>
           </div>
@@ -130,7 +131,7 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
                 <p>
                   &copy; {new Date().getFullYear()} Nandighosh. {currentLang.rightsReserved}
                 </p>
-                <div className="flex items-center space-x-4 mt-2">
+                <div className="flex flex-wrap items-center gap-2 mt-2">
                   <Link 
                     href="/terms" 
                     className="text-sm text-gray-500 hover:text-orange-600 transition-colors"
@@ -146,10 +147,24 @@ export default function Footer({ currentLang, currentTime }: FooterProps) {
                   </Link>
                   <span className="text-gray-400">|</span>
                   <Link 
-                    href="/contact#refund-policy" 
+                    href="/refund-policy" 
                     className="text-sm text-gray-500 hover:text-orange-600 transition-colors"
                   >
                     Refund Policy
+                  </Link>
+                  <span className="text-gray-400">|</span>
+                  <Link 
+                    href="/cancellation-policy" 
+                    className="text-sm text-gray-500 hover:text-orange-600 transition-colors"
+                  >
+                    Cancellation Policy
+                  </Link>
+                  <span className="text-gray-400">|</span>
+                  <Link 
+                    href="/shipping-policy" 
+                    className="text-sm text-gray-500 hover:text-orange-600 transition-colors"
+                  >
+                    Shipping Policy
                   </Link>
                 </div>
               </div>

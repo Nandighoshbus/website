@@ -119,8 +119,9 @@ export default function TermsAndConditions() {
               <div className="text-gray-700 leading-relaxed space-y-2">
                 <p>For questions regarding these terms and conditions, please contact us:</p>
                 <p><strong>Email:</strong> info@nandighoshbus.com</p>
-                <p><strong>Phone:</strong> +91 12345 67890</p>
+                <p><strong>Phone:</strong> +91 9778835361</p>
                 <p><strong>Address:</strong> Balasore, Odisha, India</p>
+                <p><strong>Operated by:</strong> Saurav Nanda (Aadhar: 938449720041)</p>
               </div>
             </section>
 
