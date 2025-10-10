@@ -447,3 +447,129 @@ export const getAgentBookings = async (req: Request, res: Response): Promise<voi
     throw error;
   }
 };
+
+// Search available schedules for agents
+export const searchSchedules = async (req: Request, res: Response): Promise<void> => {
+  const from = req.query.from as string;
+  const to = req.query.to as string;
+  const date = req.query.date as string;
+  const passengers = req.query.passengers as string;
+
+  console.log('=== AGENT SEARCH SCHEDULES ===');
+  console.log('Query params:', { from, to, date, passengers });
+
+  if (!from || !to || !date) {
+    throw new AppError('Source city (from), destination city (to), and date are required', 400, 'MISSING_REQUIRED_PARAMS');
+  }
+
+  try {
+    // Find routes between cities (case-insensitive search)
+    const { data: routes, error: routeError } = await supabaseAdmin
+      .from('routes')
+      .select('id, route_code, name, source_city, destination_city, distance_km, estimated_duration, base_fare')
+      .ilike('source_city', from)
+      .ilike('destination_city', to)
+      .eq('is_active', true);
+
+    console.log('Routes found:', routes?.length || 0, 'Error:', routeError);
+
+    if (routeError) {
+      throw new AppError(`Failed to search routes: ${routeError.message}`, 500, 'DATABASE_ERROR');
+    }
+
+    if (!routes || routes.length === 0) {
+      const response: ApiResponse = {
+        success: true,
+        message: `No routes found from ${from} to ${to}`,
+        data: []
+      };
+      res.status(200).json(response);
+      return;
+    }
+
+    const routeIds = routes.map(route => route.id);
+
+    // Search for schedules on the specified date
+    const { data: schedules, error: scheduleError } = await supabaseAdmin
+      .from('bus_schedules')
+      .select(`
+        id,
+        departure_date,
+        departure_time,
+        arrival_date,
+        arrival_time,
+        base_fare,
+        available_seats,
+        booked_seats,
+        is_active,
+        special_notes,
+        bus_id,
+        route_id,
+        buses!inner(
+          id,
+          bus_number,
+          bus_name,
+          bus_type,
+          total_seats,
+          amenities
+        )
+      `)
+      .in('route_id', routeIds)
+      .eq('departure_date', date)
+      .eq('is_active', true)
+      .gte('available_seats', passengers ? Number(passengers) : 1)
+      .order('departure_time', { ascending: true });
+
+    console.log('Schedules found:', schedules?.length || 0, 'Error:', scheduleError);
+
+    if (scheduleError) {
+      throw new AppError(`Failed to search schedules: ${scheduleError.message}`, 500, 'DATABASE_ERROR');
+    }
+
+    // Combine schedules with route information
+    const formattedSchedules = (schedules || []).map((schedule: any) => {
+      const route = routes.find(r => r.id === schedule.route_id);
+      return {
+        id: schedule.id,
+        departureDate: schedule.departure_date,
+        departureTime: schedule.departure_time,
+        arrivalDate: schedule.arrival_date,
+        arrivalTime: schedule.arrival_time,
+        fare: schedule.base_fare,
+        availableSeats: schedule.available_seats,
+        bookedSeats: schedule.booked_seats,
+        isActive: schedule.is_active,
+        specialNotes: schedule.special_notes,
+        bus: {
+          id: schedule.buses.id,
+          busNumber: schedule.buses.bus_number,
+          busName: schedule.buses.bus_name,
+          busType: schedule.buses.bus_type,
+          totalSeats: schedule.buses.total_seats,
+          amenities: Array.isArray(schedule.buses.amenities) ? schedule.buses.amenities : []
+        },
+        route: {
+          id: route?.id,
+          routeCode: route?.route_code,
+          name: route?.name,
+          sourceCity: route?.source_city,
+          destinationCity: route?.destination_city,
+          distanceKm: route?.distance_km,
+          estimatedDuration: route?.estimated_duration,
+          baseFare: route?.base_fare
+        }
+      };
+    });
+
+    const response: ApiResponse = {
+      success: true,
+      message: `Found ${formattedSchedules.length} available schedule(s)`,
+      data: formattedSchedules
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error('Error searching schedules:', error);
+    throw error;
+  }
+};

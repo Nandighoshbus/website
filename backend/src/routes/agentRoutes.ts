@@ -57,6 +57,7 @@ router.get('/validate', authenticate, authorize('agent'), asyncHandler(agentCont
 router.get('/profile', authenticate, authorize('agent'), asyncHandler(agentController.getAgentProfile));
 router.get('/stats', authenticate, authorize('agent'), asyncHandler(agentController.getAgentStats));
 router.get('/routes', authenticate, authorize('agent'), asyncHandler(agentController.getAvailableRoutes));
+router.get('/schedules', authenticate, authorize('agent'), asyncHandler(agentController.searchSchedules));
 router.post('/bookings', authenticate, authorize('agent'), asyncHandler(agentController.createBooking));
 router.get('/bookings', authenticate, authorize('agent'), asyncHandler(agentController.getAgentBookings));
 

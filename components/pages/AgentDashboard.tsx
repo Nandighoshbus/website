@@ -76,7 +76,6 @@ export default function AgentDashboard() {
 
       try {
         console.log('Attempting to fetch agent stats...')
-        console.log('Has refresh token:', jwtAuth.hasRefreshToken('agent'))
         
         const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
         
@@ -87,19 +86,13 @@ export default function AgentDashboard() {
         }
         console.error('Unexpected stats response:', data)
       } catch (err: any) {
-        console.error('Error fetching agent stats via jwtAuth:', err.message || err)
+        console.error('Error fetching agent stats:', err.message || err)
         
-        // Handle different types of authentication errors
-        if (err.message && err.message.includes('Authentication expired')) {
-          if (err.message.includes('does not support token refresh')) {
-            console.log('Backend does not support token refresh - this is expected behavior')
-            console.log('Agent will need to login again when token fully expires')
-          } else {
-            console.log('Authentication expired, but not logging out automatically')
-            console.log('User should refresh the page or login again')
-          }
-        } else {
-          console.error('Non-auth error:', err)
+        // Handle authentication errors
+        if (err.message && err.message.includes('Authentication')) {
+          console.log('Authentication error - agent may need to login again')
+          // Optionally redirect to login after a delay
+          // setTimeout(() => router.push('/agent/login'), 2000)
         }
       }
 

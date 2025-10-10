@@ -288,7 +288,12 @@ class JWTAuthService {
 
   // Check if backend supports refresh tokens
   private refreshEndpointsChecked = new Set<string>();
-  private backendSupportsRefresh = new Map<string, boolean>();
+  private backendSupportsRefresh = new Map<string, boolean>([
+    // Pre-populate with known support for all user types
+    ['admin', true],
+    ['agent', true],
+    ['customer', true]
+  ]);
 
   // Refresh token with backend capability detection
   async refreshToken(userType: 'admin' | 'agent' | 'customer'): Promise<boolean> {
@@ -417,6 +422,10 @@ class JWTAuthService {
         const newToken = this.getToken(userType);
         if (newToken) {
           console.log(`Retrying request with refreshed token...`);
+          console.log(`New token (first 30 chars): ${newToken.substring(0, 30)}...`);
+          console.log(`Old token (first 30 chars): ${token.substring(0, 30)}...`);
+          console.log(`Tokens are different:`, newToken !== token);
+          
           const retryResponse = await makeRequest(newToken);
           
           if (retryResponse.ok) {
@@ -424,8 +433,14 @@ class JWTAuthService {
             return retryResponse.json();
           } else {
             console.log(`Request still failed after refresh: ${retryResponse.status}`);
+            const errorBody = await retryResponse.text();
+            console.log(`Error response body:`, errorBody);
           }
+        } else {
+          console.log(`No new token found after refresh!`);
         }
+      } else {
+        console.log(`Token refresh returned false`);
       }
       
       // If refresh failed, provide different messages based on backend capability

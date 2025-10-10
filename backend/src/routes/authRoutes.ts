@@ -19,8 +19,13 @@ router.post('/send-verification-email', asyncHandler(sendVerificationEmail));
 router.post('/verify-email', asyncHandler(verifyEmail));
 router.post('/resend-verification', asyncHandler(authController.resendVerification));
 
+// Token refresh routes (no auth required - refresh token is validated in controller)
+router.post('/refresh-token', asyncHandler(authController.refreshToken));
+router.post('/refresh', asyncHandler(authController.refreshToken));
+router.post('/agent/refresh', asyncHandler(authController.refreshToken));
+router.post('/admin/refresh', asyncHandler(authController.refreshToken));
+
 // Protected routes
-router.post('/refresh-token', authenticate, asyncHandler(authController.refreshToken));
 router.post('/logout', authenticate, asyncHandler(authController.logout));
 router.post('/change-password', authenticate, asyncHandler(authController.changePassword));
 
