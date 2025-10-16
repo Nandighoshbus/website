@@ -259,7 +259,6 @@ export default function CancellationPolicy() {
                   <div className="space-y-2 text-sm text-gray-700">
                     <p><span className="font-medium">Operated by:</span> Saurav Nanda</p>
                     <p><span className="font-medium">Address:</span> Balasore, Odisha, India</p>
-                    <p><span className="font-medium">Aadhar Ref:</span> 938449720041</p>
                     <p><span className="font-medium">Service Since:</span> 1998</p>
                   </div>
                 </div>

@@ -62,10 +62,19 @@ export const getAgentProfile = async (req: Request, res: Response): Promise<void
       throw new AppError('Agent account is inactive', 403, 'AGENT_INACTIVE');
     }
 
+    // Format credit fields
+    const profileData = {
+      ...agent,
+      credit_balance: parseFloat(agent.credit_balance || '0'),
+      total_credits_received: parseFloat(agent.total_credits_received || '0'),
+      total_credits_used: parseFloat(agent.total_credits_used || '0'),
+      credit_limit: parseFloat(agent.credit_limit || '0')
+    };
+
     const response: ApiResponse = {
       success: true,
       message: 'Agent profile retrieved successfully',
-      data: agent
+      data: profileData
     };
 
     res.status(200).json(response);
@@ -90,10 +99,10 @@ export const getAgentStats = async (req: Request, res: Response): Promise<void> 
   }
 
   try {
-    // Verify agent exists and get basic info
+    // Verify agent exists and get basic info including credit balance
     const { data: agent, error: agentError } = await supabaseAdmin
       .from('agents')
-      .select('id, is_active')
+      .select('id, is_active, credit_balance, total_credits_received, total_credits_used')
       .eq('id', agentId)
       .single();
 
@@ -138,7 +147,10 @@ export const getAgentStats = async (req: Request, res: Response): Promise<void> 
       monthlyBookings: monthlyBookings?.length || 0,
       totalCommission: totalCommission?.reduce((sum, earning) => sum + parseFloat(earning.commission_amount), 0) || 0,
       monthlyCommission: monthlyCommission?.reduce((sum, earning) => sum + parseFloat(earning.commission_amount), 0) || 0,
-      activeRoutes: 0 // TODO: Calculate based on agent's active routes
+      activeRoutes: 0, // TODO: Calculate based on agent's active routes
+      creditBalance: parseFloat(agent.credit_balance || '0'),
+      totalCreditsReceived: parseFloat(agent.total_credits_received || '0'),
+      totalCreditsUsed: parseFloat(agent.total_credits_used || '0')
     };
 
     const response: ApiResponse = {
@@ -251,22 +263,32 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     journeyDate,
     seatNumbers,
     paymentMethod,
-    contactDetails
+    contactDetails,
+    creditAmount = 0 // Amount to pay using credits
   } = req.body;
 
   // Get agent ID from authenticated user
   const agentId = req.userId; // This is already the agent ID from auth middleware
   
   try {
-    // Get agent details
+    // Get agent details including credit balance
     const { data: agent, error: agentError } = await supabaseAdmin
       .from('agents')
-      .select('id, commission_rate')
+      .select('id, commission_rate, credit_balance')
       .eq('id', agentId)
       .single();
 
     if (agentError || !agent) {
       throw new AppError('Agent not found', 404, 'AGENT_NOT_FOUND');
+    }
+
+    // Validate credit amount if provided
+    const creditToUse = parseFloat(creditAmount) || 0;
+    if (creditToUse > 0) {
+      const availableCredit = parseFloat(agent.credit_balance || '0');
+      if (creditToUse > availableCredit) {
+        throw new AppError(`Insufficient credit balance. Available: ₹${availableCredit}, Requested: ₹${creditToUse}`, 400, 'INSUFFICIENT_CREDIT');
+      }
     }
 
     // Get schedule details for pricing
@@ -326,11 +348,23 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     const totalAmount = baseFare * totalSeats;
     const agentCommission = (totalAmount * parseFloat(agent.commission_rate)) / 100;
 
+    // Calculate payment split
+    const creditUsed = Math.min(creditToUse, totalAmount);
+    const cashPaid = totalAmount - creditUsed;
+
+    // Validate total payment
+    if (creditUsed + cashPaid !== totalAmount) {
+      throw new AppError('Payment split does not match total amount', 400, 'INVALID_PAYMENT_SPLIT');
+    }
+
     // Generate booking reference
     const bookingReference = `BK${Date.now().toString().slice(-8)}`;
 
     // Create bookings for each passenger
     const bookings = [];
+    const creditPerPassenger = creditUsed / passengerIds.length;
+    const cashPerPassenger = cashPaid / passengerIds.length;
+
     for (let i = 0; i < passengerIds.length; i++) {
       const { data: booking, error: bookingError } = await supabaseAdmin
         .from('bookings')
@@ -345,12 +379,19 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
           base_fare: baseFare,
           total_amount: baseFare,
           agent_commission: (baseFare * parseFloat(agent.commission_rate)) / 100,
-          payment_method: paymentMethod,
+          payment_method: creditUsed > 0 ? 'credit_and_cash' : paymentMethod,
           payment_status: 'paid',
           booking_status: 'confirmed',
           contact_name: contactDetails?.name || passengers[0].fullName,
           contact_phone: contactDetails?.phone || passengers[0].phone,
-          contact_email: contactDetails?.email || passengers[0].email
+          contact_email: contactDetails?.email || passengers[0].email,
+          credit_used: creditPerPassenger,
+          cash_paid: cashPerPassenger,
+          payment_split: {
+            credit: creditPerPassenger,
+            cash: cashPerPassenger,
+            method: paymentMethod
+          }
         }])
         .select()
         .single();
@@ -359,6 +400,26 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
         throw new AppError(`Failed to create booking for passenger ${i + 1}`, 500, 'BOOKING_CREATE_ERROR');
       }
       bookings.push(booking);
+    }
+
+    // Deduct credits from agent balance if used
+    if (creditUsed > 0) {
+      const { error: deductError } = await supabaseAdmin
+        .rpc('deduct_agent_credit', {
+          p_agent_id: agent.id,
+          p_amount: creditUsed,
+          p_booking_id: bookings[0].id,
+          p_description: `Credit used for booking ${bookingReference}`
+        });
+
+      if (deductError) {
+        console.error('Error deducting agent credit:', deductError);
+        // Rollback bookings if credit deduction fails
+        for (const booking of bookings) {
+          await supabaseAdmin.from('bookings').delete().eq('id', booking.id);
+        }
+        throw new AppError('Failed to process credit payment', 500, 'CREDIT_DEDUCTION_ERROR');
+      }
     }
 
     // Create agent earning record for total commission
@@ -380,8 +441,15 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
         bookings,
         bookingReference,
         totalAmount,
+        creditUsed,
+        cashPaid,
         agentCommission,
-        passengerCount: passengers.length
+        passengerCount: passengers.length,
+        paymentSplit: {
+          credit: creditUsed,
+          cash: cashPaid,
+          method: paymentMethod
+        }
       }
     };
 

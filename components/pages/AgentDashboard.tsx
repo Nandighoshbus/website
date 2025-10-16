@@ -75,24 +75,17 @@ export default function AgentDashboard() {
       console.log('Agent token present. length:', token.length)
 
       try {
-        console.log('Attempting to fetch agent stats...')
-        
-        const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
-        
+  const data = await jwtAuth.authenticatedRequest('agent', '/agents/stats', { method: 'GET' })
         if (data && (data as any).success) {
           setStats((data as any).data)
-          console.log('Agent stats loaded successfully:', (data as any).data)
+          console.log('Agent stats loaded:', (data as any).data)
           return
         }
         console.error('Unexpected stats response:', data)
       } catch (err: any) {
-        console.error('Error fetching agent stats:', err.message || err)
-        
-        // Handle authentication errors
-        if (err.message && err.message.includes('Authentication')) {
-          console.log('Authentication error - agent may need to login again')
-          // Optionally redirect to login after a delay
-          // setTimeout(() => router.push('/agent/login'), 2000)
+        console.error('Error fetching agent stats via jwtAuth:', err.message || err)
+        if (err.message && err.message.includes('Authentication expired')) {
+          await logout()
         }
       }
 

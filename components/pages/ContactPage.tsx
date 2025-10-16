@@ -393,7 +393,6 @@ export default function ContactPage({ currentLanguage }: ContactPageProps) {
               <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-2">Registered Address</h4>
                 <p className="text-sm text-gray-700">
-                  As per Aadhar: 938449720041<br />
                   Balasore, Odisha, India
                 </p>
               </div>

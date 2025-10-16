@@ -410,73 +410,25 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     const decoded = jwt.verify(refresh_token, process.env.JWT_REFRESH_SECRET!) as any;
     const userId = decoded.sub;
 
-      // Try to get user from user_profiles first
-    const { data: user, error: userError } = await supabaseAdmin
+    // Get user
+    const { data: user, error } = await supabaseAdmin
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
 
-    if (user && !userError && user.is_active) {
-      // Generate new tokens
-      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user.id);
-
-      const response: ApiResponse<AuthResponse> = {
-        success: true,
-        message: 'Token refreshed successfully',
-        data: {
-          user,
-          access_token: accessToken,
-          refresh_token: newRefreshToken,
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        }
-      };
-
-      return res.status(200).json(response);
-    }
-
-    // If not found in user_profiles, try agents table
-    const { data: agent, error: agentError } = await supabaseAdmin
-      .from('agents')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (agentError || !agent || !agent.is_active) {
+    if (error || !user || !user.is_active) {
       throw new AppError('Invalid refresh token', 401, 'INVALID_REFRESH_TOKEN');
     }
 
-    // Create user object for agent
-    const userForToken: UserProfile = {
-      id: agent.id,
-      email: agent.business_address?.email || '',
-      full_name: agent.contact_person || agent.business_name,
-      role: 'agent' as UserRole,
-      is_verified: true,
-      is_active: agent.is_active,
-      created_at: new Date(agent.created_at),
-      updated_at: new Date(agent.updated_at || agent.created_at),
-      phone: agent.business_address?.phone,
-      preferences: {
-        agent_id: agent.id,
-        agent_code: agent.agent_code,
-        business_name: agent.business_name
-      }
-    };
-
     // Generate new tokens
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(agent.id);
-    
-    // Clear cache to force fresh lookup on next request
-    const { CacheService } = await import('../services/CacheService');
-    const cache = CacheService.getInstance();
-    await cache.del(`user:${agent.id}`);
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user.id);
 
     const response: ApiResponse<AuthResponse> = {
       success: true,
-      message: 'Agent token refreshed successfully',
+      message: 'Token refreshed successfully',
       data: {
-        user: userForToken,
+        user,
         access_token: accessToken,
         refresh_token: newRefreshToken,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)

@@ -28,11 +28,13 @@ import {
   Edit,
   Trash2,
   CheckCircle,
-  UserPlus
+  UserPlus,
+  Wallet
 } from 'lucide-react'
 import { useAdminAuth } from '@/components/context/AdminAuthContext'
 import { useRouter } from 'next/navigation'
 import { jwtAuth } from '@/lib/jwtAuth'
+import AdminCreditManagement from '@/components/admin/AdminCreditManagement'
 
 // TypeScript interfaces
 interface User {
@@ -561,15 +563,16 @@ ${request.reviewed_at ? `Reviewed: ${new Date(request.reviewed_at).toLocaleStrin
           </div>
         </div>
       </div>
-
+      
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-8 lg:w-[800px]">
+          <TabsList className="grid w-full grid-cols-10 lg:w-[1000px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="approved-agents">Agents</TabsTrigger>
-            <TabsTrigger value="agents">Agent Requests</TabsTrigger>
+            <TabsTrigger value="agent-requests">Requests</TabsTrigger>
+            <TabsTrigger value="credits">Credits</TabsTrigger>
             <TabsTrigger value="buses">Buses</TabsTrigger>
             <TabsTrigger value="routes">Routes</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
@@ -1103,6 +1106,11 @@ ${request.reviewed_at ? `Reviewed: ${new Date(request.reviewed_at).toLocaleStrin
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Credits Tab */}
+          <TabsContent value="credits" className="space-y-6">
+            <AdminCreditManagement />
           </TabsContent>
 
           {/* Settings Tab */}

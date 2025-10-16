@@ -211,7 +211,6 @@ export default function ReturnRefundPolicy() {
                   <div className="space-y-2 text-sm text-gray-700">
                     <p><span className="font-medium">Operated by:</span> Saurav Nanda</p>
                     <p><span className="font-medium">Registered Address:</span> Balasore, Odisha, India</p>
-                    <p><span className="font-medium">Aadhar Reference:</span> 938449720041</p>
                     <p><span className="font-medium">Service Area:</span> Odisha & Eastern India</p>
                   </div>
                 </div>

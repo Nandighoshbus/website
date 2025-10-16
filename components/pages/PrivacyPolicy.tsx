@@ -40,7 +40,6 @@ export default function PrivacyPolicy() {
                 <div className="text-sm text-gray-700 space-y-1">
                   <p><span className="font-medium">Operated by:</span> Saurav Nanda</p>
                   <p><span className="font-medium">Registered Address:</span> Balasore, Odisha, India</p>
-                  <p><span className="font-medium">Aadhar Reference:</span> 938449720041</p>
                   <p><span className="font-medium">Contact:</span> +91 9778835361</p>
                   <p><span className="font-medium">Email:</span> privacy@nandighoshbus.com</p>
                 </div>
@@ -171,7 +170,7 @@ export default function PrivacyPolicy() {
                 <p><strong>Email:</strong> saurav@nandighoshbus.com</p>
                 <p><strong>Phone:</strong> +91 9778835361</p>
                 <p><strong>Address:</strong> Balasore, Odisha, India</p>
-                <p><strong>Operated by:</strong> Saurav Nanda (Aadhar: 938449720041)</p>
+                <p><strong>Operated by:</strong> Saurav Nanda</p>
               </div>
             </section>
 
